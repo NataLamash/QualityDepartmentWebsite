@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="QualityDepartment.API/QualityDepartment.API.csproj" />
+  <Project Path="QualityDepartment.Core/QualityDepartment.Core.csproj" />
+  <Project Path="QualityDepartment.Infrastructure/QualityDepartment.Infrastructure.csproj" />
+</Solution>
