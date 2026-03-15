@@ -28,5 +28,6 @@ namespace QualityDepartment.Core.Entities
         public virtual SurveyCategory? Category { get; set; }
 
         public virtual ICollection<Question> Questions { get; set; } = new List<Question>();
+        public virtual ICollection<UserResponse> UserResponses { get; set; } = new List<UserResponse>();
     }
 }
