@@ -92,6 +92,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
                   .WithMany(u => u.HandledFeedbackMessages)
                   .HasForeignKey(e => e.AdminHandlerId)
                   .OnDelete(DeleteBehavior.SetNull);
+
+            entity.Property(e => e.Status)
+                  .HasConversion<string>()
+                  .HasMaxLength(50);
         });
 
         modelBuilder.Entity<Survey>(entity =>
@@ -188,6 +192,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
                   .WithMany(s => s.Questions)
                   .HasForeignKey(q => q.SurveyId)
                   .OnDelete(DeleteBehavior.Cascade);
+
+            entity.Property(e => e.QuestionType)
+                  .HasConversion<string>()
+                  .HasMaxLength(50);
         });
 
         modelBuilder.Entity<AnswerOption>(entity =>
