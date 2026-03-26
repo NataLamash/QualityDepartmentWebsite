@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using QualityDepartment.Core.Entities;
+using QualityDepartment.Core.Mappings;
 using QualityDepartment.Infrastructure.Data;
+using AutoMapper;
+using QualityDepartment.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +13,9 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySQL(connectionString!));
 
+builder.Services.AddAutoMapper(cfg => { }, typeof(NewsAndHomeMappingProfile));
+builder.Services.AddScoped<NewsService>();
+builder.Services.AddScoped<HomeService>();
 builder.Services.AddIdentity<ApplicationUser, IdentityRole<int>>(options => {
     options.Password.RequireDigit = false;
     options.Password.RequiredLength = 6;
