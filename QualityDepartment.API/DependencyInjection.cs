@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using QualityDepartment.Core.Entities;
+using QualityDepartment.Core.Mappings;
 using QualityDepartment.Infrastructure.Data;
 using QualityDepartment.Infrastructure.Services;
 
@@ -26,6 +27,11 @@ namespace QualityDepartment.API
 
             services.AddScoped<NewsService>();
             services.AddScoped<HomeService>();
+
+            services.AddAutoMapper(config =>
+            {
+                config.AddProfile<NewsAndHomeMappingProfile>();
+            });
 
             return services;
         }
