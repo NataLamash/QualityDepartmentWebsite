@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using QualityDepartment.Core.DTOs.Common;
+using QualityDepartment.Core.DTOs.Home;
 using QualityDepartment.Infrastructure.Services;
 
 namespace QualityDepartment.API.Controllers
@@ -15,19 +17,19 @@ namespace QualityDepartment.API.Controllers
         }
 
         [HttpGet("latest-news")]
-        public async Task<IActionResult> GetLatestNews(
+        public async Task<ActionResult<ApiResponse<List<HomeNewsCardDto>>>> GetLatestNews(
             [FromQuery] int count = 3,
             [FromQuery] string lang = "ua")
         {
             var result = await _homeService.GetLatestNewsAsync(count, lang);
-            return Ok(result);
+            return Ok(ApiResponse<List<HomeNewsCardDto>>.SuccessResponse(result));
         }
 
         [HttpGet("administration")]
-        public async Task<IActionResult> GetAdministration([FromQuery] string lang = "ua")
+        public async Task<ActionResult<ApiResponse<List<AdministrationMemberCardDto>>>> GetAdministration([FromQuery] string lang = "ua")
         {
             var result = await _homeService.GetAdministrationMembersAsync(lang);
-            return Ok(result);
+            return Ok(ApiResponse<List<AdministrationMemberCardDto>>.SuccessResponse(result));
         }
     }
 }

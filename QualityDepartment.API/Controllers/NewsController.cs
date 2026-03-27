@@ -1,4 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using QualityDepartment.Core.DTOs.Common;
+using QualityDepartment.Core.DTOs.Home;
+using QualityDepartment.Core.DTOs.News;
 using QualityDepartment.Infrastructure.Services;
 
 namespace QualityDepartment.API.Controllers
@@ -15,7 +18,7 @@ namespace QualityDepartment.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll(
+        public async Task<ActionResult<ApiResponse<PagedResultDto<NewsListItemDto>>>> GetAll(
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10,
             [FromQuery] string sortOrder = "desc",
@@ -23,18 +26,19 @@ namespace QualityDepartment.API.Controllers
             [FromQuery] string lang = "ua")
         {
             var result = await _newsService.GetNewsAsync(page, pageSize, sortOrder, status, lang);
-            return Ok(result);
+            return Ok(ApiResponse<PagedResultDto<NewsListItemDto>>.SuccessResponse(result));
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetById(int id, [FromQuery] string lang = "ua")
+        public async Task<ActionResult<ApiResponse<NewsDetailsDto>>> GetById(int id, [FromQuery] string lang = "ua")
         {
             var result = await _newsService.GetNewsByIdAsync(id, lang);
 
             if (result == null)
-                return NotFound();
+                return NotFound(ApiResponse<object>.FailureResponse(
+                    new List<string> { "News not found" }, "Новину не знайдено"));
 
-            return Ok(result);
+            return Ok(ApiResponse<NewsDetailsDto>.SuccessResponse(result));
         }
     }
 }
