@@ -16,6 +16,7 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
+		<PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.5" />
 	</ItemGroup>
 
@@ -26,7 +27,6 @@
 
 	<ItemGroup>
 	  <Folder Include="Configuration\" />
-	  <Folder Include="Middleware\" />
 	</ItemGroup>
 
 </Project>
