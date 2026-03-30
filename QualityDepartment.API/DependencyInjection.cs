@@ -27,6 +27,8 @@ namespace QualityDepartment.API
 
             services.AddScoped<NewsService>();
             services.AddScoped<HomeService>();
+            services.AddScoped<DocumentService>();
+
 
             services.AddAutoMapper(config =>
             {
