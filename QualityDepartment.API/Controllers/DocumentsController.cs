@@ -35,12 +35,10 @@ namespace QualityDepartment.API.Controllers
 
             if (result == null)
             {
-                return NotFound(new ApiResponse<object>
-                {
-                    Success = false,
-                    Message = "Документ не знайдено",
-                    Errors = new List<string> { $"Document with ID {id} does not exist." }
-                });
+                return NotFound(ApiResponse<object>.FailureResponse(
+                    new List<string> { "Document with ID {id} does not exist." }, 
+                    "Документ не знайдено"
+                ));
             }
 
             return Ok(new ApiResponse<DocumentDetailsDto>
@@ -55,7 +53,13 @@ namespace QualityDepartment.API.Controllers
         {
             var fileResult = await _documentService.DownloadDocumentAsync(id);
 
-            if (fileResult == null) return NotFound();
+            if (fileResult == null)
+            {
+                return NotFound(ApiResponse<object>.FailureResponse(
+                    new List<string> { $"File with ID {id} not found." },
+                    "Файл не знайдено"
+                ));
+            }
 
             return File(fileResult.Value.stream, fileResult.Value.contentType, fileResult.Value.fileName);
         }
@@ -67,13 +71,13 @@ namespace QualityDepartment.API.Controllers
 
             if (fileResult == null)
             {
-                return BadRequest(new ApiResponse<object>
-                {
-                    Success = false,
-                    Message = "Попередній перегляд недоступний для цього формату або файл не знайдено."
-                });
+                return BadRequest(ApiResponse<object>.FailureResponse(
+                    new List<string> { $"File with ID {id} not available for the preview or not found." },
+                    "Попередній перегляд недоступний для цього формату або файл не знайдено."
+                ));
             }
 
+            Response.Headers.Add("Content-Disposition", "inline; filename=\"" + fileResult.Value.fileName + "\"");
             return File(fileResult.Value.stream, fileResult.Value.contentType);
         }
 
