@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using QualityDepartment.Core.Entities;
 using QualityDepartment.Core.Mappings;
 using QualityDepartment.Infrastructure.Data;
@@ -32,6 +32,8 @@ namespace QualityDepartment.Infrastructure
 
             services.AddScoped<NewsService>();
             services.AddScoped<HomeService>();
+            services.AddScoped<DocumentService>();
+
 
             services.AddAutoMapper(config =>
             {
