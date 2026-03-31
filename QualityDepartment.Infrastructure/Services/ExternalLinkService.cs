@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using QualityDepartment.Core.DTOs.ExternalLinks;
 using QualityDepartment.Infrastructure.Data;
+using QualityDepartment.Core.Mappings;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -34,6 +35,23 @@ namespace QualityDepartment.Infrastructure.Services
                 .ToListAsync();
 
             return _mapper.Map<List<ExternalLinkDto>>(links, opt => opt.Items["lang"] = lang);
+        }
+
+        public async Task<ExternalLinkDto?> GetByIdAsync(int id, string lang = "ua")
+        {
+            _logger.LogInformation("Fetching external link details for ID: {Id}, Language: {Lang}", id, lang);
+
+            var link = await _context.ExternalLinks
+                .AsNoTracking()
+                .FirstOrDefaultAsync(l => l.Id == id && l.PublishDate <= DateTime.UtcNow);
+
+            if (link == null)
+            {
+                _logger.LogWarning("External link with ID: {Id} not found or not published yet.", id);
+                return null;
+            }
+
+            return _mapper.Map<ExternalLinkDto>(link, opt => opt.Items["lang"] = lang);
         }
     }
 }

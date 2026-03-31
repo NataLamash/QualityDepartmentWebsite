@@ -33,6 +33,7 @@ namespace QualityDepartment.Infrastructure
             services.AddScoped<NewsService>();
             services.AddScoped<HomeService>();
             services.AddScoped<DocumentService>();
+            services.AddScoped<ExternalLinkService>();
 
 
             services.AddAutoMapper(config =>

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using QualityDepartment.Core.DTOs.Documents;
+using QualityDepartment.Core.DTOs.ExternalLinks;
 using QualityDepartment.Core.DTOs.Home;
 using QualityDepartment.Core.DTOs.News;
 using QualityDepartment.Core.Entities;
@@ -73,9 +74,9 @@ namespace QualityDepartment.Core.Mappings
             CreateMap<Document, DocumentDetailsDto>()
                 .IncludeBase<Document, DocumentListItemDto>();
 
-            //CreateMap<ExternalLink, ExternalLinkDto>()
-            //    .ForMember(dest => dest.Name, opt => opt.MapFrom((src, dest, _, context) =>
-            //        GetLocalizedValue(src.NameUa, src.NameEn, context)));
+            CreateMap<ExternalLink, ExternalLinkDto>()
+                .ForMember(dest => dest.Name, opt => opt.MapFrom((src, dest, _, context) =>
+                    GetLocalizedValue(src.NameUa, src.NameEn, context)));
         }
 
         private static string GetLanguage(ResolutionContext context)
