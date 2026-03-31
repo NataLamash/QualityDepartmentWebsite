@@ -169,7 +169,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
             entity.Property(e => e.NameUa).HasMaxLength(255).IsRequired();
             entity.Property(e => e.NameEn).HasMaxLength(255).IsRequired();
 
+            entity.Property(e => e.SortOrder).HasDefaultValue(0);
+
             entity.HasIndex(e => e.PublishDate);
+            entity.HasIndex(e => e.SortOrder);
 
             entity.HasOne(e => e.Creator)
                   .WithMany(u => u.CreatedExternalLinks)
@@ -266,8 +269,18 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     private void SeedInitialData(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<IdentityRole<int>>().HasData(
-            new IdentityRole<int> { Id = 1, Name = "Admin", NormalizedName = "ADMIN" },
-            new IdentityRole<int> { Id = 2, Name = "SuperAdmin", NormalizedName = "SUPERADMIN" }
+            new IdentityRole<int> { 
+                Id = 1, 
+                Name = "Admin", 
+                NormalizedName = "ADMIN",
+                ConcurrencyStamp = "461ccee7-25fd-43b3-b8b2-b2e196ce77fe"
+            },
+            new IdentityRole<int> { 
+                Id = 2, 
+                Name = "SuperAdmin", 
+                NormalizedName = "SUPERADMIN",
+                ConcurrencyStamp = "1912dca2-3106-41d3-990b-1b71ec296577"
+            }
         );
 
         var hasher = new PasswordHasher<ApplicationUser>();
@@ -279,8 +292,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
             Email = "admin@knu.ua",
             NormalizedEmail = "ADMIN@KNU.UA",
             EmailConfirmed = true,
-            SecurityStamp = Guid.NewGuid().ToString(),
-            PasswordHash = hasher.HashPassword(null!, "Admin123!")
+            SecurityStamp = "B4628F5F-0A12-4C7A-A1F2-D5E397B1A990",
+            ConcurrencyStamp = "672eb5c1-ecdf-4ed6-a5bb-07bbc1b1bf15",
+            PasswordHash = "AQAAAAIAAYagAAAAEGjthsKhOUSp3G03HRX9BAr1z7mpyb50xhBHWx94BDJsVpnJKMGRw+UpxEBFqY2EgA==" //password: Admin123!
         });
 
         modelBuilder.Entity<DocumentCategory>().HasData(
