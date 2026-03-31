@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using QualityDepartment.Core.DTOs.Common;
 using QualityDepartment.Core.DTOs.Documents;
 using QualityDepartment.Infrastructure.Data;
@@ -8,10 +10,14 @@ namespace QualityDepartment.Infrastructure.Services
     public class DocumentService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IMapper _mapper;
+        private readonly ILogger<DocumentService> _logger;
 
-        public DocumentService(ApplicationDbContext context)
+        public DocumentService(ApplicationDbContext context, IMapper mapper, ILogger<DocumentService> logger)
         {
             _context = context;
+            _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<PagedResultDto<DocumentListItemDto>> GetDocumentsAsync(DocumentParams p)
@@ -19,7 +25,8 @@ namespace QualityDepartment.Infrastructure.Services
             var query = _context.Documents
                 .Include(d => d.Category)
                 .AsNoTracking()
-                .AsQueryable();
+                .AsQueryable()
+                .Where(d => d.PublishDate <= DateTime.UtcNow); ;
 
             if (!string.IsNullOrWhiteSpace(p.Search))
             {
@@ -48,16 +55,12 @@ namespace QualityDepartment.Infrastructure.Services
                 .Take(p.PageSize)
                 .ToListAsync();
 
-            var dtos = items.Select(d => new DocumentListItemDto
-            {
-                Id = d.Id,
-                Name = p.Lang == "en" ? d.NameEn : d.NameUa,
-                Description = p.Lang == "en" ? d.DescriptionEn : d.DescriptionUa,
-                CategoryName = p.Lang == "en" ? d.Category.NameEn : d.Category.NameUa,
-                FilePath = d.FilePath,
-                PublishDate = d.PublishDate,
-                ExternalType = d.ExternalType
-            }).ToList();
+            var dtos = _mapper
+                .Map<List<DocumentListItemDto>>
+                (
+                    items, 
+                    opt => opt.Items["lang"] = p.Lang
+                );
 
             return new PagedResultDto<DocumentListItemDto>
             {
@@ -77,33 +80,29 @@ namespace QualityDepartment.Infrastructure.Services
 
             if (doc == null) return null;
 
-            string formattedSize = "0 KB";
-            string extension = Path.GetExtension(doc.FilePath) ?? "unknown";
+            var dto = _mapper.Map<DocumentDetailsDto>(doc, opt => opt.Items["lang"] = lang);
 
+            dto.FileType = Path.GetExtension(doc.FilePath) ?? "unknown";
+            dto.FileSize = GetFormattedFileSize(doc.FilePath);
+
+            return dto;
+        }
+
+        private string GetFormattedFileSize(string filePath)
+        {
             try
             {
-                var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", doc.FilePath.TrimStart('/'));
+                var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", filePath.TrimStart('/'));
                 if (File.Exists(fullPath))
                 {
-                    long bytes = new FileInfo(fullPath).Length;
-                    formattedSize = FormatBytes(bytes);
+                    return FormatBytes(new FileInfo(fullPath).Length);
                 }
             }
-            catch { }
-
-            return new DocumentDetailsDto
+            catch (Exception ex)
             {
-                Id = doc.Id,
-                Name = lang == "en" ? doc.NameEn : doc.NameUa,
-                Description = (lang == "en" ? doc.DescriptionEn : doc.DescriptionUa) ?? string.Empty,
-                CategoryName = lang == "en" ? doc.Category.NameEn : doc.Category.NameUa,
-                PublishDate = doc.PublishDate,
-                FilePath = doc.FilePath,
-                FileType = extension,
-                FileSize = formattedSize,
-                Lang = lang,
-                ExternalType = doc.ExternalType
-            };
+                _logger.LogError(ex, "Error while getting file size for {Path}", filePath);
+            }
+            return "0 KB";
         }
         private string FormatBytes(long bytes)
         {
@@ -119,13 +118,18 @@ namespace QualityDepartment.Infrastructure.Services
 
         public async Task<(Stream stream, string contentType, string fileName)?> DownloadDocumentAsync(int id)
         {
+            _logger.LogInformation("Attempting to download document with ID: {Id}", id);
             var doc = await _context.Documents.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
 
             if (doc == null || doc.ExternalType) return null;
 
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", doc.FilePath.TrimStart('/'));
 
-            if (!File.Exists(filePath)) return null;
+            if (!File.Exists(filePath))
+            {
+                _logger.LogWarning("Download failed: Document {Id} not found in database", id);
+                return null;
+            }
 
             var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
 

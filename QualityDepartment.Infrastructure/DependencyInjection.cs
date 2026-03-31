@@ -37,7 +37,7 @@ namespace QualityDepartment.Infrastructure
 
             services.AddAutoMapper(config =>
             {
-                config.AddProfile<NewsAndHomeMappingProfile>();
+                config.AddProfile<GeneralMappingProfile>();
             });
 
             return services;
