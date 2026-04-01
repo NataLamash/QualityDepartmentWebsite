@@ -1,4 +1,5 @@
 using QualityDepartment.API;
+using QualityDepartment.Infrastructure;
 using QualityDepartment.API.Middleware;
 using QualityDepartment.Core.Mappings;
 

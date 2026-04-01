@@ -6,7 +6,7 @@ using QualityDepartment.Infrastructure.Services;
 namespace QualityDepartment.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/documents")]
     public class DocumentsController : ControllerBase
     {
         private readonly DocumentService _documentService;

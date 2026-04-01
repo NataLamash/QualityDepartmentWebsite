@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using QualityDepartment.Infrastructure.Data;
 
@@ -10,9 +11,11 @@ using QualityDepartment.Infrastructure.Data;
 namespace QualityDepartment.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260331072836_SyncModel")]
+    partial class SyncModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -49,14 +52,14 @@ namespace QualityDepartment.Infrastructure.Migrations
                         new
                         {
                             Id = 1,
-                            ConcurrencyStamp = "461ccee7-25fd-43b3-b8b2-b2e196ce77fe",
+                            ConcurrencyStamp = "7c9a42de-b6f7-475e-a9d9-219355580e66",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
                             Id = 2,
-                            ConcurrencyStamp = "1912dca2-3106-41d3-990b-1b71ec296577",
+                            ConcurrencyStamp = "34abda56-1eb3-45a2-ba07-c58b81ed6ddb",
                             Name = "SuperAdmin",
                             NormalizedName = "SUPERADMIN"
                         });
@@ -337,15 +340,15 @@ namespace QualityDepartment.Infrastructure.Migrations
                         {
                             Id = 1,
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "672eb5c1-ecdf-4ed6-a5bb-07bbc1b1bf15",
+                            ConcurrencyStamp = "b23eb88b-e2eb-41da-a8d8-f0286c2676ce",
                             Email = "admin@knu.ua",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@KNU.UA",
                             NormalizedUserName = "VZAO_ADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEGjthsKhOUSp3G03HRX9BAr1z7mpyb50xhBHWx94BDJsVpnJKMGRw+UpxEBFqY2EgA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEPdQMnlseFJ36nabOGntfIKuDnlSAew5p6ArcPA8CSVbE8VJsDIzZHLy0Ws6c1fVbA==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "B4628F5F-0A12-4C7A-A1F2-D5E397B1A990",
+                            SecurityStamp = "9970f632-81a9-4173-92a5-1ce8f272c35e",
                             TwoFactorEnabled = false,
                             UserName = "vzao_admin"
                         });

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using QualityDepartment.Infrastructure.Data;
 
@@ -10,9 +11,11 @@ using QualityDepartment.Infrastructure.Data;
 namespace QualityDepartment.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260331072030_NewMigrationName")]
+    partial class NewMigrationName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -337,15 +340,15 @@ namespace QualityDepartment.Infrastructure.Migrations
                         {
                             Id = 1,
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "672eb5c1-ecdf-4ed6-a5bb-07bbc1b1bf15",
+                            ConcurrencyStamp = "1fea1856-2788-47a5-9be7-37553e6710d3",
                             Email = "admin@knu.ua",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@KNU.UA",
                             NormalizedUserName = "VZAO_ADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEGjthsKhOUSp3G03HRX9BAr1z7mpyb50xhBHWx94BDJsVpnJKMGRw+UpxEBFqY2EgA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEGQgLhOWOisScwcUrlqtFmu5hmzzaWcnMTAiOwcSlsPXf1Kgb+JNo2vbCsuFW9KRDg==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "B4628F5F-0A12-4C7A-A1F2-D5E397B1A990",
+                            SecurityStamp = "2d3398b2-a951-4291-9d92-46bc5ccc9105",
                             TwoFactorEnabled = false,
                             UserName = "vzao_admin"
                         });
@@ -520,9 +523,7 @@ namespace QualityDepartment.Infrastructure.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<int>("SortOrder")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0);
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime(6)");
@@ -539,8 +540,6 @@ namespace QualityDepartment.Infrastructure.Migrations
                     b.HasIndex("EditorId");
 
                     b.HasIndex("PublishDate");
-
-                    b.HasIndex("SortOrder");
 
                     b.ToTable("ExternalLinks");
                 });
