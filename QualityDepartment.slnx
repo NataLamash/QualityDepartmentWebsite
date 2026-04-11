@@ -2,4 +2,8 @@
   <Project Path="QualityDepartment.API/QualityDepartment.API.csproj" />
   <Project Path="QualityDepartment.Core/QualityDepartment.Core.csproj" />
   <Project Path="QualityDepartment.Infrastructure/QualityDepartment.Infrastructure.csproj" />
+  <Project Path="QualityDepartment.Web/qualitydepartment.web.esproj">
+    <Build />
+    <Deploy />
+  </Project>
 </Solution>
