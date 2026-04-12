@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using QualityDepartment.Core.DTOs.Common;
-using QualityDepartment.Core.DTOs.Home;
 using QualityDepartment.Core.DTOs.News;
 using QualityDepartment.Infrastructure.Services;
 
@@ -23,9 +22,11 @@ namespace QualityDepartment.API.Controllers
             [FromQuery] int pageSize = 10,
             [FromQuery] string sortOrder = "desc",
             [FromQuery] string? status = "published",
-            [FromQuery] string lang = "ua")
+            [FromQuery] string lang = "ua",
+            [FromQuery] string? search = null,
+            [FromQuery] string? date = null)
         {
-            var result = await _newsService.GetNewsAsync(page, pageSize, sortOrder, status, lang);
+            var result = await _newsService.GetNewsAsync(page, pageSize, sortOrder, status, lang, search, date);
             return Ok(ApiResponse<PagedResultDto<NewsListItemDto>>.SuccessResponse(result));
         }
 

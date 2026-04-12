@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+    --primary-knu: #B80000;
+    --bg-dark: #242424;
+    --text-main: #1a1a1a;
+    font-family: 'Inter', system-ui, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+    color: var(--text-main);
+    background-color: #ffffff;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    margin: 0;
+    display: flex;
+    place-items: initial;
+    min-width: 320px;
+    min-height: 100vh;
+}
+
+#root {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    text-align: left; 
+}
+
+a {
+    font-weight: 500;
+    color: inherit;
+    text-decoration: inherit;
+    transition: color 0.3s;
+}
+
+    a:hover {
+        color: var(--primary-knu);
+    }
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+.react-multiple-carousel__arrow {
+    z-index: 10;
+}
