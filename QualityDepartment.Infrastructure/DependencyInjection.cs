@@ -6,6 +6,7 @@ using QualityDepartment.Core.Entities;
 using QualityDepartment.Core.Mappings;
 using QualityDepartment.Infrastructure.Data;
 using QualityDepartment.Infrastructure.Services;
+using Microsoft.AspNetCore.Authorization;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -29,6 +30,12 @@ namespace QualityDepartment.Infrastructure
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AdminOnly", policy =>
+                    policy.RequireRole("Admin", "SuperAdmin"));
+            });
 
             services.AddScoped<NewsService>();
             services.AddScoped<HomeService>();
