@@ -297,6 +297,31 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
             PasswordHash = "AQAAAAIAAYagAAAAEGjthsKhOUSp3G03HRX9BAr1z7mpyb50xhBHWx94BDJsVpnJKMGRw+UpxEBFqY2EgA==" //password: Admin123!
         });
 
+        modelBuilder.Entity<ApplicationUser>().HasData(new ApplicationUser
+        {
+            Id = 2,
+            UserName = "vzao_superadmin",
+            NormalizedUserName = "VZAO_SUPERADMIN",
+            Email = "superadmin@knu.ua",
+            NormalizedEmail = "SUPERADMIN@KNU.UA",
+            EmailConfirmed = true,
+            SecurityStamp = "C5739G6G-1B23-5D8B-B2G3-E6F498C2B0A1",
+            ConcurrencyStamp = "783fc6d2-fdfe-5fe7-b6cc-18ccd2c2cg26",
+            PasswordHash = "AQAAAAIAAYagAAAAEGjthsKhOUSp3G03HRX9BAr1z7mpyb50xhBHWx94BDJsVpnJKMGRw+UpxEBFqY2EgA==" // Той самий Admin123!
+        });
+
+        modelBuilder.Entity<IdentityUserRole<int>>().HasData(new IdentityUserRole<int>
+        {
+            UserId = 1,
+            RoleId = 1
+        });
+
+        modelBuilder.Entity<IdentityUserRole<int>>().HasData(new IdentityUserRole<int>
+        {
+            UserId = 2,
+            RoleId = 2
+        });
+
         modelBuilder.Entity<DocumentCategory>().HasData(
             new DocumentCategory { Id = 1, NameUa = "Нормативна база", NameEn = "Regulatory Framework" },
             new DocumentCategory { Id = 2, NameUa = "Анкетування", NameEn = "Surveys" },
