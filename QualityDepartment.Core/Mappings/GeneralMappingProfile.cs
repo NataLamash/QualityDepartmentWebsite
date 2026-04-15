@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using QualityDepartment.Core.DTOs.Admin.News;
 using QualityDepartment.Core.DTOs.Documents;
 using QualityDepartment.Core.DTOs.ExternalLinks;
 using QualityDepartment.Core.DTOs.Home;
@@ -50,6 +51,10 @@ namespace QualityDepartment.Core.Mappings
                         BuildShortInfo(GetLocalizedValue(src.FullTextUa, src.FullTextEn, context))))
                 .ForMember(dest => dest.PublishDate, opt => opt.MapFrom(src => src.PublishDate))
                 .ForMember(dest => dest.PhotoPath, opt => opt.MapFrom(src => src.PhotoPath));
+
+            CreateMap<NewsCreateUpdateDto, New>();
+            CreateMap<New, NewsAdminDto>()
+                .ForMember(dest => dest.CreatorName, opt => opt.MapFrom(src => src.Creator!.UserName));
 
             CreateMap<AdministrationMember, AdministrationMemberCardDto>()
                 .ForMember(
