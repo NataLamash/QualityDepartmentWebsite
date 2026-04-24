@@ -1,199 +1,282 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from 'react';
+import { Box, Button, CircularProgress, Container, Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
+import { useDocuments } from './hooks/useDocuments';
+import { getLang } from './utils/documentUtils';
+import type { SortMode, UiDocument, ViewMode } from './types';
+import {
+    emptyTextSx,
+    errorTextSx,
+    loadMoreButtonSx,
+    loadMoreWrapSx,
+    pageContainerSx,
+    pageTitleSx,
+} from './document.styles';
+import DocumentsTopBar from './components/DocumentsTopBar';
+import DocumentsFilterPopover from './components/DocumentsFilterPopover';
+import DocumentsListView from './components/DocumentsListView';
+import DocumentsGridView from './components/DocumentsGridView';
+import DocumentPreviewDialog from './components/DocumentPreviewDialog';
 
-/**
- * DocumentPage.tsx
- * Простая страница управления документами.
- * - Загрузка списка документов
- * - Загрузка нового файла
- * - Удаление документа
- *
- * Примечания:
- * - API-запросы сделаны через fetch и предполагают стандартные роуты:
- *   GET  /api/documents
- *   POST /api/documents    (form-data: file)
- *   DELETE /api/documents/:id
- *
- * При необходимости адаптировать под существующий API в проекте.
- */
+const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '');
 
-type DocumentItem = {
-  id: string;
-  title: string;
-  url?: string;
-  author?: string;
-  createdAt?: string;
+export default function DocumentPage() {
+    const { i18n } = useTranslation();
+    const lang = getLang(i18n.language);
+
+    const text = {
+        title: lang === 'en' ? 'Archive' : 'Архів',
+        filters: lang === 'en' ? 'Filters' : 'Фільтри',
+        category: lang === 'en' ? 'Category' : 'Категорія',
+        date: lang === 'en' ? 'Choose date' : 'Оберіть дату',
+        search: lang === 'en' ? 'Search' : 'Пошук',
+        sort: lang === 'en' ? 'Sorting' : 'Сортування',
+        newest: lang === 'en' ? 'Newest first' : 'Спочатку нові',
+        oldest: lang === 'en' ? 'Oldest first' : 'Спочатку старі',
+        az: lang === 'en' ? 'Alphabetically A–Z' : 'За алфавітом А–Я',
+        za: lang === 'en' ? 'Alphabetically Z–A' : 'За алфавітом Я–А',
+        allCategories: lang === 'en' ? 'All categories' : 'Усі категорії',
+        apply: lang === 'en' ? 'APPLY' : 'ЗАСТОСУВАТИ',
+        loadMore: lang === 'en' ? 'Load more' : 'Завантажити більше',
+        noDocuments: lang === 'en' ? 'No documents found' : 'Документи не знайдено',
+        error: lang === 'en' ? 'Failed to load documents' : 'Не вдалося завантажити документи',
+        namePlaceholder: lang === 'en' ? 'Title' : 'Назва',
+    };
+
+    const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+    const [viewMode, setViewMode] = useState<ViewMode>('icons');
+
+    const [tempSearch, setTempSearch] = useState('');
+    const [tempCategory, setTempCategory] = useState('all');
+    const [tempDate, setTempDate] = useState('');
+    const [tempSort, setTempSort] = useState<SortMode>('date-desc');
+
+    const [appliedSearch, setAppliedSearch] = useState('');
+    const [appliedCategory, setAppliedCategory] = useState('all');
+    const [appliedDate, setAppliedDate] = useState('');
+    const [sortMode, setSortMode] = useState<SortMode>('date-desc');
+
+    const [visibleCount, setVisibleCount] = useState(8);
+
+    const [previewDocument, setPreviewDocument] = useState<UiDocument | null>(null);
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+    const { loading, error, categories, filteredDocuments } = useDocuments({
+        lang,
+        search: appliedSearch,
+        selectedCategory: appliedCategory,
+        selectedTag: 'all',
+        sortMode,
+    });
+
+    const dateFilteredDocuments = useMemo(() => {
+        if (!appliedDate) return filteredDocuments;
+
+        return filteredDocuments.filter((doc) => {
+            if (!doc.publishDate) return false;
+
+            const docDate = new Date(doc.publishDate);
+            if (Number.isNaN(docDate.getTime())) return false;
+
+            const yyyy = docDate.getFullYear();
+            const mm = String(docDate.getMonth() + 1).padStart(2, '0');
+            const dd = String(docDate.getDate()).padStart(2, '0');
+            const normalized = `${yyyy}-${mm}-${dd}`;
+
+            return normalized === appliedDate;
+        });
+    }, [filteredDocuments, appliedDate]);
+
+    const visibleDocuments = useMemo(() => {
+        return dateFilteredDocuments.slice(0, visibleCount);
+    }, [dateFilteredDocuments, visibleCount]);
+
+    const handleApplyFilters = () => {
+        setVisibleCount(8);
+        setAppliedSearch(tempSearch.trim());
+        setAppliedCategory(tempCategory);
+        setAppliedDate(tempDate);
+        setSortMode(tempSort);
+        setAnchorEl(null);
+    };
+
+    const handleToggleSort = () => {
+        const nextSort = sortMode === 'date-desc' ? 'date-asc' : 'date-desc';
+        setVisibleCount(8);
+        setSortMode(nextSort);
+        setTempSort(nextSort);
+    };
+
+    const handleToggleView = () => {
+        setViewMode((prev) => (prev === 'icons' ? 'cards' : 'icons'));
+    };
+
+    const handleLoadMore = () => {
+        setVisibleCount((prev) => prev + 8);
+    };
+
+    const getFullFilePath = (path: string) => {
+        if (!path) return '#';
+        if (path.startsWith('http://') || path.startsWith('https://')) return path;
+
+        const cleanPath = path.replace(/\\/g, '/').replace(/^\//, '');
+        return `${API_BASE}/${cleanPath}`;
+    };
+
+    const handleDownloadDocument = async (documentItem: UiDocument) => {
+    try {
+        const fileUrl = getFullFilePath(documentItem.filePath);
+        const response = await fetch(fileUrl);
+
+        if (!response.ok) {
+            throw new Error('Не вдалося завантажити файл');
+        }
+
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        const safeName = (documentItem.title || 'document')
+            .replace(/[<>:"/\\|?*]+/g, '_')
+            .trim();
+        const fileName = safeName.toLowerCase().endsWith('.pdf')
+            ? safeName
+            : `${safeName || 'document'}.pdf`;
+
+        link.href = blobUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+        console.error('Download error:', error);
+    }
 };
 
-export const DocumentPage: React.FC = () => {
-  const [documents, setDocuments] = useState<DocumentItem[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [uploading, setUploading] = useState<boolean>(false);
+    const isPdfFile = (path: string) => path.toLowerCase().endsWith('.pdf');
 
-  const fetchDocuments = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/documents");
-      if (!res.ok) throw new Error(`Ошибка загрузки: ${res.statusText}`);
-      const data = (await res.json()) as DocumentItem[];
-      setDocuments(data || []);
-    } catch (err: any) {
-      setError(err?.message ?? "Неизвестная ошибка при загрузке документов");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    const handleOpenPreview = (documentItem: UiDocument) => {
+        if (!documentItem.filePath || !isPdfFile(documentItem.filePath)) return;
 
-  useEffect(() => {
-    fetchDocuments();
-  }, [fetchDocuments]);
+        setPreviewDocument(documentItem);
+        setIsPreviewOpen(true);
+    };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    setError(null);
-    try {
-      const form = new FormData();
-      form.append("file", file);
-      // Можно добавить дополнительные поля при необходимости
-      const res = await fetch("/api/documents", {
-        method: "POST",
-        body: form,
-      });
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || "Ошибка загрузки файла");
-      }
-      // Обновим список после успешной загрузки
-      await fetchDocuments();
-    } catch (err: any) {
-      setError(err?.message ?? "Не удалось загрузить файл");
-    } finally {
-      setUploading(false);
-      // Сброс input
-      e.currentTarget.value = "";
-    }
-  };
+    const handleClosePreview = () => {
+        setIsPreviewOpen(false);
+        setPreviewDocument(null);
+    };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Вы уверены, что хотите удалить документ?")) return;
-    setError(null);
-    try {
-      const res = await fetch(`/api/documents/${encodeURIComponent(id)}`, {
-        method: "DELETE",
-      });
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || "Ошибка при удалении");
-      }
-      setDocuments((prev) => prev.filter((d) => d.id !== id));
-    } catch (err: any) {
-      setError(err?.message ?? "Не удалось удалить документ");
-    }
-  };
+    return (
+        <Container maxWidth="xl" sx={pageContainerSx}>
+            <Typography component="h1" variant="h2" align="center" sx={pageTitleSx}>
+                {text.title}
+            </Typography>
 
-  const sortedDocuments = useMemo(
-    () =>
-      [...documents].sort((a, b) => {
-        const ta = a.createdAt ? Date.parse(a.createdAt) : 0;
-        const tb = b.createdAt ? Date.parse(b.createdAt) : 0;
-        return tb - ta;
-      }),
-    [documents]
-  );
+            <DocumentsTopBar
+                filtersLabel={text.filters}
+                viewMode={viewMode}
+                onOpenFilters={(e) => setAnchorEl(e.currentTarget)}
+                onToggleView={handleToggleView}
+                onToggleSort={handleToggleSort}
+                isAscendingSort={sortMode === 'date-asc'}
+            />
 
-  return (
-    <div style={{ padding: 20 }}>
-      <h2>Документы</h2>
+            {loading && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
+                    <CircularProgress sx={{ color: '#BA0000' }} />
+                </Box>
+            )}
 
-      <div style={{ marginBottom: 12 }}>
-        <label style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
-          <input
-            type="file"
-            onChange={handleFileChange}
-            disabled={uploading}
-            accept="*/*"
-          />
-          <span>{uploading ? "Загрузка..." : "Загрузить файл"}</span>
-        </label>
-      </div>
+            {!loading && !!error && (
+                <Typography component="p" sx={errorTextSx}>
+                    {text.error}
+                </Typography>
+            )}
 
-      {error && (
-        <div style={{ color: "crimson", marginBottom: 12 }} role="alert">
-          {error}
-        </div>
-      )}
+            {!loading && !error && dateFilteredDocuments.length === 0 && (
+                <Typography component="p" sx={emptyTextSx}>
+                    {text.noDocuments}
+                </Typography>
+            )}
 
-      {loading ? (
-        <div>Загрузка списка документов...</div>
-      ) : sortedDocuments.length === 0 ? (
-        <div>Документы не найдены.</div>
-      ) : (
-        <table
-          style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            marginTop: 8,
-          }}
-        >
-          <thead>
-            <tr>
-              <th style={{ textAlign: "left", padding: 8, borderBottom: "1px solid #ddd" }}>
-                Название
-              </th>
-              <th style={{ textAlign: "left", padding: 8, borderBottom: "1px solid #ddd" }}>
-                Автор
-              </th>
-              <th style={{ textAlign: "left", padding: 8, borderBottom: "1px solid #ddd" }}>
-                Дата
-              </th>
-              <th style={{ padding: 8, borderBottom: "1px solid #ddd" }}>Действия</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedDocuments.map((doc) => (
-              <tr key={doc.id}>
-                <td style={{ padding: 8, borderBottom: "1px solid #f0f0f0" }}>
-                  {doc.url ? (
-                    <a href={doc.url} target="_blank" rel="noopener noreferrer">
-                      {doc.title || "Без названия"}
-                    </a>
-                  ) : (
-                    doc.title || "Без названия"
-                  )}
-                </td>
-                <td style={{ padding: 8, borderBottom: "1px solid #f0f0f0" }}>
-                  {doc.author ?? "—"}
-                </td>
-                <td style={{ padding: 8, borderBottom: "1px solid #f0f0f0" }}>
-                  {doc.createdAt
-                    ? new Date(doc.createdAt).toLocaleString("ru-RU")
-                    : "—"}
-                </td>
-                <td style={{ padding: 8, borderBottom: "1px solid #f0f0f0" }}>
-                  <button
-                    onClick={() => {
-                      if (doc.url) window.open(doc.url, "_blank");
-                    }}
-                    disabled={!doc.url}
-                    style={{ marginRight: 8 }}
-                    title="Открыть"
-                  >
-                    Открыть
-                  </button>
-                  <button onClick={() => handleDelete(doc.id)} title="Удалить">
-                    Удалить
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </div>
-  );
-};
+            {!loading && !error && dateFilteredDocuments.length > 0 && viewMode === 'icons' && (
+                <DocumentsListView
+                    documents={visibleDocuments}
+                    lang={lang}
+                    namePlaceholder={text.namePlaceholder}
+                    getFullFilePath={getFullFilePath}
+                    onPreview={handleOpenPreview}
+                    onDownload={handleDownloadDocument}
+/>
+            )}
 
-export default DocumentPage;
+            {!loading && !error && dateFilteredDocuments.length > 0 && viewMode === 'cards' && (
+                <DocumentsGridView
+                    documents={visibleDocuments}
+                    lang={lang}
+                    namePlaceholder={text.namePlaceholder}
+                    getFullFilePath={getFullFilePath}
+                    onPreview={handleOpenPreview}
+                    onDownload={handleDownloadDocument}
+                />
+            )}
+
+            {!loading && !error && visibleDocuments.length < dateFilteredDocuments.length && (
+                <Box sx={loadMoreWrapSx}>
+                    <Button
+                        onClick={handleLoadMore}
+                        variant="outlined"
+                        startIcon={
+                            <Box
+                                component="img"
+                                src="/material-symbols_replay.png"
+                                sx={{ width: 22 }}
+                            />
+                        }
+                        sx={loadMoreButtonSx}
+                    >
+                        {text.loadMore}
+                    </Button>
+                </Box>
+            )}
+
+            <DocumentsFilterPopover
+                open={Boolean(anchorEl)}
+                anchorEl={anchorEl}
+                onClose={() => setAnchorEl(null)}
+                onApply={handleApplyFilters}
+                title={text.filters}
+                categoryLabel={text.category}
+                dateLabel={text.date}
+                searchLabel={text.search}
+                sortLabel={text.sort}
+                applyLabel={text.apply}
+                allCategoriesLabel={text.allCategories}
+                newestLabel={text.newest}
+                oldestLabel={text.oldest}
+                azLabel={text.az}
+                zaLabel={text.za}
+                categories={categories}
+                tempCategory={tempCategory}
+                tempDate={tempDate}
+                tempSearch={tempSearch}
+                tempSort={tempSort}
+                onCategoryChange={setTempCategory}
+                onDateChange={setTempDate}
+                onSearchChange={setTempSearch}
+                onSortChange={setTempSort}
+            />
+
+            <DocumentPreviewDialog
+                open={isPreviewOpen}
+                documentItem={previewDocument}
+                fileUrl={previewDocument ? getFullFilePath(previewDocument.filePath) : ''}
+                onClose={handleClosePreview}
+                onDownload={handleDownloadDocument}
+            />
+        </Container>
+    );
+}
