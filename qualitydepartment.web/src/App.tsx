@@ -16,7 +16,7 @@ function App() {
                 <Routes>
                     <Route path="/" element={<HomePage />} />
                     <Route path="/news" element={<NewsPage />} />
-                    <Route path="/documents" element={<DocumentPage />} />
+                    <Route path="/archive" element={<DocumentPage />} />
                     <Route path="/info" element={<h1>Корисна інформація</h1>} />
                     <Route path="/news" element={<NewsPage />} />
                     <Route path="/news/:id" element={<NewsDetailsPage />} />
