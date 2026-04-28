@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using QualityDepartment.Core.DTOs.Admin.Administration;
+using QualityDepartment.Core.DTOs.Admin.Documents;
 using QualityDepartment.Core.DTOs.Admin.News;
 using QualityDepartment.Core.DTOs.Documents;
 using QualityDepartment.Core.DTOs.ExternalLinks;
@@ -108,6 +109,26 @@ namespace QualityDepartment.Core.Mappings
 
             CreateMap<Document, DocumentDetailsDto>()
                 .IncludeBase<Document, DocumentListItemDto>();
+
+            CreateMap<DocumentCreateDto, Document>()
+            .ForMember(dest => dest.FilePath, opt => opt.Ignore())
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatorId, opt => opt.Ignore());
+
+            CreateMap<DocumentUpdateDto, Document>()
+                .ForMember(dest => dest.FilePath, opt => opt.Ignore())
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.EditorId, opt => opt.Ignore());
+
+            CreateMap<Document, DocumentAdminDetailsDto>()
+                .ForMember(dest => dest.CategoryNameUa, opt => opt.MapFrom(src => src.Category.NameUa))
+                .ForMember(dest => dest.CreatorName, opt => opt.MapFrom(src => src.Creator.UserName))
+                .ForMember(dest => dest.EditorName, opt => opt.MapFrom(src => src.Editor.UserName));
+            CreateMap<Document, DocumentAdminDto>()
+                .ForMember(dest => dest.CategoryNameUa, opt => opt.MapFrom(src => src.Category.NameUa))
+                .ForMember(dest => dest.CategoryNameEn, opt => opt.MapFrom(src => src.Category.NameEn));
 
             CreateMap<ExternalLink, ExternalLinkDto>()
                 .ForMember(dest => dest.Name, opt => opt.MapFrom((src, dest, _, context) =>

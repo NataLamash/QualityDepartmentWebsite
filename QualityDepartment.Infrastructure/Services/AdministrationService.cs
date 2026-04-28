@@ -16,6 +16,7 @@ namespace QualityDepartment.Infrastructure.Services
         private readonly IMapper _mapper;
         private readonly FileService _fileService;
         private const long MaxFileSizeBytes = 5 * 1024 * 1024; // 5MB
+        private readonly string saveFolder = "administration";
 
         public AdministrationService(ApplicationDbContext context, IMapper mapper, FileService fileService)
         {
@@ -47,7 +48,7 @@ namespace QualityDepartment.Infrastructure.Services
             member.CreatorId = userId;
 
             if (dto.Photo != null)
-                member.PhotoPath = await _fileService.SaveFileAsync(dto.Photo);
+                member.PhotoPath = await _fileService.SaveFileAsync(dto.Photo, saveFolder);
 
             _context.AdministrationMembers.Add(member);
             await _context.SaveChangesAsync();
@@ -70,7 +71,7 @@ namespace QualityDepartment.Infrastructure.Services
             if (dto.Photo != null)
             {
                 _fileService.DeleteFile(member.PhotoPath);
-                member.PhotoPath = await _fileService.SaveFileAsync(dto.Photo);
+                member.PhotoPath = await _fileService.SaveFileAsync(dto.Photo, saveFolder);
             }
             else if (string.IsNullOrWhiteSpace(dto.ExistingPhotoPath))
             {

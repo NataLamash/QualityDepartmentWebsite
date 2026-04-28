@@ -16,6 +16,7 @@ namespace QualityDepartment.Infrastructure.Services
         private readonly IMapper _mapper;
         private readonly FileService _fileService;
         private const long MaxFileSizeBytes = 5 * 1024 * 1024; // 5MB
+        private readonly string saveFolder = "news";
 
         public NewsService(ApplicationDbContext context, IMapper mapper, FileService fileService)
         {
@@ -190,7 +191,7 @@ namespace QualityDepartment.Infrastructure.Services
             }
 
             if (dto.Photo != null)
-                entity.PhotoPath = await _fileService.SaveFileAsync(dto.Photo);
+                entity.PhotoPath = await _fileService.SaveFileAsync(dto.Photo, saveFolder);
 
             entity.CreatorId = creatorId;
             entity.CreatedAt = DateTime.UtcNow;
@@ -223,7 +224,7 @@ namespace QualityDepartment.Infrastructure.Services
             if (dto.Photo != null)
             {
                 _fileService.DeleteFile(entity.PhotoPath);
-                entity.PhotoPath = await _fileService.SaveFileAsync(dto.Photo);
+                entity.PhotoPath = await _fileService.SaveFileAsync(dto.Photo, saveFolder);
             }
             else if (string.IsNullOrWhiteSpace(dto.ExistingPhotoPath))
             {
