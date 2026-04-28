@@ -182,6 +182,12 @@ namespace QualityDepartment.Infrastructure.Services
                 return (null, "TITLE_ALREADY_EXISTS");
 
             var entity = _mapper.Map<New>(dto);
+            entity.CreatorId = creatorId;
+            entity.CreatedAt = DateTime.UtcNow;
+            if (dto.TagIds.Any())
+            {
+                entity.Tags = await _context.Tags.Where(t => dto.TagIds.Contains(t.Id)).ToListAsync();
+            }
 
             if (dto.Photo != null)
                 entity.PhotoPath = await _fileService.SaveFileAsync(dto.Photo);
@@ -192,6 +198,8 @@ namespace QualityDepartment.Infrastructure.Services
             _context.News.Add(entity);
             await _context.SaveChangesAsync();
 
+            await _context.Entry(entity).Reference(x => x.Creator).LoadAsync();
+
             return (_mapper.Map<NewsAdminDto>(entity), null);
         }
 
@@ -200,7 +208,7 @@ namespace QualityDepartment.Infrastructure.Services
             if (dto.Photo != null && dto.Photo.Length > MaxFileSizeBytes)
                 return (null, false, "FILE_TOO_LARGE");
 
-            var entity = await _context.News.FindAsync(id);
+            var entity = await _context.News.Include(x => x.Tags).FirstOrDefaultAsync(x => x.Id == id);
             if (entity == null)
                 return (null, false, "NEWS_NOT_FOUND");
 
@@ -224,6 +232,12 @@ namespace QualityDepartment.Infrastructure.Services
             }
 
             _mapper.Map(dto, entity);
+
+            entity.Tags.Clear();
+            if (dto.TagIds != null && dto.TagIds.Any())
+            {
+                entity.Tags = await _context.Tags.Where(t => dto.TagIds.Contains(t.Id)).ToListAsync();
+            }
 
             entity.EditorId = editorId;
             entity.UpdatedAt = DateTime.UtcNow;

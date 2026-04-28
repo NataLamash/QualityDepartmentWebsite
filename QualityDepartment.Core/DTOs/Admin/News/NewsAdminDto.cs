@@ -15,5 +15,6 @@ namespace QualityDepartment.Core.DTOs.Admin.News
         public DateTime PublishDate { get; set; }
         public bool IsPublished => PublishDate <= DateTime.UtcNow;
         public string CreatorName { get; set; } = null!;
+        public List<TagAdminDto> Tags { get; set; } = new();
     }
 }

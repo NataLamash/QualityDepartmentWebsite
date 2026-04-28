@@ -24,8 +24,8 @@ namespace QualityDepartment.Core.DTOs.Admin.News
 
         [Required(ErrorMessage = "FIELD_REQUIRED")]
         public DateTime PublishDate { get; set; }
-
         public IFormFile? Photo { get; set; }
+        public List<int> TagIds { get; set; } = new();
     }
 
     public class NewsUpdateDto
@@ -48,7 +48,7 @@ namespace QualityDepartment.Core.DTOs.Admin.News
         public DateTime PublishDate { get; set; }
 
         public IFormFile? Photo { get; set; }
-
         public string? ExistingPhotoPath { get; set; }
+        public List<int> TagIds { get; set; } = new();
     }
 }

@@ -59,12 +59,13 @@ namespace QualityDepartment.Core.Mappings
             CreateMap<NewsUpdateDto, New>()
                 .ForMember(dest => dest.PhotoPath, opt => opt.Ignore());
 
+            CreateMap<Tag, TagAdminDto>();
+
             CreateMap<New, NewsAdminDto>()
                 .ForMember(dest => dest.CreatorName, opt => opt.MapFrom(src => src.Creator!.UserName));
             CreateMap<New, NewsAdminDto>()
                 .ForMember(dest => dest.CreatorName, opt => opt.MapFrom(src => src.Creator!.UserName));
 
-            CreateMap<Tag, TagAdminDto>();
 
             CreateMap<New, NewsAdminDetailsDto>()
                 .ForMember(dest => dest.CreatorName,
