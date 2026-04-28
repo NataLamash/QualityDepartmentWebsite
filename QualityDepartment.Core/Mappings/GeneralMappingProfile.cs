@@ -52,9 +52,28 @@ namespace QualityDepartment.Core.Mappings
                 .ForMember(dest => dest.PublishDate, opt => opt.MapFrom(src => src.PublishDate))
                 .ForMember(dest => dest.PhotoPath, opt => opt.MapFrom(src => src.PhotoPath));
 
-            CreateMap<NewsCreateUpdateDto, New>();
+            CreateMap<NewsCreateDto, New>()
+                .ForMember(dest => dest.PhotoPath, opt => opt.Ignore());
+
+            CreateMap<NewsUpdateDto, New>()
+                .ForMember(dest => dest.PhotoPath, opt => opt.Ignore());
+
             CreateMap<New, NewsAdminDto>()
                 .ForMember(dest => dest.CreatorName, opt => opt.MapFrom(src => src.Creator!.UserName));
+            CreateMap<New, NewsAdminDto>()
+                .ForMember(dest => dest.CreatorName, opt => opt.MapFrom(src => src.Creator!.UserName));
+
+            CreateMap<Tag, TagAdminDto>();
+
+            CreateMap<New, NewsAdminDetailsDto>()
+                .ForMember(dest => dest.CreatorName,
+                    opt => opt.MapFrom(src => src.Creator.UserName))
+
+                .ForMember(dest => dest.EditorName,
+                    opt => opt.MapFrom(src => src.Editor != null ? src.Editor.UserName : null))
+
+                .ForMember(dest => dest.Tags,
+                    opt => opt.MapFrom(src => src.Tags));
 
             CreateMap<AdministrationMember, AdministrationMemberCardDto>()
                 .ForMember(

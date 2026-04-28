@@ -119,11 +119,29 @@ namespace QualityDepartment.Infrastructure.Services
                 opt => opt.Items["lang"] = lang);
         }
 
+        public async Task<NewsAdminDetailsDto?> GetAdminByIdAsync(int id)
+        {
+            var entity = await _context.News
+                .AsNoTracking()
+                .Include(x => x.Creator)
+                .Include(x => x.Editor)
+                .Include(x => x.Tags)
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (entity == null)
+                return null;
+
+            return _mapper.Map<NewsAdminDetailsDto>(entity);
+        }
+
         public async Task<PagedResultDto<NewsAdminDto>> GetAdminNewsAsync(
             int page = 1,
             int pageSize = 10,
             string? search = null)
         {
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 10;
+            if (pageSize > 100) pageSize = 100;
             IQueryable<New> query = _context.News
                 .AsNoTracking()
                 .Include(n => n.Creator);
@@ -134,7 +152,7 @@ namespace QualityDepartment.Infrastructure.Services
                 query = query.Where(x => x.TitleUa.ToLower().Contains(s) || x.TitleEn.ToLower().Contains(s));
             }
 
-            query = query.OrderByDescending(x => x.CreatedAt);
+            query = query.OrderByDescending(x => x.PublishDate);
 
             var totalCount = await query.CountAsync();
             var newsList = await query
@@ -152,18 +170,18 @@ namespace QualityDepartment.Infrastructure.Services
             };
         }
 
-        public async Task<(NewsAdminDto? Result, List<string>? Errors)> CreateAsync(NewsCreateUpdateDto dto, int creatorId)
+        public async Task<(NewsAdminDto? Result, string? ErrorCode)> CreateAsync(NewsCreateDto dto, int creatorId)
         {
-            if (await _context.News.AnyAsync(x => x.TitleUa == dto.TitleUa))
-                return (null, new List<string> { "Новина з таким заголовком вже існує" });
+            var normalizedTitle = dto.TitleUa.Trim().ToLower();
+
+            if (await _context.News.AnyAsync(x =>
+                x.TitleUa.ToLower() == normalizedTitle))
+                return (null, "TITLE_ALREADY_EXISTS");
 
             var entity = _mapper.Map<New>(dto);
 
-            // Обробка фото
             if (dto.Photo != null)
-            {
                 entity.PhotoPath = await _fileService.SaveFileAsync(dto.Photo);
-            }
 
             entity.CreatorId = creatorId;
             entity.CreatedAt = DateTime.UtcNow;
@@ -174,25 +192,38 @@ namespace QualityDepartment.Infrastructure.Services
             return (_mapper.Map<NewsAdminDto>(entity), null);
         }
 
-        public async Task<(bool Success, List<string>? Errors)> UpdateAsync(int id, NewsCreateUpdateDto dto, int editorId)
+        public async Task<(NewsAdminDto? Result, bool Success, string? ErrorCode)> UpdateAsync(int id, NewsUpdateDto dto, int editorId)
         {
             var entity = await _context.News.FindAsync(id);
-            if (entity == null) return (false, null);
+            if (entity == null)
+                return (null, false, "NEWS_NOT_FOUND");
 
             var isDuplicate = await _context.News.AnyAsync(x =>
-                x.TitleUa.ToLower() == dto.TitleUa.ToLower() && x.Id != id);
+                x.TitleUa.ToLower() == dto.TitleUa.Trim().ToLower() && x.Id != id);
 
             if (isDuplicate)
             {
-                return (false, new List<string> { "Новина з таким заголовком вже існує" });
+                return (null, false, "TITLE_ALREADY_EXISTS");
+            }
+
+            if (dto.Photo != null)
+            {
+                _fileService.DeleteFile(entity.PhotoPath);
+                entity.PhotoPath = await _fileService.SaveFileAsync(dto.Photo);
+            }
+            else if (string.IsNullOrWhiteSpace(dto.ExistingPhotoPath))
+            {
+                _fileService.DeleteFile(entity.PhotoPath);
+                entity.PhotoPath = null;
             }
 
             _mapper.Map(dto, entity);
+
             entity.EditorId = editorId;
             entity.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
-            return (true, null);
+            return (_mapper.Map<NewsAdminDto>(entity), true, null);
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -200,8 +231,11 @@ namespace QualityDepartment.Infrastructure.Services
             var entity = await _context.News.FindAsync(id);
             if (entity == null) return false;
 
+            _fileService.DeleteFile(entity.PhotoPath);
+
             _context.News.Remove(entity);
             await _context.SaveChangesAsync();
+
             return true;
         }
     }

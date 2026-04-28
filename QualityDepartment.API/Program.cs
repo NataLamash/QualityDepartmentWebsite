@@ -1,13 +1,16 @@
 using QualityDepartment.API;
-using QualityDepartment.Infrastructure;
+using QualityDepartment.API.Extensions;
 using QualityDepartment.API.Middleware;
 using QualityDepartment.Core.Mappings;
+using QualityDepartment.Infrastructure;
 
+System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 var builder = WebApplication.CreateBuilder(args);
 
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
 
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddSwaggerDocumentation();
 
 
 builder.Services.AddCors(options =>
@@ -25,7 +28,6 @@ builder.Services.AddControllers()
         options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 

@@ -16,6 +16,17 @@ namespace QualityDepartment.API.Controllers.Admin
 
         public AdminNewsController(NewsService newsService) => _newsService = newsService;
 
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<ApiResponse<NewsAdminDetailsDto>>> GetById(int id)
+        {
+            var result = await _newsService.GetAdminByIdAsync(id);
+
+            if (result == null)
+                return NotFound();
+
+            return Ok(ApiResponse<NewsAdminDetailsDto>.SuccessResponse(result));
+        }
+
         [HttpGet]
         public async Task<ActionResult<ApiResponse<PagedResultDto<NewsAdminDto>>>> GetAll(
             [FromQuery] int page = 1,
@@ -27,31 +38,29 @@ namespace QualityDepartment.API.Controllers.Admin
         }
 
         [HttpPost]
-        public async Task<ActionResult<ApiResponse<NewsAdminDto>>> Create([FromForm] NewsCreateUpdateDto dto)
+        public async Task<ActionResult<ApiResponse<NewsAdminDto>>> Create([FromForm] NewsCreateDto dto)
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var (result, errorCode) = await _newsService.CreateAsync(dto, userId);
 
-            var (result, errors) = await _newsService.CreateAsync(dto, userId);
+            if (errorCode != null)
+                return BadRequest(ApiResponse<NewsAdminDto>.FailureResponse(new List<string> { errorCode }));
 
-            if (errors != null)
-                return BadRequest(ApiResponse<NewsAdminDto>.FailureResponse(errors, "Помилка створення"));
-
-            return Ok(ApiResponse<NewsAdminDto>.SuccessResponse(result!));
+            return Ok(ApiResponse<NewsAdminDto>.SuccessResponse(result!, "NEWS_UPDATED_SUCCESS"));
         }
 
         [HttpPut("{id:int}")]
-        public async Task<ActionResult<ApiResponse<string>>> Update(int id, [FromBody] NewsCreateUpdateDto dto)
+        public async Task<ActionResult<ApiResponse<string>>> Update(int id, [FromForm] NewsUpdateDto dto)
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var (result, success, errorCode) = await _newsService.UpdateAsync(id, dto, userId);
 
-            var (success, errors) = await _newsService.UpdateAsync(id, dto, userId);
-
-            if (errors != null)
-                return BadRequest(ApiResponse<string>.FailureResponse(errors, "Помилка оновлення"));
+            if (errorCode != null)
+                return BadRequest(ApiResponse<string>.FailureResponse(new List<string> { errorCode }));
 
             if (!success) return NotFound();
 
-            return Ok(ApiResponse<string>.SuccessResponse("Новину успішно оновлено"));
+            return Ok(ApiResponse<NewsAdminDto>.SuccessResponse(result!, "NEWS_UPDATED_SUCCESS"));
         }
 
         [HttpDelete("{id:int}")]
@@ -59,8 +68,8 @@ namespace QualityDepartment.API.Controllers.Admin
         {
             var success = await _newsService.DeleteAsync(id);
             return success
-                ? Ok(ApiResponse<string>.SuccessResponse("Видалено"))
-                : NotFound(ApiResponse<string>.FailureResponse(new List<string> { "Новину не знайдено" }));
+                ? Ok(ApiResponse<string>.SuccessResponse("NEW_DELETED_SUCCESSFULLY"))
+                : NotFound(ApiResponse<string>.FailureResponse(new List<string> { "NEW_NOT_FOUND" }));
         }
     }
 }

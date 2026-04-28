@@ -11,6 +11,7 @@ using QualityDepartment.Infrastructure.Data;
 using QualityDepartment.Infrastructure.Services;
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Text;
 
 namespace QualityDepartment.Infrastructure
@@ -59,7 +60,9 @@ namespace QualityDepartment.Infrastructure
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = configuration["Jwt:Issuer"],
                     ValidAudience = configuration["Jwt:Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!)),
+                    RoleClaimType = ClaimTypes.Role,
+                    NameClaimType = ClaimTypes.Name
                 };
             });
 
@@ -73,5 +76,6 @@ namespace QualityDepartment.Infrastructure
 
             return services;
         }
+
     }
 }
