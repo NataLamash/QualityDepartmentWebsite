@@ -46,7 +46,7 @@ namespace QualityDepartment.API.Controllers.Admin
             if (errorCode != null)
                 return BadRequest(ApiResponse<NewsAdminDto>.FailureResponse(new List<string> { errorCode }));
 
-            return Ok(ApiResponse<NewsAdminDto>.SuccessResponse(result!, "NEWS_UPDATED_SUCCESS"));
+            return Ok(ApiResponse<NewsAdminDto>.SuccessResponse(result!, "NEWS_CREATED_SUCCESS"));
         }
 
         [HttpPut("{id:int}")]

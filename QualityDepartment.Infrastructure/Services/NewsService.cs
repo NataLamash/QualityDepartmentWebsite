@@ -15,6 +15,7 @@ namespace QualityDepartment.Infrastructure.Services
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
         private readonly FileService _fileService;
+        private const long MaxFileSizeBytes = 5 * 1024 * 1024; // 5MB
 
         public NewsService(ApplicationDbContext context, IMapper mapper, FileService fileService)
         {
@@ -172,6 +173,8 @@ namespace QualityDepartment.Infrastructure.Services
 
         public async Task<(NewsAdminDto? Result, string? ErrorCode)> CreateAsync(NewsCreateDto dto, int creatorId)
         {
+            if (dto.Photo != null && dto.Photo.Length > MaxFileSizeBytes)
+                return (null, "FILE_TOO_LARGE");
             var normalizedTitle = dto.TitleUa.Trim().ToLower();
 
             if (await _context.News.AnyAsync(x =>
@@ -194,6 +197,9 @@ namespace QualityDepartment.Infrastructure.Services
 
         public async Task<(NewsAdminDto? Result, bool Success, string? ErrorCode)> UpdateAsync(int id, NewsUpdateDto dto, int editorId)
         {
+            if (dto.Photo != null && dto.Photo.Length > MaxFileSizeBytes)
+                return (null, false, "FILE_TOO_LARGE");
+
             var entity = await _context.News.FindAsync(id);
             if (entity == null)
                 return (null, false, "NEWS_NOT_FOUND");

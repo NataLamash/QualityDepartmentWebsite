@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using QualityDepartment.Core.DTOs.Admin.Administration;
 using QualityDepartment.Core.DTOs.Admin.News;
 using QualityDepartment.Core.DTOs.Documents;
 using QualityDepartment.Core.DTOs.ExternalLinks;
@@ -86,6 +87,15 @@ namespace QualityDepartment.Core.Mappings
                         GetLocalizedValue(src.PositionUa, src.PositionEn, context)))
                 .ForMember(dest => dest.PhotoPath, opt => opt.MapFrom(src => src.PhotoPath))
                 .ForMember(dest => dest.SortOrder, opt => opt.MapFrom(src => src.SortOrder));
+
+            CreateMap<AdministrationMember, AdministrationMemberAdminDto>();
+            CreateMap<AdministrationMember, AdministrationMemberAdminDetailsDto>();
+
+            CreateMap<AdministrationMemberCreateDto, AdministrationMember>()
+                .ForMember(dest => dest.PhotoPath, opt => opt.Ignore());
+
+            CreateMap<AdministrationMemberUpdateDto, AdministrationMember>()
+                .ForMember(dest => dest.PhotoPath, opt => opt.Ignore());
 
             CreateMap<Document, DocumentListItemDto>()
                 .ForMember(dest => dest.Name, opt => opt.MapFrom((src, dest, _, context) =>

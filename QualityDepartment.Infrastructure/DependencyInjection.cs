@@ -45,6 +45,7 @@ namespace QualityDepartment.Infrastructure
             services.AddScoped<DocumentService>();
             services.AddScoped<ExternalLinkService>();
             services.AddScoped<FileService>();
+            services.AddScoped<AdministrationService>();
 
             var jwtKey = configuration["Jwt:Key"];
             services.AddAuthentication(options => {

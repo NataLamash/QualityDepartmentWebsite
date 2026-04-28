@@ -307,7 +307,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
             EmailConfirmed = true,
             SecurityStamp = "C5739G6G-1B23-5D8B-B2G3-E6F498C2B0A1",
             ConcurrencyStamp = "783fc6d2-fdfe-5fe7-b6cc-18ccd2c2cg26",
-            PasswordHash = "AQAAAAIAAYagAAAAEGjthsKhOUSp3G03HRX9BAr1z7mpyb50xhBHWx94BDJsVpnJKMGRw+UpxEBFqY2EgA==" // Той самий Admin123!
+            PasswordHash = "AQAAAAIAAYagAAAAEGjthsKhOUSp3G03HRX9BAr1z7mpyb50xhBHWx94BDJsVpnJKMGRw+UpxEBFqY2EgA==" // password: Admin123!
         });
 
         modelBuilder.Entity<IdentityUserRole<int>>().HasData(new IdentityUserRole<int>

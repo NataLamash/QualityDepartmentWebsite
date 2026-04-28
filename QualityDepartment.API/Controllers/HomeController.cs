@@ -17,13 +17,6 @@ namespace QualityDepartment.API.Controllers
         }
 
 
-        [HttpGet("check-my-claims")]
-        public IActionResult CheckClaims()
-        {
-            var claims = User.Claims.Select(c => new { c.Type, c.Value }).ToList();
-            return Ok(claims);
-        }
-
         [HttpGet("latest-news")]
         public async Task<ActionResult<ApiResponse<List<HomeNewsCardDto>>>> GetLatestNews(
             [FromQuery] int count = 3,
