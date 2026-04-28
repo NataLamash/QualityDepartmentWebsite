@@ -102,7 +102,7 @@ export default function NewsDetailsPage() {
                             '& img': { maxWidth: '100%', borderRadius: '20px', my: 2 },
                             '& ul, & ol': { fontSize: '1.2rem', lineHeight: 1.8, mb: 3, ml: 3 }
                         }}>
-                            <div dangerouslySetInnerHTML={{ __html: news.content || '' }} />
+                            <div dangerouslySetInnerHTML={{ __html: news.fullText || '' }} />
                         </Box>
                         <Divider sx={{ my: 6 }} />
                     </Grid>

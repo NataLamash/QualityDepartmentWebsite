@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using QualityDepartment.Core.DTOs.Admin.Documents;
 using QualityDepartment.Core.DTOs.Common;
 using QualityDepartment.Core.DTOs.Documents;
+using QualityDepartment.Core.Entities;
 using QualityDepartment.Infrastructure.Data;
 
 namespace QualityDepartment.Infrastructure.Services
@@ -12,12 +14,16 @@ namespace QualityDepartment.Infrastructure.Services
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
         private readonly ILogger<DocumentService> _logger;
+        private readonly FileService _fileService;
+        private const long MaxFileSizeBytes = 20 * 1024 * 1024; // 20MB
+        private readonly string saveFolder = "docs";
 
-        public DocumentService(ApplicationDbContext context, IMapper mapper, ILogger<DocumentService> logger)
+        public DocumentService(ApplicationDbContext context, IMapper mapper, ILogger<DocumentService> logger, FileService fileService)
         {
             _context = context;
             _mapper = mapper;
             _logger = logger;
+            _fileService = fileService;
         }
 
         public async Task<PagedResultDto<DocumentListItemDto>> GetDocumentsAsync(DocumentParams p)
@@ -187,6 +193,110 @@ namespace QualityDepartment.Infrastructure.Services
                     Name = lang == "en" ? c.NameEn : c.NameUa
                 })
                 .ToListAsync();
+        }
+
+        public async Task<DocumentAdminDetailsDto?> GetAdminByIdAsync(int id)
+        {
+            var doc = await _context.Documents
+                .Include(d => d.Category)
+                .Include(d => d.Creator)
+                .Include(d => d.Editor)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (doc == null) return null;
+
+            return _mapper.Map<DocumentAdminDetailsDto>(doc);
+        }
+
+        public async Task<PagedResultDto<DocumentAdminDto>> GetAdminDocumentsAsync(int page, int pageSize, string? search)
+        {
+            var query = _context.Documents.Include(d => d.Category).AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(search))
+                query = query.Where(d => d.NameUa.Contains(search) || d.NameEn.Contains(search));
+
+            var totalCount = await query.CountAsync();
+            var items = await query.OrderByDescending(d => d.CreatedAt)
+                .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+
+            return new PagedResultDto<DocumentAdminDto>
+            {
+                Items = _mapper.Map<List<DocumentAdminDto>>(items),
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
+        }
+
+        public async Task<(DocumentAdminDto? result, string? errorCode)> CreateAsync(DocumentCreateDto dto, int userId)
+        {
+            if (dto.File != null && dto.File.Length > MaxFileSizeBytes) return (null, "FILE_TOO_LARGE");
+            if (dto.File == null) return (null, "FILE_REQUIRED");
+
+            if (!await _context.DocumentCategories.AnyAsync(c => c.Id == dto.CategoryId))
+                return (null, "CATEGORY_NOT_FOUND");
+
+            var doc = _mapper.Map<Document>(dto);
+            doc.CreatedAt = DateTime.UtcNow;
+            doc.CreatorId = userId;
+            doc.ExternalType = false;
+
+            if (dto.File != null)
+                doc.FilePath = await _fileService.SaveFileAsync(dto.File, saveFolder);
+
+            _context.Documents.Add(doc);
+            await _context.SaveChangesAsync();
+
+            await _context.Entry(doc).Reference(d => d.Category).LoadAsync();
+
+            return (_mapper.Map<DocumentAdminDto>(doc), null);
+        }
+
+        public async Task<(DocumentAdminDto? result, bool success, string? errorCode)> UpdateAsync(int id, DocumentUpdateDto dto, int userId)
+        {
+            var doc = await _context.Documents.FindAsync(id);
+            if (doc == null) return (null, false, "DOCUMENT_NOT_FOUND");
+
+            if (dto.File != null && dto.File.Length > MaxFileSizeBytes)
+                return (null, false, "FILE_TOO_LARGE");
+
+            if(dto.CategoryId != doc.CategoryId)
+            {
+                if (!await _context.DocumentCategories.AnyAsync(c => c.Id == dto.CategoryId))
+                    return (null, false, "CATEGORY_NOT_FOUND");
+            }
+
+            _mapper.Map(dto, doc);
+
+            doc.ExternalType = false;
+
+            if (dto.File != null)
+            {
+                if (!string.IsNullOrEmpty(doc.FilePath))
+                    _fileService.DeleteFile(doc.FilePath);
+
+                doc.FilePath = await _fileService.SaveFileAsync(dto.File, saveFolder);
+            }
+
+            doc.UpdatedAt = DateTime.UtcNow;
+            doc.EditorId = userId;
+
+            await _context.SaveChangesAsync();
+
+            await _context.Entry(doc).Reference(d => d.Category).LoadAsync();
+
+            return (_mapper.Map<DocumentAdminDto>(doc), true, null);
+        }
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var doc = await _context.Documents.FindAsync(id);
+            if (doc == null) return false;
+
+            if (!string.IsNullOrEmpty(doc.FilePath)) _fileService.DeleteFile(doc.FilePath);
+            _context.Documents.Remove(doc);
+            return await _context.SaveChangesAsync() > 0;
         }
     }
 }

@@ -1,13 +1,17 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using QualityDepartment.Core.Entities;
 using QualityDepartment.Core.Mappings;
 using QualityDepartment.Infrastructure.Data;
 using QualityDepartment.Infrastructure.Services;
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Text;
 
 namespace QualityDepartment.Infrastructure
@@ -30,10 +34,40 @@ namespace QualityDepartment.Infrastructure
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AdminOnly", policy =>
+                    policy.RequireRole("Admin", "SuperAdmin"));
+            });
+
             services.AddScoped<NewsService>();
             services.AddScoped<HomeService>();
             services.AddScoped<DocumentService>();
             services.AddScoped<ExternalLinkService>();
+            services.AddScoped<FileService>();
+            services.AddScoped<AdministrationService>();
+
+            var jwtKey = configuration["Jwt:Key"];
+            services.AddAuthentication(options => {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options => {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = configuration["Jwt:Issuer"],
+                    ValidAudience = configuration["Jwt:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!)),
+                    RoleClaimType = ClaimTypes.Role,
+                    NameClaimType = ClaimTypes.Name
+                };
+            });
+
+            services.AddScoped<AuthService>();
 
 
             services.AddAutoMapper(config =>
@@ -43,5 +77,6 @@ namespace QualityDepartment.Infrastructure
 
             return services;
         }
+
     }
 }

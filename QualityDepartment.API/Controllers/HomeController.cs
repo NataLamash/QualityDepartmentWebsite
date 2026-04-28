@@ -16,6 +16,7 @@ namespace QualityDepartment.API.Controllers
             _homeService = homeService;
         }
 
+
         [HttpGet("latest-news")]
         public async Task<ActionResult<ApiResponse<List<HomeNewsCardDto>>>> GetLatestNews(
             [FromQuery] int count = 3,

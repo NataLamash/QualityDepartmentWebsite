@@ -7,7 +7,7 @@ export interface NewsItem {
     title: string;
     photoPath: string;
     publishDate: string;
-    content?: string;
+    fullText?: string;
 }
 
 export interface AdministrationMember {
