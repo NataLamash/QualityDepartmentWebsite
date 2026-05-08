@@ -17,6 +17,8 @@ namespace QualityDepartment.Infrastructure.Services
         private readonly FileService _fileService;
         private const long MaxFileSizeBytes = 5 * 1024 * 1024; // 5MB
         private readonly string saveFolder = "administration";
+        private readonly string[] images = { ".jpg", ".jpeg", ".png", ".webp" };
+        private readonly string[] mimeTypes = { "image/jpeg", "image/png", "image/webp" };
 
         public AdministrationService(ApplicationDbContext context, IMapper mapper, FileService fileService)
         {
@@ -36,8 +38,19 @@ namespace QualityDepartment.Infrastructure.Services
 
         public async Task<(AdministrationMemberAdminDto? result, string? errorCode)> CreateAsync(AdministrationMemberCreateDto dto, int userId)
         {
-            if (dto.Photo != null && dto.Photo.Length > MaxFileSizeBytes)
-                return (null, "FILE_TOO_LARGE");
+            if (dto.Photo != null)
+            {
+                if (!_fileService.IsFileValid(dto.Photo, images, mimeTypes)) return (null, "INVALID_FILE_FORMAT");
+                if (dto.Photo.Length > MaxFileSizeBytes) return (null, "FILE_TOO_LARGE");
+            }
+
+            var nameLower = dto.FullNameUa.Trim().ToLower();
+            var positionLower = (dto.PositionUa ?? "").Trim().ToLower();
+
+            var isDuplicate = await _context.AdministrationMembers.AnyAsync(x =>
+                x.FullNameUa.ToLower() == nameLower &&
+                (x.PositionUa ?? "").ToLower() == positionLower);
+            if (isDuplicate) return (null, "MEMBER_ALREADY_EXISTS");
 
             var member = _mapper.Map<AdministrationMember>(dto);
 
@@ -58,11 +71,23 @@ namespace QualityDepartment.Infrastructure.Services
 
         public async Task<(AdministrationMemberAdminDto? result, bool success, string? errorCode)> UpdateAsync(int id, AdministrationMemberUpdateDto dto, int userId)
         {
-            if (dto.Photo != null && dto.Photo.Length > MaxFileSizeBytes)
-                return (null, false, "FILE_TOO_LARGE");
-
             var member = await _context.AdministrationMembers.FindAsync(id);
             if (member == null) return (null, false, "MEMBER_NOT_FOUND");
+
+            if (dto.Photo != null)
+            {
+                if (!_fileService.IsFileValid(dto.Photo, images, mimeTypes)) return (null, false, "INVALID_FILE_FORMAT");
+                if (dto.Photo.Length > MaxFileSizeBytes) return (null, false, "FILE_TOO_LARGE");
+            }
+
+            var nameLower = dto.FullNameUa.Trim().ToLower();
+            var positionLower = (dto.PositionUa ?? "").Trim().ToLower();
+
+            var isDuplicate = await _context.AdministrationMembers.AnyAsync(x =>
+                x.FullNameUa.ToLower() == nameLower
+                && (x.PositionUa ?? "").ToLower() == positionLower && x.Id != id);
+
+            if (isDuplicate) return (null, false, "MEMBER_ALREADY_EXISTS");
 
             _mapper.Map(dto, member);
             member.UpdatedAt = DateTime.UtcNow;
