@@ -15,7 +15,7 @@ namespace QualityDepartment.Infrastructure.Services
         private readonly IMapper _mapper;
         private readonly ILogger<DocumentService> _logger;
         private readonly FileService _fileService;
-        private const long MaxFileSizeBytes = 20 * 1024 * 1024; // 20MB
+        private const long MaxFileSizeBytes = 20 * 1024 * 1024;
         private readonly string saveFolder = "docs";
         private readonly string[] allowedExtensions = { ".pdf" };
         private readonly string[] allowedMimeTypes = { "application/pdf" };
@@ -30,11 +30,13 @@ namespace QualityDepartment.Infrastructure.Services
 
         public async Task<PagedResultDto<DocumentListItemDto>> GetDocumentsAsync(DocumentParams p)
         {
+            var nowUtc = DateTime.UtcNow;
+
             var query = _context.Documents
                 .Include(d => d.Category)
                 .AsNoTracking()
                 .AsQueryable()
-                .Where(d => d.PublishDate <= DateTime.UtcNow); ;
+                .Where(d => d.PublishDate <= nowUtc); 
 
             if (!string.IsNullOrWhiteSpace(p.Search))
             {
@@ -63,12 +65,7 @@ namespace QualityDepartment.Infrastructure.Services
                 .Take(p.PageSize)
                 .ToListAsync();
 
-            var dtos = _mapper
-                .Map<List<DocumentListItemDto>>
-                (
-                    items, 
-                    opt => opt.Items["lang"] = p.Lang
-                );
+            var dtos = _mapper.Map<List<DocumentListItemDto>>(items, opt => opt.Items["lang"] = p.Lang);
 
             return new PagedResultDto<DocumentListItemDto>
             {
@@ -79,6 +76,7 @@ namespace QualityDepartment.Infrastructure.Services
                 TotalPages = (int)Math.Ceiling(totalCount / (double)p.PageSize)
             };
         }
+
         public async Task<DocumentDetailsDto?> GetDocumentByIdAsync(int id, string lang = "ua")
         {
             var doc = await _context.Documents
@@ -89,7 +87,6 @@ namespace QualityDepartment.Infrastructure.Services
             if (doc == null) return null;
 
             var dto = _mapper.Map<DocumentDetailsDto>(doc, opt => opt.Items["lang"] = lang);
-
             dto.FileType = Path.GetExtension(doc.FilePath) ?? "unknown";
             dto.FileSize = GetFormattedFileSize(doc.FilePath);
 
@@ -101,10 +98,7 @@ namespace QualityDepartment.Infrastructure.Services
             try
             {
                 var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", filePath.TrimStart('/'));
-                if (File.Exists(fullPath))
-                {
-                    return FormatBytes(new FileInfo(fullPath).Length);
-                }
+                if (File.Exists(fullPath)) return FormatBytes(new FileInfo(fullPath).Length);
             }
             catch (Exception ex)
             {
@@ -112,39 +106,26 @@ namespace QualityDepartment.Infrastructure.Services
             }
             return "0 KB";
         }
+
         private string FormatBytes(long bytes)
         {
             string[] Suffix = { "B", "KB", "MB", "GB" };
-            int i;
-            double dblSByte = bytes;
+            int i; double dblSByte = bytes;
             for (i = 0; i < Suffix.Length && bytes >= 1024; i++, bytes /= 1024)
-            {
                 dblSByte = bytes / 1024.0;
-            }
             return $"{dblSByte:0.##} {Suffix[i]}";
         }
 
         public async Task<(Stream stream, string contentType, string fileName)?> DownloadDocumentAsync(int id)
         {
-            _logger.LogInformation("Attempting to download document with ID: {Id}", id);
             var doc = await _context.Documents.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
-
             if (doc == null || doc.ExternalType) return null;
 
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", doc.FilePath.TrimStart('/'));
-
-            if (!File.Exists(filePath))
-            {
-                _logger.LogWarning("Download failed: Document {Id} not found in database", id);
-                return null;
-            }
+            if (!File.Exists(filePath)) return null;
 
             var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-
-            var contentType = GetContentType(filePath);
-            var fileName = Path.GetFileName(doc.FilePath);
-
-            return (stream, contentType, fileName);
+            return (stream, GetContentType(filePath), Path.GetFileName(doc.FilePath));
         }
 
         private string GetContentType(string path)
@@ -163,58 +144,40 @@ namespace QualityDepartment.Infrastructure.Services
 
         public async Task<(Stream stream, string contentType, string fileName)?> GetDocumentPreviewAsync(int id)
         {
-            var doc = await _context.Documents
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == id);
-
+            var doc = await _context.Documents.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
             if (doc == null || doc.ExternalType) return null;
 
             var ext = Path.GetExtension(doc.FilePath).ToLowerInvariant();
-
-            var allowedPreview = new[] { ".pdf", ".jpg", ".jpeg", ".png" };
-            if (!allowedPreview.Contains(ext)) return null;
+            if (!(new[] { ".pdf", ".jpg", ".jpeg", ".png" }).Contains(ext)) return null;
 
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", doc.FilePath.TrimStart('/'));
-
             if (!File.Exists(filePath)) return null;
 
             var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true);
-
-            var contentType = GetContentType(filePath);
-
-            return (stream, contentType, Path.GetFileName(doc.FilePath));
+            return (stream, GetContentType(filePath), Path.GetFileName(doc.FilePath));
         }
 
         public async Task<List<LookupDto>> GetCategoriesLookupAsync(string lang = "ua")
         {
             return await _context.DocumentCategories
                 .AsNoTracking()
-                .Select(c => new LookupDto
-                {
-                    Id = c.Id,
-                    Name = lang == "en" ? c.NameEn : c.NameUa
-                })
+                .Select(c => new LookupDto { Id = c.Id, Name = lang == "en" ? c.NameEn : c.NameUa })
                 .ToListAsync();
         }
 
         public async Task<DocumentAdminDetailsDto?> GetAdminByIdAsync(int id)
         {
             var doc = await _context.Documents
-                .Include(d => d.Category)
-                .Include(d => d.Creator)
-                .Include(d => d.Editor)
+                .Include(d => d.Category).Include(d => d.Creator).Include(d => d.Editor)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == id);
 
-            if (doc == null) return null;
-
-            return _mapper.Map<DocumentAdminDetailsDto>(doc);
+            return doc == null ? null : _mapper.Map<DocumentAdminDetailsDto>(doc);
         }
 
         public async Task<PagedResultDto<DocumentAdminDto>> GetAdminDocumentsAsync(int page, int pageSize, string? search)
         {
             var query = _context.Documents.Include(d => d.Category).AsNoTracking();
-
             if (!string.IsNullOrWhiteSpace(search))
                 query = query.Where(d => d.NameUa.Contains(search) || d.NameEn.Contains(search));
 
