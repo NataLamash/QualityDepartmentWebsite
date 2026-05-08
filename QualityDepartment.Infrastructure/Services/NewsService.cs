@@ -226,7 +226,7 @@ namespace QualityDepartment.Infrastructure.Services
                 _fileService.DeleteFile(entity.PhotoPath);
                 entity.PhotoPath = await _fileService.SaveFileAsync(dto.Photo, saveFolder);
             }
-            else if (string.IsNullOrWhiteSpace(dto.ExistingPhotoPath))
+            else if (!dto.KeepOldPhoto)
             {
                 _fileService.DeleteFile(entity.PhotoPath);
                 entity.PhotoPath = null;

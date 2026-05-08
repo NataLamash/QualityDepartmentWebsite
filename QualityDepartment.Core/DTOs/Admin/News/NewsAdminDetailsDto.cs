@@ -34,7 +34,7 @@ namespace QualityDepartment.Core.DTOs.Admin.News
     public class TagAdminDto
     {
         public int Id { get; set; }
-        public string NameUa { get; set; }
-        public string NameEn { get; set; }
+        public string NameUa { get; set; } = null!;
+        public string NameEn { get; set; } = null!;
     }
 }
