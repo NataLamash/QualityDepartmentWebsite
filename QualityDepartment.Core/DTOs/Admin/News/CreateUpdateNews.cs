@@ -48,7 +48,7 @@ namespace QualityDepartment.Core.DTOs.Admin.News
         public DateTime PublishDate { get; set; }
 
         public IFormFile? Photo { get; set; }
-        public string? ExistingPhotoPath { get; set; }
+        public bool KeepOldPhoto { get; set; } = true;
         public List<int> TagIds { get; set; } = new();
     }
 }

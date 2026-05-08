@@ -50,7 +50,7 @@ namespace QualityDepartment.Core.DTOs.Admin.Administration
         [StringLength(255)]
         public string? PositionEn { get; set; }
         public IFormFile? Photo { get; set; }
-        public string? ExistingPhotoPath { get; set; }
+        public bool KeepOldPhoto { get; set; } = true;
     }
 
     public class AdministrationMemberReorderDto

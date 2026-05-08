@@ -73,7 +73,7 @@ namespace QualityDepartment.Infrastructure.Services
                 _fileService.DeleteFile(member.PhotoPath);
                 member.PhotoPath = await _fileService.SaveFileAsync(dto.Photo, saveFolder);
             }
-            else if (string.IsNullOrWhiteSpace(dto.ExistingPhotoPath))
+            else if (!dto.KeepOldPhoto)
             {
                 _fileService.DeleteFile(member.PhotoPath);
                 member.PhotoPath = null;
