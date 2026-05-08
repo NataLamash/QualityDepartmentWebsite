@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Mvc;
 using QualityDepartment.API;
 using QualityDepartment.API.Extensions;
 using QualityDepartment.API.Middleware;
+using QualityDepartment.Core.DTOs.Common;
 using QualityDepartment.Core.Mappings;
 using QualityDepartment.Infrastructure;
 
@@ -24,6 +26,20 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var errors = context.ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage)
+                .ToList();
+
+            var response = ApiResponse<object>.FailureResponse(errors, "VALIDATION_ERROR");
+
+            return new BadRequestObjectResult(response);
+        };
+    })
     .AddNewtonsoftJson(options =>
         options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 

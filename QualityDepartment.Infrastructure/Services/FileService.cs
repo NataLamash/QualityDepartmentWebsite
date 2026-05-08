@@ -20,6 +20,17 @@ namespace QualityDepartment.Infrastructure.Services
                 Directory.CreateDirectory(uploadsPath);
         }
 
+        public bool IsFileValid(IFormFile file, string[] allowedExtensions, string[] allowedMimeTypes)
+        {
+            var ext = Path.GetExtension(file.FileName).ToLower();
+
+            if (!allowedExtensions.Contains(ext)) return false;
+
+            if (!allowedMimeTypes.Contains(file.ContentType.ToLower())) return false;
+
+            return true;
+        }
+
         public async Task<string> SaveFileAsync(IFormFile file, string subFolder)
         {
             var targetDirectory = Path.Combine(_webRootPath, BaseFolderName, subFolder);

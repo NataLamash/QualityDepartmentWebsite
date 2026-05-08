@@ -17,6 +17,8 @@ namespace QualityDepartment.Infrastructure.Services
         private readonly FileService _fileService;
         private const long MaxFileSizeBytes = 5 * 1024 * 1024; // 5MB
         private readonly string saveFolder = "news";
+        private readonly string[] images = { ".jpg", ".jpeg", ".png", ".webp" };
+        private readonly string[] mimeTypes = { "image/jpeg", "image/png", "image/webp" };
 
         public NewsService(ApplicationDbContext context, IMapper mapper, FileService fileService)
         {
@@ -174,6 +176,12 @@ namespace QualityDepartment.Infrastructure.Services
 
         public async Task<(NewsAdminDto? Result, string? ErrorCode)> CreateAsync(NewsCreateDto dto, int creatorId)
         {
+
+            if (dto.Photo != null && !_fileService.IsFileValid(dto.Photo, images, mimeTypes))
+            {
+                return (null, "INVALID_FILE_FORMAT");
+            }
+
             if (dto.Photo != null && dto.Photo.Length > MaxFileSizeBytes)
                 return (null, "FILE_TOO_LARGE");
             var normalizedTitle = dto.TitleUa.Trim().ToLower();
@@ -206,12 +214,34 @@ namespace QualityDepartment.Infrastructure.Services
 
         public async Task<(NewsAdminDto? Result, bool Success, string? ErrorCode)> UpdateAsync(int id, NewsUpdateDto dto, int editorId)
         {
+            var now = DateTime.UtcNow;
+
             if (dto.Photo != null && dto.Photo.Length > MaxFileSizeBytes)
                 return (null, false, "FILE_TOO_LARGE");
+
+            if (dto.Photo != null && !_fileService.IsFileValid(dto.Photo, images, mimeTypes))
+            {
+                return (null, false, "INVALID_FILE_FORMAT");
+            }
 
             var entity = await _context.News.Include(x => x.Tags).FirstOrDefaultAsync(x => x.Id == id);
             if (entity == null)
                 return (null, false, "NEWS_NOT_FOUND");
+
+            bool isAlreadyPublished = entity.PublishDate <= now;
+
+            if (isAlreadyPublished)
+            {
+                dto.PublishDate = entity.PublishDate;
+            }
+            else
+            {
+                if (dto.PublishDate < now.AddMinutes(-5))
+                    return (null, false, "DATE_CANNOT_BE_IN_PAST");
+
+                if (dto.PublishDate > now.AddDays(7))
+                    return (null, false, "DATE_TOO_FAR_IN_FUTURE");
+            }
 
             var isDuplicate = await _context.News.AnyAsync(x =>
                 x.TitleUa.ToLower() == dto.TitleUa.Trim().ToLower() && x.Id != id);
@@ -241,7 +271,7 @@ namespace QualityDepartment.Infrastructure.Services
             }
 
             entity.EditorId = editorId;
-            entity.UpdatedAt = DateTime.UtcNow;
+            entity.UpdatedAt = now;
 
             await _context.SaveChangesAsync();
             return (_mapper.Map<NewsAdminDto>(entity), true, null);
