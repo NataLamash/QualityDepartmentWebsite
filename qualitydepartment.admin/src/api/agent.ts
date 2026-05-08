@@ -25,9 +25,13 @@ const agent = {
     },
 
     Documents: {
-        list: () => requests.get<any>('/admin/documents'),
-        create: (data: FormData) => requests.post<void>('/admin/documents', data),
+        list: (page = 1, pageSize = 10, search = '') => 
+            requests.get<any>(`/admin/documents?page=${page}&pageSize=${pageSize}&search=${search}`),
+        details: (id: number) => requests.get<any>(`/admin/documents/${id}`),
+        create: (doc: FormData) => requests.post<void>('/admin/documents', doc),
+        update: (id: number, doc: FormData) => requests.put<void>(`/admin/documents/${id}`, doc),
         delete: (id: number) => requests.del<void>(`/admin/documents/${id}`),
+        categories: () => requests.get<any[]>('/documents/categories'), 
     },
 
     AdministrationMembers: {
