@@ -17,6 +17,8 @@ namespace QualityDepartment.Infrastructure.Services
         private readonly FileService _fileService;
         private const long MaxFileSizeBytes = 20 * 1024 * 1024; // 20MB
         private readonly string saveFolder = "docs";
+        private readonly string[] allowedExtensions = { ".pdf" };
+        private readonly string[] allowedMimeTypes = { "application/pdf" };
 
         public DocumentService(ApplicationDbContext context, IMapper mapper, ILogger<DocumentService> logger, FileService fileService)
         {
@@ -231,8 +233,14 @@ namespace QualityDepartment.Infrastructure.Services
 
         public async Task<(DocumentAdminDto? result, string? errorCode)> CreateAsync(DocumentCreateDto dto, int userId)
         {
-            if (dto.File != null && dto.File.Length > MaxFileSizeBytes) return (null, "FILE_TOO_LARGE");
+            var now = DateTime.UtcNow;
             if (dto.File == null) return (null, "FILE_REQUIRED");
+            if (dto.File.Length > MaxFileSizeBytes) return (null, "FILE_TOO_LARGE");
+            if (!_fileService.IsFileValid(dto.File, allowedExtensions, allowedMimeTypes))
+                return (null, "INVALID_FILE_FORMAT");
+
+            if (dto.PublishDate < now.AddMinutes(-5)) return (null, "DATE_CANNOT_BE_IN_PAST");
+            if (dto.PublishDate > now.AddDays(7)) return (null, "DATE_TOO_FAR_IN_FUTURE");
 
             if (!await _context.DocumentCategories.AnyAsync(c => c.Id == dto.CategoryId))
                 return (null, "CATEGORY_NOT_FOUND");
@@ -241,9 +249,7 @@ namespace QualityDepartment.Infrastructure.Services
             doc.CreatedAt = DateTime.UtcNow;
             doc.CreatorId = userId;
             doc.ExternalType = false;
-
-            if (dto.File != null)
-                doc.FilePath = await _fileService.SaveFileAsync(dto.File, saveFolder);
+            doc.FilePath = await _fileService.SaveFileAsync(dto.File, saveFolder);
 
             _context.Documents.Add(doc);
             await _context.SaveChangesAsync();
@@ -255,30 +261,41 @@ namespace QualityDepartment.Infrastructure.Services
 
         public async Task<(DocumentAdminDto? result, bool success, string? errorCode)> UpdateAsync(int id, DocumentUpdateDto dto, int userId)
         {
+            var now = DateTime.UtcNow;
             var doc = await _context.Documents.FindAsync(id);
             if (doc == null) return (null, false, "DOCUMENT_NOT_FOUND");
 
-            if (dto.File != null && dto.File.Length > MaxFileSizeBytes)
-                return (null, false, "FILE_TOO_LARGE");
+            if (dto.File != null)
+            {
+                if (dto.File.Length > MaxFileSizeBytes) return (null, false, "FILE_TOO_LARGE");
+                if (!_fileService.IsFileValid(dto.File, allowedExtensions, allowedMimeTypes))
+                    return (null, false, "INVALID_FILE_FORMAT");
+            }
 
-            if(dto.CategoryId != doc.CategoryId)
+            bool isAlreadyPublished = doc.PublishDate <= now;
+            if (isAlreadyPublished)
+            {
+                dto.PublishDate = doc.PublishDate;
+            }
+            else
+            {
+                if (dto.PublishDate < now.AddMinutes(-5)) return (null, false, "DATE_CANNOT_BE_IN_PAST");
+                if (dto.PublishDate > now.AddDays(7)) return (null, false, "DATE_TOO_FAR_IN_FUTURE");
+            }
+
+            if (dto.CategoryId != doc.CategoryId)
             {
                 if (!await _context.DocumentCategories.AnyAsync(c => c.Id == dto.CategoryId))
                     return (null, false, "CATEGORY_NOT_FOUND");
             }
 
-            _mapper.Map(dto, doc);
-
-            doc.ExternalType = false;
-
             if (dto.File != null)
             {
-                if (!string.IsNullOrEmpty(doc.FilePath))
-                    _fileService.DeleteFile(doc.FilePath);
-
+                _fileService.DeleteFile(doc.FilePath);
                 doc.FilePath = await _fileService.SaveFileAsync(dto.File, saveFolder);
             }
 
+            _mapper.Map(dto, doc);
             doc.UpdatedAt = DateTime.UtcNow;
             doc.EditorId = userId;
 

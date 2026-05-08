@@ -219,6 +219,11 @@ namespace QualityDepartment.Infrastructure.Services
             if (dto.Photo != null && dto.Photo.Length > MaxFileSizeBytes)
                 return (null, false, "FILE_TOO_LARGE");
 
+            if (dto.Photo != null && !_fileService.IsFileValid(dto.Photo, images, mimeTypes))
+            {
+                return (null, false, "INVALID_FILE_FORMAT");
+            }
+
             var entity = await _context.News.Include(x => x.Tags).FirstOrDefaultAsync(x => x.Id == id);
             if (entity == null)
                 return (null, false, "NEWS_NOT_FOUND");
