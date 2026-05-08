@@ -173,7 +173,7 @@ export default function HomePage() {
 
             <Container sx={{ py: 12 }}>
                 <Typography variant="h3" sx={{ mb: 6, fontWeight: 800, color: '#1a1a1a', textAlign: { xs: 'center', md: 'left' } }}>
-                    {i18n.language === 'en' ? 'Administration' : 'Адміністрація'}
+                    {i18n.language === 'en' ? 'Our Team' : 'Наша Команада'}
                 </Typography>
 
                 <Box sx={{ position: 'relative' }}>

@@ -12,11 +12,16 @@ const requests = {
 const agent = {
     Auth: {
         login: (body: { email: string; password: string }) =>
-            requests.post('/auth/login', body),
+            requests.post<any>('/auth/login', body),
     },
-
     News: {
-        list: () => requests.get('/admin/news'),
+     list: (page = 1, pageSize = 50) => 
+        requests.get<any>(`/admin/news?pageNumber=${page}&pageSize=${pageSize}`),
+    
+     create: (news: FormData) => requests.post<void>('/admin/news', news),
+     update: (id: number, news: FormData) => requests.put<void>(`/admin/news/${id}`, news),
+    
+     delete: (id: number) => requests.del<void>(`/admin/news/${id}`),
     },
 
     Documents: {
@@ -30,15 +35,18 @@ const agent = {
     },
 
     AdministrationMembers: {
-        list: () => requests.get('/admin/administration-members'),
+        list: () => requests.get<any>('/admin/administration-members'),
+        create: (data: FormData) => requests.post<void>('/admin/administration-members', data),
+        update: (id: number, data: FormData) => baseApi.put(`/admin/administration-members/${id}`, data).then(responseBody),
+        delete: (id: number) => requests.del<void>(`/admin/administration-members/${id}`),
     },
 
     UsefulInformation: {
-        list: () => requests.get('/admin/external-links'),
+        list: () => requests.get<any>('/admin/external-links'),
     },
 
     Categories: {
-        list: () => requests.get('/admin/document-categories'),
+        list: () => requests.get<any>('/admin/document-categories'),
     },
 };
 
