@@ -17,6 +17,8 @@ namespace QualityDepartment.Infrastructure.Services
         private readonly FileService _fileService;
         private const long MaxFileSizeBytes = 5 * 1024 * 1024; // 5MB
         private readonly string saveFolder = "news";
+        private readonly string[] images = { ".jpg", ".jpeg", ".png", ".webp" };
+        private readonly string[] mimeTypes = { "image/jpeg", "image/png", "image/webp" };
 
         public NewsService(ApplicationDbContext context, IMapper mapper, FileService fileService)
         {
@@ -174,6 +176,12 @@ namespace QualityDepartment.Infrastructure.Services
 
         public async Task<(NewsAdminDto? Result, string? ErrorCode)> CreateAsync(NewsCreateDto dto, int creatorId)
         {
+
+            if (dto.Photo != null && !_fileService.IsFileValid(dto.Photo, images, mimeTypes))
+            {
+                return (null, "INVALID_FILE_FORMAT");
+            }
+
             if (dto.Photo != null && dto.Photo.Length > MaxFileSizeBytes)
                 return (null, "FILE_TOO_LARGE");
             var normalizedTitle = dto.TitleUa.Trim().ToLower();

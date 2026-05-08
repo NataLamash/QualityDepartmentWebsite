@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using QualityDepartment.Core.DTOs.Admin.Common;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -24,6 +25,8 @@ namespace QualityDepartment.Core.DTOs.Admin.News
 
         [Required(ErrorMessage = "FIELD_REQUIRED")]
         public DateTime PublishDate { get; set; } = DateTime.UtcNow;
+
+        [AllowedExtensions(new[] { ".jpg", ".jpeg", ".png", ".webp" })]
         public IFormFile? Photo { get; set; }
         public List<int> TagIds { get; set; } = new();
 
