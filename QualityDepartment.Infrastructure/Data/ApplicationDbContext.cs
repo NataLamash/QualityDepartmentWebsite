@@ -184,6 +184,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
             entity.Property(e => e.NameUa).HasMaxLength(255).IsRequired();
             entity.Property(e => e.NameEn).HasMaxLength(255).IsRequired();
 
+            entity.Property(e => e.PhotoPath).HasMaxLength(500).IsRequired(false);
+            entity.Property(e => e.ShortDescriptionUa).HasMaxLength(500).IsRequired(false);
+            entity.Property(e => e.ShortDescriptionEn).HasMaxLength(500).IsRequired(false);
+
             entity.Property(e => e.SortOrder).HasDefaultValue(0);
 
             entity.HasIndex(e => e.PublishDate);
