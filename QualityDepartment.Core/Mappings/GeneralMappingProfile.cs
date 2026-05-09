@@ -2,6 +2,7 @@
 using QualityDepartment.Core.DTOs.Admin.Administration;
 using QualityDepartment.Core.DTOs.Admin.Documents;
 using QualityDepartment.Core.DTOs.Admin.News;
+using QualityDepartment.Core.DTOs.Admin.TagsAndCategories;
 using QualityDepartment.Core.DTOs.Documents;
 using QualityDepartment.Core.DTOs.ExternalLinks;
 using QualityDepartment.Core.DTOs.Home;
@@ -133,6 +134,26 @@ namespace QualityDepartment.Core.Mappings
             CreateMap<ExternalLink, ExternalLinkDto>()
                 .ForMember(dest => dest.Name, opt => opt.MapFrom((src, dest, _, context) =>
                     GetLocalizedValue(src.NameUa, src.NameEn, context)));
+
+            CreateMap<Tag, TagDto>()
+                .ForMember(d => d.Name, opt => opt.MapFrom((src, dest, destMember, context) =>
+                    context.Items["lang"]?.ToString() == "en" ? src.NameEn : src.NameUa));
+
+            CreateMap<TagCreateUpdateDto, Tag>();
+
+            CreateMap<DocumentCategory, CategoryDto>()
+            .ForMember(d => d.Name, opt => opt.MapFrom((src, dest, destMember, context) =>
+                context.Items.ContainsKey("lang") && context.Items["lang"]?.ToString() == "en"
+                    ? src.NameEn
+                    : src.NameUa));
+
+            CreateMap<CategoryCreateUpdateDto, DocumentCategory>();
+
+            CreateMap<DocumentCategory, CategoryAdminDto>()
+            .ForMember(d => d.DocumentsCount, opt => opt.MapFrom(src => src.Documents.Count));
+
+            CreateMap<Tag, AdminTagDto>()
+                .ForMember(d => d.NewsCount, opt => opt.MapFrom(src => src.News.Count));
         }
 
         private static string GetLanguage(ResolutionContext context)

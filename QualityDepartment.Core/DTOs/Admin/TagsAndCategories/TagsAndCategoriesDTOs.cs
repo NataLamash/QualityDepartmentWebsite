@@ -25,4 +25,23 @@ namespace QualityDepartment.Core.DTOs.Admin.TagsAndCategories
         public string NameUa { get; set; } = null!; 
         public string NameEn { get; set; } = null!; 
     }
+
+    public class AdminTagDto
+    {
+        public int Id { get; set; }
+
+        public string NameUa { get; set; } = null!;
+        public string NameEn { get; set; } = null!;
+
+        public int NewsCount { get; set; }
+    }
+
+    public class CategoryAdminDto
+    {
+        public int Id { get; set; }
+
+        public string NameUa { get; set; } = null!;
+        public string NameEn { get; set; } = null!;
+        public int DocumentsCount { get; set; }
+    }
 }

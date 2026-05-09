@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using QualityDepartment.Core.DTOs.Admin.News;
 using QualityDepartment.Core.DTOs.Admin.TagsAndCategories;
 using QualityDepartment.Core.Entities;
 using QualityDepartment.Infrastructure.Data;
@@ -22,34 +23,50 @@ namespace QualityDepartment.Infrastructure.Services
 
         public async Task<List<TagDto>> GetTagsAsync(string lang = "ua")
         {
-            return await _context.Tags
-                .AsNoTracking()
-                .Select(t => new TagDto
-                {
-                    Id = t.Id,
-                    Name = lang == "en" ? t.NameEn : t.NameUa
-                })
-                .ToListAsync();
+            var tags = await _context.Tags
+            .AsNoTracking()
+            .ToListAsync();
+
+            return _mapper.Map<List<TagDto>>(tags, opt => opt.Items["lang"] = lang);
         }
 
-        public async Task<TagDto> CreateAsync(TagCreateUpdateDto dto)
-        {
-            var tag = new Tag { NameUa = dto.NameUa, NameEn = dto.NameEn };
-            _context.Tags.Add(tag);
-            await _context.SaveChangesAsync();
-            return new TagDto { Id = tag.Id, Name = tag.NameUa };
-        }
-
-        public async Task<bool> UpdateAsync(int id, TagCreateUpdateDto dto)
+        public async Task<(AdminTagDto? result, string? errorCode)> GetByIdAsync(int id)
         {
             var tag = await _context.Tags.FindAsync(id);
-            if (tag == null) return false;
+            if (tag == null) return (null, "TAG_NOT_FOUND");
 
-            tag.NameUa = dto.NameUa;
-            tag.NameEn = dto.NameEn;
+            return (_mapper.Map<AdminTagDto>(tag), null);
+        }
+        public async Task<List<AdminTagDto>> GetAllAdminAsync()
+        {
+            var tags = await _context.Tags.AsNoTracking().ToListAsync();
+            return _mapper.Map<List<AdminTagDto>>(tags);
+        }
 
+        public async Task<(AdminTagDto? Result, string? ErrorCode)> CreateAsync(TagCreateUpdateDto dto)
+        {
+            if (await _context.Tags.AnyAsync(c => c.NameUa == dto.NameUa))
+                return (null, "TAG_ALREADY_EXISTS");
+
+            var tag = _mapper.Map<Tag>(dto);
+            _context.Tags.Add(tag);
             await _context.SaveChangesAsync();
-            return true;
+            return (_mapper.Map<AdminTagDto>(tag), null);
+        }
+
+        public async Task<(bool success, string? errorCode)> UpdateAsync(int id, TagCreateUpdateDto dto)
+        {
+            var tag = await _context.Tags.FindAsync(id);
+            if (tag == null) return (false, "TAG_NOT_FOUND");
+
+            if(await _context.Tags
+                .AnyAsync(c => c.NameUa == dto.NameUa
+                && c.Id != id))
+                return (false, "TAG_ALREADY_EXISTS");
+
+            _mapper.Map(dto, tag);
+            await _context.SaveChangesAsync();
+            return (true, null);
         }
 
         public async Task<bool> DeleteAsync(int id)
