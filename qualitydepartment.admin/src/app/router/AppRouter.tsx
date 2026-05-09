@@ -24,7 +24,7 @@ export default function AppRouter() {
                 <Route path="/login" element={<LoginPlaceholder />} />
                 <Route path="/news" element={<NewsAdminPage />} />
                 <Route path="/documents" element={<DocumentsAdminPage />} />
-                <Route path="/administration-members" element={<AdministrationMembersPage />} />
+                <Route path="/administration" element={<AdministrationMembersPage />} />
                 <Route path="/useful-information" element={<UsefulInformationPage />} />
                 <Route path="/categories" element={<CategoriesPage />} />
             </Route>

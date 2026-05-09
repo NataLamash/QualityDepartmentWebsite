@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { 
     Box, Button, Typography, Table, TableBody, TableCell, 
     TableContainer, TableHead, TableRow, Paper, IconButton, 
-    Dialog, DialogTitle, DialogContent, Stack, CircularProgress 
+    Dialog, DialogTitle, DialogContent, Stack, CircularProgress, Chip 
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -30,6 +30,15 @@ export default function DocumentsAdminPage() {
 
     useEffect(() => { loadDocs(); }, []);
 
+    const formatDateTime = (dateString?: string) => {
+        if (!dateString) return '—';
+        const normalizedDate = dateString.endsWith('Z') ? dateString : dateString + 'Z';
+        const date = new Date(normalizedDate);
+        return isNaN(date.getTime()) ? '—' : date.toLocaleString('uk-UA', {
+            year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',
+        }).replace(',', '');
+    };
+
     const handleOpen = async (item: any = null) => {
         if (item) {
             setLoadingDetails(true);
@@ -37,7 +46,6 @@ export default function DocumentsAdminPage() {
                 const details = await agent.Documents.details(item.id);
                 setSelectedDoc(details?.data || details); 
             } catch (error) {
-                console.error("Помилка завантаження деталей", error);
                 setSelectedDoc(item); 
             } finally {
                 setLoadingDetails(false);
@@ -53,6 +61,13 @@ export default function DocumentsAdminPage() {
         setSelectedDoc(null);
     };
 
+    const handleDelete = async (id: number) => {
+        if (window.confirm("Ви впевнені, що хочете видалити цей документ?")) {
+            await agent.Documents.delete(id);
+            loadDocs();
+        }
+    };
+
     return (
         <Box sx={{ p: 4 }}>
             <Stack direction="row" sx={{ justifyContent: 'space-between', mb: 4 }}>
@@ -62,7 +77,7 @@ export default function DocumentsAdminPage() {
                     startIcon={loadingDetails ? <CircularProgress size={20} color="inherit" /> : <AddIcon />} 
                     disabled={loadingDetails}
                     onClick={() => handleOpen()} 
-                    sx={{ bgcolor: '#BA0000' }}
+                    sx={{ bgcolor: '#BA0000', borderRadius: '10px' }}
                 >
                     Додати документ
                 </Button>
@@ -75,34 +90,46 @@ export default function DocumentsAdminPage() {
                             <TableCell sx={{ fontWeight: 700 }}>Назва (UA)</TableCell>
                             <TableCell sx={{ fontWeight: 700 }}>Категорія</TableCell>
                             <TableCell sx={{ fontWeight: 700 }}>Дата публікації</TableCell>
+                            <TableCell sx={{ fontWeight: 700 }}>Статус</TableCell>
                             <TableCell align="right" sx={{ fontWeight: 700 }}>Дії</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {loading ? (
-                             <TableRow><TableCell colSpan={4} align="center"><CircularProgress /></TableCell></TableRow>
+                             <TableRow><TableCell colSpan={5} align="center" sx={{ py: 3 }}><CircularProgress /></TableCell></TableRow>
                         ) : (
-                            docs.map((doc) => (
-                                <TableRow key={doc.id} hover>
-                                    <TableCell>{doc.nameUa}</TableCell>
-                                    <TableCell>{doc.categoryNameUa}</TableCell>
-                                    <TableCell>{new Date(doc.publishDate).toLocaleDateString()}</TableCell>
-                                    <TableCell align="right">
-                                        <IconButton onClick={() => handleOpen(doc)} color="primary" disabled={loadingDetails}>
-                                            <EditIcon />
-                                        </IconButton>
-                                        <IconButton onClick={() => { if(window.confirm("Видалити?")) agent.Documents.delete(doc.id).then(loadDocs) }} color="error">
-                                            <DeleteIcon />
-                                        </IconButton>
-                                    </TableCell>
-                                </TableRow>
-                            ))
+                            docs.map((doc) => {
+                                const normalizedDate = doc.publishDate?.endsWith('Z') ? doc.publishDate : doc.publishDate + 'Z';
+                                const isPublished = new Date(normalizedDate) <= new Date();
+
+                                return (
+                                    <TableRow key={doc.id} hover>
+                                        <TableCell sx={{ fontWeight: 500 }}>{doc.nameUa}</TableCell>
+                                        <TableCell>{doc.categoryNameUa || doc.categoryName}</TableCell>
+                                        <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatDateTime(doc.publishDate)}</TableCell>
+                                        <TableCell>
+                                            {isPublished ? 
+                                                <Chip label="Опубліковано" color="success" size="small" /> : 
+                                                <Chip label="Заплановано" color="warning" size="small" />
+                                            }
+                                        </TableCell>
+                                        <TableCell align="right">
+                                            <IconButton onClick={() => handleOpen(doc)} color="primary" disabled={loadingDetails}>
+                                                <EditIcon />
+                                            </IconButton>
+                                            <IconButton onClick={() => handleDelete(doc.id)} color="error">
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })
                         )}
                     </TableBody>
                 </Table>
             </TableContainer>
 
-            <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+            <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
                 <DialogTitle sx={{ fontWeight: 800 }}>
                     {selectedDoc ? 'Редагування документа' : 'Додавання документа'}
                 </DialogTitle>

@@ -2,13 +2,13 @@ import { useEffect, useState } from 'react';
 import { 
     Box, Button, Typography, Table, TableBody, TableCell, 
     TableContainer, TableHead, TableRow, Paper, IconButton, 
-    Dialog, DialogTitle, DialogContent, Stack, CircularProgress 
+    Dialog, DialogTitle, DialogContent, Stack, CircularProgress, Chip 
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import agent from '../../api/agent';
-import NewsForm from './NewsForm'; 
+import NewsForm from './NewsForm';
 
 export default function NewsAdminPage() {
     const [news, setNews] = useState<any[]>([]);
@@ -19,20 +19,32 @@ export default function NewsAdminPage() {
     const loadNews = async () => {
         setLoading(true);
         try {
-            const response: any = await agent.News.list(1, 50); 
-            const items = response?.items || response?.data?.items || [];
-            setNews(Array.isArray(items) ? items : []);
-        } catch (error) {
-            console.error("Failed to load news", error);
-            setNews([]);
+            const response = await agent.News.list(1, 50);
+            const items = response?.data?.items || response?.items || [];
+            setNews(items);
         } finally {
             setLoading(false);
         }
     };
 
-    useEffect(() => {
-        loadNews();
-    }, []);
+    useEffect(() => { loadNews(); }, []);
+
+    const formatDateTime = (dateString?: string) => {
+        if (!dateString) return '—';
+        
+        const normalizedDate = dateString.endsWith('Z') ? dateString : dateString + 'Z';
+        const date = new Date(normalizedDate);
+        
+        if (isNaN(date.getTime())) return '—';
+
+        return date.toLocaleString('uk-UA', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+        }).replace(',', ''); 
+    };
 
     const handleOpen = (item: any = null) => {
         setSelectedNews(item);
@@ -46,32 +58,20 @@ export default function NewsAdminPage() {
 
     const handleDelete = async (id: number) => {
         if (window.confirm("Ви впевнені, що хочете видалити цю новину?")) {
-            try {
-                await agent.News.delete(id);
-                loadNews();
-            } catch (error) {
-                console.error("Delete error", error);
-            }
+            await agent.News.delete(id);
+            loadNews();
         }
     };
 
-    if (loading && news.length === 0) {
-        return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-                <CircularProgress sx={{ color: '#BA0000' }} />
-            </Box>
-        );
-    }
-
     return (
         <Box sx={{ p: 4 }}>
-            <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+            <Stack direction="row" sx={{ justifyContent: 'space-between', mb: 4 }}>
                 <Typography variant="h4" sx={{ fontWeight: 800 }}>Керування новинами</Typography>
                 <Button 
                     variant="contained" 
                     startIcon={<AddIcon />} 
-                    onClick={() => handleOpen()}
-                    sx={{ borderRadius: '12px', textTransform: 'none', px: 3, bgcolor: '#BA0000', '&:hover': { bgcolor: '#8e0000' } }}
+                    onClick={() => handleOpen()} 
+                    sx={{ bgcolor: '#BA0000', borderRadius: '10px', '&:hover': { bgcolor: '#8e0000' } }}
                 >
                     Створити новину
                 </Button>
@@ -82,24 +82,44 @@ export default function NewsAdminPage() {
                     <TableHead sx={{ bgcolor: '#fafafa' }}>
                         <TableRow>
                             <TableCell sx={{ fontWeight: 700 }}>Заголовок (UA)</TableCell>
+                            <TableCell sx={{ fontWeight: 700 }}>Автор</TableCell>
                             <TableCell sx={{ fontWeight: 700 }}>Дата публікації</TableCell>
+                            <TableCell sx={{ fontWeight: 700 }}>Статус</TableCell>
                             <TableCell align="right" sx={{ fontWeight: 700 }}>Дії</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {news.length > 0 ? (
-                            news.map((item) => (
-                                <TableRow key={item.id} hover>
-                                    <TableCell>{item.titleUa}</TableCell>
-                                    <TableCell>{item.publishDate ? new Date(item.publishDate).toLocaleDateString() : '—'}</TableCell>
-                                    <TableCell align="right">
-                                        <IconButton onClick={() => handleOpen(item)} color="primary"><EditIcon /></IconButton>
-                                        <IconButton onClick={() => handleDelete(item.id)} color="error"><DeleteIcon /></IconButton>
-                                    </TableCell>
-                                </TableRow>
-                            ))
+                        {loading ? (
+                             <TableRow><TableCell colSpan={5} align="center" sx={{ py: 3 }}><CircularProgress /></TableCell></TableRow>
                         ) : (
-                            <TableRow><TableCell colSpan={3} align="center">Новин не знайдено</TableCell></TableRow>
+                            news.map((item) => {
+                                const normalizedDate = item.publishDate?.endsWith('Z') ? item.publishDate : item.publishDate + 'Z';
+                                const isPublished = new Date(normalizedDate) <= new Date();
+
+                                return (
+                                    <TableRow key={item.id} hover>
+                                        <TableCell sx={{ fontWeight: 500 }}>{item.titleUa}</TableCell>
+                                        <TableCell>{item.creatorName}</TableCell>
+                                        <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                                            {formatDateTime(item.publishDate)}
+                                        </TableCell>
+                                        <TableCell>
+                                            {isPublished ? 
+                                                <Chip label="Опубліковано" color="success" size="small" /> : 
+                                                <Chip label="Заплановано" color="warning" size="small" />
+                                            }
+                                        </TableCell>
+                                        <TableCell align="right">
+                                            <IconButton onClick={() => handleOpen(item)} color="primary">
+                                                <EditIcon />
+                                            </IconButton>
+                                            <IconButton onClick={() => handleDelete(item.id)} color="error">
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })
                         )}
                     </TableBody>
                 </Table>
