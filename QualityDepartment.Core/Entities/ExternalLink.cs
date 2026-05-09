@@ -12,7 +12,9 @@ namespace QualityDepartment.Core.Entities
 
         public string NameUa { get; set; } = null!;
         public string NameEn { get; set; } = null!;
-
+        public string? PhotoPath { get; set; }
+        public string? ShortDescriptionUa { get; set; }
+        public string? ShortDescriptionEn { get; set; }
         public int SortOrder { get; set; } = 0;
 
         public DateTime PublishDate { get; set; }
