@@ -17,7 +17,7 @@ const agent = {
     News: {
      list: (page = 1, pageSize = 50) => 
         requests.get<any>(`/admin/news?pageNumber=${page}&pageSize=${pageSize}`),
-    
+     details: (id: number) => requests.get<any>(`/admin/news/${id}`),
      create: (news: FormData) => requests.post<void>('/admin/news', news),
      update: (id: number, news: FormData) => requests.put<void>(`/admin/news/${id}`, news),
     
@@ -35,10 +35,13 @@ const agent = {
     },
 
     AdministrationMembers: {
-        list: () => requests.get<any>('/admin/administration-members'),
-        create: (data: FormData) => requests.post<void>('/admin/administration-members', data),
-        update: (id: number, data: FormData) => baseApi.put(`/admin/administration-members/${id}`, data).then(responseBody),
-        delete: (id: number) => requests.del<void>(`/admin/administration-members/${id}`),
+        list: () => requests.get<any>('/admin/administration'),
+        details: (id: number) => requests.get<any>(`/admin/administration/${id}`), 
+        create: (data: FormData) => requests.post<void>('/admin/administration', data),
+        update: (id: number, data: FormData) => requests.put<void>(`/admin/administration/${id}`, data),
+        delete: (id: number) => requests.del<void>(`/admin/administration/${id}`),
+        reorder: (id: number, targetPosition: number) => 
+            baseApi.patch('/admin/administration/reorder', { id, targetPosition })
     },
 
     UsefulInformation: {

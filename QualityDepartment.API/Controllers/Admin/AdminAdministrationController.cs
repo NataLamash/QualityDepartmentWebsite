@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 namespace QualityDepartment.API.Controllers.Admin
 {
-    [Authorize(Policy = "AdminOnly")]
+    //[Authorize(Policy = "AdminOnly")]
     [ApiController]
     [Route("api/admin/administration")]
     public class AdminAdministrationController : ControllerBase
@@ -35,8 +35,9 @@ namespace QualityDepartment.API.Controllers.Admin
         [HttpPost]
         public async Task<ActionResult<ApiResponse<AdministrationMemberAdminDto>>> Create([FromForm] AdministrationMemberCreateDto dto)
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var (result, errorCode) = await _adminService.CreateAsync(dto, userId);
+            //var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var userId = 1;
+           var (result, errorCode) = await _adminService.CreateAsync(dto, userId);
 
             if (errorCode != null)
                 return BadRequest(ApiResponse<AdministrationMemberAdminDto>.FailureResponse(new List<string> { errorCode }));
@@ -47,8 +48,9 @@ namespace QualityDepartment.API.Controllers.Admin
         [HttpPut("{id:int}")]
         public async Task<ActionResult<ApiResponse<AdministrationMemberAdminDto>>> Update(int id, [FromForm] AdministrationMemberUpdateDto dto)
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var (result, success, errorCode) = await _adminService.UpdateAsync(id, dto, userId);
+            //var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var userId = 1;
+           var (result, success, errorCode) = await _adminService.UpdateAsync(id, dto, userId);
 
             if (errorCode != null)
                 return BadRequest(ApiResponse<AdministrationMemberAdminDto>.FailureResponse(new List<string> { errorCode }));

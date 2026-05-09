@@ -12,7 +12,7 @@ const sidebarItems = [
     { label: 'Dashboard', path: '/dashboard', icon: DashboardRoundedIcon },
     { label: 'News', path: '/news', icon: FeedRoundedIcon },
     { label: 'Documents', path: '/documents', icon: DescriptionRoundedIcon },
-    { label: 'Administration', path: '/administration-members', icon: GroupsRoundedIcon },
+    { label: 'Administration', path: '/administration', icon: GroupsRoundedIcon },
     { label: 'Useful Information', path: '/useful-information', icon: InfoRoundedIcon },
     { label: 'Categories', path: '/categories', icon: CategoryRoundedIcon },
     { label: 'Login', path: '/login', icon: LoginRoundedIcon },
