@@ -46,9 +46,9 @@ namespace QualityDepartment.Infrastructure.Services
                     : query.Where(d => d.NameUa.Contains(s) || d.DescriptionUa.Contains(s));
             }
 
-            if (p.CategoryId.HasValue)
+            if (p.CategoryIds != null && p.CategoryIds.Any())
             {
-                query = query.Where(d => d.CategoryId == p.CategoryId);
+                query = query.Where(x => p.CategoryIds.Contains(x.CategoryId));
             }
 
             query = p.Sort switch

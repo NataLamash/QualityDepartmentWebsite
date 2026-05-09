@@ -17,8 +17,8 @@ namespace QualityDepartment.Core.DTOs.Documents
         }
 
         public string? Search { get; set; }
-        public int? CategoryId { get; set; }
         public string Sort { get; set; } = "dateDesc";
         public string Lang { get; set; } = "ua";
+        public List<int>? CategoryIds { get; set; } = null;
     }
 }
