@@ -24,9 +24,10 @@ namespace QualityDepartment.API.Controllers
             [FromQuery] string? status = "published",
             [FromQuery] string lang = "ua",
             [FromQuery] string? search = null,
-            [FromQuery] string? date = null)
+            [FromQuery] string? date = null,
+            [FromQuery] List<int>? tagIds = null)
         {
-            var result = await _newsService.GetNewsAsync(page, pageSize, sortOrder, status, lang, search, date);
+            var result = await _newsService.GetNewsAsync(page, pageSize, sortOrder, status, lang, search, date, tagIds);
             return Ok(ApiResponse<PagedResultDto<NewsListItemDto>>.SuccessResponse(result));
         }
 

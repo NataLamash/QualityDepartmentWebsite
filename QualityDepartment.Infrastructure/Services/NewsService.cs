@@ -34,7 +34,8 @@ namespace QualityDepartment.Infrastructure.Services
             string? status = "published",
             string lang = "ua",
             string? search = null,
-            string? date = null)
+            string? date = null,
+            List<int>? tagIds = null)
         {
             if (page < 1) page = 1;
             if (pageSize < 1) pageSize = 10;
@@ -56,6 +57,11 @@ namespace QualityDepartment.Infrastructure.Services
                     x.TitleEn.ToLower().Contains(searchLower) ||
                     x.FullTextUa.ToLower().Contains(searchLower) ||
                     x.FullTextEn.ToLower().Contains(searchLower));
+            }
+
+            if (tagIds != null && tagIds.Any())
+            {
+                query = query.Where(x => x.Tags.Any(t => tagIds.Contains(t.Id)));
             }
 
             if (!string.IsNullOrWhiteSpace(date))
@@ -141,7 +147,8 @@ namespace QualityDepartment.Infrastructure.Services
         public async Task<PagedResultDto<NewsAdminDto>> GetAdminNewsAsync(
             int page = 1,
             int pageSize = 10,
-            string? search = null)
+            string? search = null,
+            List<int>? tagIds = null)
         {
             if (page < 1) page = 1;
             if (pageSize < 1) pageSize = 10;
@@ -154,6 +161,11 @@ namespace QualityDepartment.Infrastructure.Services
             {
                 var s = search.ToLower();
                 query = query.Where(x => x.TitleUa.ToLower().Contains(s) || x.TitleEn.ToLower().Contains(s));
+            }
+
+            if (tagIds != null && tagIds.Any())
+            {
+                query = query.Where(x => x.Tags.Any(t => tagIds.Contains(t.Id)));
             }
 
             query = query.OrderByDescending(x => x.PublishDate);
