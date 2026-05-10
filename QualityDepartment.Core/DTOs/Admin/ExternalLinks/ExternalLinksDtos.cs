@@ -18,7 +18,7 @@ namespace QualityDepartment.Core.DTOs.Admin.ExternalLinks
         public string NameEn { get; set; } = null!;
 
         [Required]
-        [Url]
+        [Url(ErrorMessage = "INVALID_URL_FORMAT")]
         [MaxLength(500)]
         public string Url { get; set; } = null!;
 
@@ -29,8 +29,6 @@ namespace QualityDepartment.Core.DTOs.Admin.ExternalLinks
         public string? ShortDescriptionEn { get; set; }
 
         public IFormFile? Photo { get; set; }
-
-        public int SortOrder { get; set; }
 
         public DateTime PublishDate { get; set; }
 
@@ -52,6 +50,8 @@ namespace QualityDepartment.Core.DTOs.Admin.ExternalLinks
 
     public class ExternalLinkUpdateDto : ExternalLinkCreateDto
     {
+        [Required]
+        public int SortOrder { get; set; }
         public bool KeepOldPhoto { get; set; } = true;
     }
 

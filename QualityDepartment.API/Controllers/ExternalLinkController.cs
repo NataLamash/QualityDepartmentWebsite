@@ -12,35 +12,23 @@ namespace QualityDepartment.API.Controllers
         private readonly ExternalLinkService _externalLinkService;
         private readonly ILogger<ExternalLinkController> _logger;
 
-        public ExternalLinkController(ExternalLinkService externalLinkService, ILogger<ExternalLinkController> logger)
-        {
-            _externalLinkService = externalLinkService;
-            _logger = logger;
-        }
+        private readonly ExternalLinkService _linkService;
+        public ExternalLinkController(ExternalLinkService linkService) => _linkService = linkService;
 
         [HttpGet]
-        public async Task<ActionResult<ApiResponse<List<ExternalLinkDto>>>> GetAll([FromQuery] string lang = "ua")
+        public async Task<ActionResult<ApiResponse<List<ExternalLinkDto>>>> GetPublic([FromQuery] string lang = "ua")
         {
-            _logger.LogInformation("API: Fetching all external links. Language: {Lang}", lang);
-
-            var links = await _externalLinkService.GetActiveLinksAsync(lang);
-
+            var links = await _linkService.GetPublicLinksAsync(lang);
             return Ok(ApiResponse<List<ExternalLinkDto>>.SuccessResponse(links));
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet("{id}")]
         public async Task<ActionResult<ApiResponse<ExternalLinkDto>>> GetById(int id, [FromQuery] string lang = "ua")
         {
-            _logger.LogInformation("API: Requested link details for ID: {Id}", id);
-
-            var result = await _externalLinkService.GetByIdAsync(id, lang);
+            var (result, errorCode) = await _linkService.GetPublicByIdAsync(id, lang);
 
             if (result == null)
-            {
-                return NotFound(ApiResponse<object>.FailureResponse(
-                    new List<string> { "External link not found" },
-                    lang == "en" ? "Link not found" : "Посилання не знайдено"));
-            }
+                return NotFound(ApiResponse<ExternalLinkDto>.FailureResponse(new List<string> { errorCode! }));
 
             return Ok(ApiResponse<ExternalLinkDto>.SuccessResponse(result));
         }
