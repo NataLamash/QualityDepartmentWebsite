@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using QualityDepartment.Core.DTOs.Admin.Administration;
 using QualityDepartment.Core.DTOs.Admin.Documents;
+using QualityDepartment.Core.DTOs.Admin.ExternalLinks;
 using QualityDepartment.Core.DTOs.Admin.News;
 using QualityDepartment.Core.DTOs.Admin.TagsAndCategories;
 using QualityDepartment.Core.DTOs.Documents;
@@ -131,9 +132,27 @@ namespace QualityDepartment.Core.Mappings
                 .ForMember(dest => dest.CategoryNameUa, opt => opt.MapFrom(src => src.Category.NameUa))
                 .ForMember(dest => dest.CategoryNameEn, opt => opt.MapFrom(src => src.Category.NameEn));
 
+
+            CreateMap<ExternalLink, ExternalLinkAdminListItemDto>();
+
+            CreateMap<ExternalLink, ExternalLinkAdminDetailsDto>()
+                .IncludeBase<ExternalLink, ExternalLinkAdminListItemDto>()
+                .ForMember(d => d.CreatorName, opt => opt.MapFrom(src => src.Creator != null ? src.Creator.UserName : "System"))
+                .ForMember(d => d.EditorName, opt => opt.MapFrom(src => src.Editor != null ? src.Editor.UserName : null));
+
+            CreateMap<ExternalLinkCreateDto, ExternalLink>()
+                .ForMember(dest => dest.PhotoPath, opt => opt.Ignore())
+                .ForMember(dest => dest.Id, opt => opt.Ignore());
+
+            CreateMap<ExternalLinkUpdateDto, ExternalLink>()
+                .ForMember(dest => dest.PhotoPath, opt => opt.Ignore())
+                .ForMember(dest => dest.Id, opt => opt.Ignore());
+
             CreateMap<ExternalLink, ExternalLinkDto>()
-                .ForMember(dest => dest.Name, opt => opt.MapFrom((src, dest, _, context) =>
-                    GetLocalizedValue(src.NameUa, src.NameEn, context)));
+                .ForMember(dest => dest.Name, opt => opt.MapFrom((src, _, _, context) =>
+                    GetLocalizedValue(src.NameUa, src.NameEn, context)))
+                .ForMember(dest => dest.ShortDescription, opt => opt.MapFrom((src, _, _, context) =>
+                    GetLocalizedValue(src.ShortDescriptionUa, src.ShortDescriptionEn, context)));
 
             CreateMap<Tag, TagDto>()
                 .ForMember(d => d.Name, opt => opt.MapFrom((src, dest, destMember, context) =>
