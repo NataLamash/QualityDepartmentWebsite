@@ -7,7 +7,7 @@ import { styled } from '@mui/material/styles';
 import SearchIcon from '@mui/icons-material/Search';
 import LanguageIcon from '@mui/icons-material/Language';
 import MenuIcon from '@mui/icons-material/Menu';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom'; 
 import { useTranslation } from 'react-i18next';
 
 const Search = styled('div')(({ theme }) => ({
@@ -19,7 +19,7 @@ const Search = styled('div')(({ theme }) => ({
     alignItems: 'center',
     width: '100%',
     [theme.breakpoints.up('md')]: {
-        width: '280px', 
+        width: '280px',
     },
     transition: '0.3s',
     '&:hover': {
@@ -29,6 +29,7 @@ const Search = styled('div')(({ theme }) => ({
 
 export default function Header() {
     const { i18n } = useTranslation();
+    const navigate = useNavigate(); 
     const [langAnchor, setLangAnchor] = useState<null | HTMLElement>(null);
     const [accessAnchor, setAccessAnchor] = useState<null | HTMLElement>(null);
     const [mobileOpen, setMobileOpen] = useState(false);
@@ -37,7 +38,7 @@ export default function Header() {
         { ua: 'Головна', en: 'Home', path: '/' },
         { ua: 'Новини', en: 'News', path: '/news' },
         { ua: 'Архів', en: 'Archive', path: '/archive' },
-        { ua: 'Посилання', en: 'Links', path: '/links' },
+        { ua: 'Оцінювання якості освіти', en: 'Assessing the quality of education', path: '/info' },
         { ua: 'Опитування', en: 'Surveys', path: '/surveys' },
     ];
 
@@ -79,7 +80,12 @@ export default function Header() {
                             <Box
                                 component="img"
                                 src="/logo-knu.png"
-                                sx={{ height: { xs: 70, md: 110 }, width: 'auto', cursor: 'pointer' }}
+                                onClick={() => navigate('/')} 
+                                sx={{
+                                    height: { xs: 70, md: 110 },
+                                    width: 'auto',
+                                    cursor: 'pointer'
+                                }}
                             />
                         </Box>
 

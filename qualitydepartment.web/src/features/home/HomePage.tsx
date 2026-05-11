@@ -18,7 +18,8 @@ const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '');
 const commonGlassStyle = {
     position: 'absolute',
     bottom: 20,
-    left: '5%',
+    left: '50%',
+    transform: 'translateX(-50%)', 
     width: '90%',
     backdropFilter: 'blur(15px)',
     bgcolor: 'rgba(255, 255, 255, 0.8)',
@@ -31,7 +32,7 @@ const commonGlassStyle = {
     justifyContent: 'center',
     minHeight: '80px',
     zIndex: 2,
-    transition: '0.3s',
+    transition: '0.3s ease-in-out',
 };
 
 const navBtnStyle = {
@@ -125,7 +126,6 @@ export default function HomePage() {
                             mx: 'auto',
                             px: { xs: 0, md: 7 }
                         }}>
-
                             <IconButton
                                 onClick={() => newsSwiperRef.current?.slidePrev()}
                                 sx={{ ...navBtnStyle, left: 0 }}
@@ -142,11 +142,19 @@ export default function HomePage() {
                             >
                                 {news.map((item) => (
                                     <SwiperSlide key={item.id} onClick={() => navigate(`/news/${item.id}`)} style={{ cursor: 'pointer' }}>
-                                        <Box sx={{ position: 'relative', height: '100%', '&:hover .glass': { bottom: 30, bgcolor: 'rgba(255, 255, 255, 0.9)' } }}>
+                                        <Box sx={{
+                                            position: 'relative',
+                                            height: '100%',
+                                            '&:hover .glass': { bottom: 30, bgcolor: 'rgba(255, 255, 255, 0.9)' }
+                                        }}>
                                             <CardMedia
                                                 component="img"
                                                 image={getFullImagePath(item.photoPath)}
-                                                sx={{ height: '100%', width: '100%', objectFit: 'cover' }}
+                                                sx={{
+                                                    height: '100%',
+                                                    width: '100%',
+                                                    objectFit: 'cover'
+                                                }}
                                             />
                                             <Box className="glass" sx={commonGlassStyle}>
                                                 <Typography variant="body1" sx={{ color: '#1a1a1a', fontWeight: 700, fontSize: '1.1rem' }}>
@@ -205,14 +213,23 @@ export default function HomePage() {
                                 <SwiperSlide key={person.id}>
                                     <Box sx={{
                                         borderRadius: '80px 80px 30px 30px',
-                                        height: 520, position: 'relative', overflow: 'hidden',
-                                        boxShadow: '0 10px 30px rgba(0,0,0,0.06)', bgcolor: '#fff',
+                                        height: 520, 
+                                        position: 'relative',
+                                        overflow: 'hidden',
+                                        boxShadow: '0 10px 30px rgba(0,0,0,0.06)',
+                                        bgcolor: '#fff',
                                         '&:hover img': { transform: 'scale(1.05)' }
                                     }}>
                                         <CardMedia
                                             component="img"
                                             image={getFullImagePath(person.photoPath)}
-                                            sx={{ height: '100%', objectPosition: 'top', objectFit: 'cover', transition: '0.6s' }}
+                                            sx={{
+                                                height: '100%',
+                                                width: '100%',
+                                                objectPosition: 'top',
+                                                objectFit: 'cover', 
+                                                transition: '0.6s'
+                                            }}
                                         />
                                         <Box sx={commonGlassStyle}>
                                             <Typography variant="h6" sx={{ fontWeight: 800, color: '#1a1a1a', fontSize: '1.1rem', mb: 0.5 }}>
