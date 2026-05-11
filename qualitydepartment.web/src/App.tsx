@@ -5,6 +5,7 @@ import Footer from './app/layout/Footer';
 import HomePage from './features/home/HomePage';
 import DocumentPage from './features/documents/DocumentPage';
 import NewsPage from './features/news/NewsPage';
+import QualityAssessmentPage from './features/info/QualityAssessmentPage';
 import NewsDetailsPage from './features/news/NewsDetailsPage';
 
 function App() {
@@ -17,7 +18,7 @@ function App() {
                     <Route path="/" element={<HomePage />} />
                     <Route path="/news" element={<NewsPage />} />
                     <Route path="/archive" element={<DocumentPage />} />
-                    <Route path="/info" element={<h1>Корисна інформація</h1>} />
+                    <Route path="/info" element={<QualityAssessmentPage />} />
                     <Route path="/news" element={<NewsPage />} />
                     <Route path="/news/:id" element={<NewsDetailsPage />} />
                 </Routes>

@@ -44,8 +44,16 @@ const agent = {
             baseApi.patch('/admin/administration/reorder', { id, targetPosition })
     },
 
+    
+
     UsefulInformation: {
-        list: () => requests.get<any>('/admin/external-links'),
+        list: () => requests.get<any[]>('/admin/external-links'),
+        details: (id: number) => requests.get<any>(`/admin/external-links/${id}`),
+        create: (data: FormData) => requests.post<void>('/admin/external-links', data),
+        update: (id: number, data: FormData) => requests.put<void>(`/admin/external-links/${id}`, data),
+        delete: (id: number) => requests.del<void>(`/admin/external-links/${id}`),
+        reorder: (id: number, targetPosition: number) => 
+            baseApi.patch(`/admin/external-links/${id}/reorder?targetPosition=${targetPosition}`).then(r => r.data)
     },
 
     Categories: {

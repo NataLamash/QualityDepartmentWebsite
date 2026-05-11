@@ -53,6 +53,15 @@ export interface DocumentCategoryItem {
     [key: string]: unknown;
 }
 
+export interface ExternalLink {
+    id: number;
+    url: string;
+    name: string;
+    photoPath: string;
+    shortDescription: string;
+    sortOrder: number;
+}
+
 export interface PagedResponse<T> {
     items: T[];
     totalCount: number;
@@ -122,6 +131,10 @@ const agent = {
         requests.get<DocumentsListResponse>(`/documents?lang=${lang}`),
     categories: (lang: string) =>
         requests.get<DocumentCategoryItem[]>(`/documents/categories?lang=${lang}`),
+    },
+    ExternalLinks: {
+        list: (lang: string) => 
+            requests.get<ExternalLink[]>(`/external-links?lang=${lang}`),
     },
 };
 

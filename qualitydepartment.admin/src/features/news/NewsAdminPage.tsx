@@ -22,6 +22,8 @@ export default function NewsAdminPage() {
             const response = await agent.News.list(1, 50);
             const items = response?.data?.items || response?.items || [];
             setNews(items);
+        } catch (error) {
+            console.error("Помилка завантаження новин:", error);
         } finally {
             setLoading(false);
         }
@@ -31,19 +33,10 @@ export default function NewsAdminPage() {
 
     const formatDateTime = (dateString?: string) => {
         if (!dateString) return '—';
-        
         const normalizedDate = dateString.endsWith('Z') ? dateString : dateString + 'Z';
         const date = new Date(normalizedDate);
-        
         if (isNaN(date.getTime())) return '—';
-
-        return date.toLocaleString('uk-UA', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-        }).replace(',', ''); 
+        return date.toLocaleString('uk-UA').replace(',', ''); 
     };
 
     const handleOpen = (item: any = null) => {
@@ -58,8 +51,12 @@ export default function NewsAdminPage() {
 
     const handleDelete = async (id: number) => {
         if (window.confirm("Ви впевнені, що хочете видалити цю новину?")) {
-            await agent.News.delete(id);
-            loadNews();
+            try {
+                await agent.News.delete(id);
+                loadNews();
+            } catch (error) {
+                console.error("Помилка видалення:", error);
+            }
         }
     };
 
@@ -71,7 +68,7 @@ export default function NewsAdminPage() {
                     variant="contained" 
                     startIcon={<AddIcon />} 
                     onClick={() => handleOpen()} 
-                    sx={{ bgcolor: '#BA0000', borderRadius: '10px', '&:hover': { bgcolor: '#8e0000' } }}
+                    sx={{ bgcolor: '#BA0000', borderRadius: '10px' }}
                 >
                     Створити новину
                 </Button>
@@ -95,27 +92,17 @@ export default function NewsAdminPage() {
                             news.map((item) => {
                                 const normalizedDate = item.publishDate?.endsWith('Z') ? item.publishDate : item.publishDate + 'Z';
                                 const isPublished = new Date(normalizedDate) <= new Date();
-
                                 return (
                                     <TableRow key={item.id} hover>
                                         <TableCell sx={{ fontWeight: 500 }}>{item.titleUa}</TableCell>
                                         <TableCell>{item.creatorName}</TableCell>
-                                        <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                                            {formatDateTime(item.publishDate)}
-                                        </TableCell>
+                                        <TableCell>{formatDateTime(item.publishDate)}</TableCell>
                                         <TableCell>
-                                            {isPublished ? 
-                                                <Chip label="Опубліковано" color="success" size="small" /> : 
-                                                <Chip label="Заплановано" color="warning" size="small" />
-                                            }
+                                            <Chip label={isPublished ? "Опубліковано" : "Заплановано"} color={isPublished ? "success" : "warning"} size="small" />
                                         </TableCell>
                                         <TableCell align="right">
-                                            <IconButton onClick={() => handleOpen(item)} color="primary">
-                                                <EditIcon />
-                                            </IconButton>
-                                            <IconButton onClick={() => handleDelete(item.id)} color="error">
-                                                <DeleteIcon />
-                                            </IconButton>
+                                            <IconButton onClick={() => handleOpen(item)} color="primary"><EditIcon /></IconButton>
+                                            <IconButton onClick={() => handleDelete(item.id)} color="error"><DeleteIcon /></IconButton>
                                         </TableCell>
                                     </TableRow>
                                 );
@@ -130,7 +117,9 @@ export default function NewsAdminPage() {
                     {selectedNews ? 'Редагування новини' : 'Створення новини'}
                 </DialogTitle>
                 <DialogContent>
+                    {/* КЛЮЧОВИЙ МОМЕНТ: Додано перевірку, щоб форма перерендерилася при зміні новини */}
                     <NewsForm 
+                        key={selectedNews?.id || 'new'}
                         initialData={selectedNews} 
                         onSuccess={() => { handleClose(); loadNews(); }} 
                     />
