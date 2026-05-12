@@ -38,7 +38,14 @@ namespace QualityDepartment.Infrastructure.Services
 
             var news = await _context.News
                 .AsNoTracking()
-                .Where(n => n.PublishDate <= now && (EF.Functions.Like(n.TitleUa, $"%{s}%") || EF.Functions.Like(n.FullTextUa, $"%{s}%")))
+                .Where(n => n.PublishDate <= now && (
+                    EF.Functions.Like(n.TitleUa, $"%{s}%") || 
+                    EF.Functions.Like(n.FullTextUa, $"%{s}%") ||
+                    EF.Functions.Like(n.TitleEn, $"%{s}%") || 
+                    EF.Functions.Like(n.FullTextEn, $"%{s}%") ||
+                    n.Tags.Any(t => EF.Functions.Like(t.NameUa, $"%{s}%") || EF.Functions.Like(t.NameEn, $"%{s}%"))
+                ))
+                .OrderByDescending(n => n.PublishDate)
                 .Select(n => new GlobalSearchResultDto
                 {
                     Id = n.Id,
@@ -51,7 +58,15 @@ namespace QualityDepartment.Infrastructure.Services
 
             var docs = await _context.Documents
                 .AsNoTracking()
-                .Where(d => d.PublishDate <= now && (EF.Functions.Like(d.NameUa, $"%{s}%") || EF.Functions.Like(d.DescriptionUa, $"%{s}%")))
+                .Where(d => d.PublishDate <= now && (
+                    EF.Functions.Like(d.NameUa, $"%{s}%") || 
+                    EF.Functions.Like(d.DescriptionUa, $"%{s}%") ||
+                    EF.Functions.Like(d.NameEn, $"%{s}%") ||
+                    EF.Functions.Like(d.DescriptionEn, $"%{s}%") ||
+                    EF.Functions.Like(d.Category.NameUa, $"%{s}%") ||
+                    EF.Functions.Like(d.Category.NameEn, $"%{s}%")
+                ))
+                .OrderByDescending(d => d.PublishDate)
                 .Select(d => new GlobalSearchResultDto
                 {
                     Id = d.Id,
@@ -64,7 +79,13 @@ namespace QualityDepartment.Infrastructure.Services
 
             var links = await _context.ExternalLinks
                 .AsNoTracking()
-                .Where(l => l.PublishDate <= now && (EF.Functions.Like(l.NameUa, $"%{s}%") || EF.Functions.Like(l.ShortDescriptionUa, $"%{s}%")))
+                .Where(l => l.PublishDate <= now && (
+                    EF.Functions.Like(l.NameUa, $"%{s}%") || 
+                    EF.Functions.Like(l.ShortDescriptionUa, $"%{s}%") ||
+                    EF.Functions.Like(l.NameEn, $"%{s}%") ||
+                    EF.Functions.Like(l.ShortDescriptionEn, $"%{s}%")
+                ))
+                .OrderByDescending(l => l.PublishDate)
                 .Select(l => new GlobalSearchResultDto
                 {
                     Id = l.Id,
