@@ -73,7 +73,7 @@ namespace QualityDepartment.Infrastructure.Services
                     Type = SearchEntityType.Document,
                     Title = lang == "en" ? d.NameEn : d.NameUa,
                     ShortDescription = lang == "en" ? d.DescriptionEn : d.DescriptionUa,
-                    Link = $"/documents/{d.Id}",
+                    Link = $"/documents/{d.Id}/preview",
                     PublishDate = d.PublishDate
                 }).Take(15).ToListAsync();
 
