@@ -12,3 +12,10 @@ public enum FeedbackStatus
     InProgress = 2,
     Resolved = 3
 }
+
+public enum SearchEntityType
+{
+    News = 1,
+    Document = 2,
+    ExternalLink = 3
+}
