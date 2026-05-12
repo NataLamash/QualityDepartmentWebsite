@@ -107,7 +107,7 @@ namespace QualityDepartment.Infrastructure.Services
 
             _cache.Set(cacheKey, combined, new MemoryCacheEntryOptions
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1),
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30),
                 SlidingExpiration = TimeSpan.FromMinutes(15)
             });
 

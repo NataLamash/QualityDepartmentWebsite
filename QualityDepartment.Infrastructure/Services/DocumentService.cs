@@ -40,10 +40,15 @@ namespace QualityDepartment.Infrastructure.Services
 
             if (!string.IsNullOrWhiteSpace(p.Search))
             {
-                var s = p.Search.ToLower();
-                query = p.Lang == "en"
-                    ? query.Where(d => d.NameEn.Contains(s) || d.DescriptionEn.Contains(s))
-                    : query.Where(d => d.NameUa.Contains(s) || d.DescriptionUa.Contains(s));
+                var s = p.Search.Trim();
+                query = query.Where(d =>
+                    EF.Functions.Like(d.NameUa, $"%{s}%") ||
+                    EF.Functions.Like(d.DescriptionUa, $"%{s}%") ||
+                    EF.Functions.Like(d.NameEn, $"%{s}%") ||
+                    EF.Functions.Like(d.DescriptionEn, $"%{s}%") ||
+                    EF.Functions.Like(d.Category.NameUa, $"%{s}%") ||
+                    EF.Functions.Like(d.Category.NameEn, $"%{s}%")
+                );
             }
 
             if (p.CategoryIds != null && p.CategoryIds.Any())
@@ -179,7 +184,17 @@ namespace QualityDepartment.Infrastructure.Services
         {
             var query = _context.Documents.Include(d => d.Category).AsNoTracking();
             if (!string.IsNullOrWhiteSpace(search))
-                query = query.Where(d => d.NameUa.Contains(search) || d.NameEn.Contains(search));
+            {
+                var s = search.Trim();
+                query = query.Where(d =>
+                    EF.Functions.Like(d.NameUa, $"%{s}%") ||
+                    EF.Functions.Like(d.DescriptionUa, $"%{s}%") ||
+                    EF.Functions.Like(d.NameEn, $"%{s}%") ||
+                    EF.Functions.Like(d.DescriptionEn, $"%{s}%") ||
+                    EF.Functions.Like(d.Category.NameUa, $"%{s}%") ||
+                    EF.Functions.Like(d.Category.NameEn, $"%{s}%")
+                );
+            }
 
             var totalCount = await query.CountAsync();
             var items = await query.OrderByDescending(d => d.CreatedAt)
