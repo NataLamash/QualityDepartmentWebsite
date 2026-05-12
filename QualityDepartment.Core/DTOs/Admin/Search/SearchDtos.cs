@@ -14,5 +14,6 @@ namespace QualityDepartment.Core.DTOs.Admin.Search
         public string Title { get; set; } = null!;
         public string? ShortDescription { get; set; }
         public string Link { get; set; } = null!;
+        public DateTime PublishDate { get; set; }
     }
 }

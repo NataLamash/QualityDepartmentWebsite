@@ -22,6 +22,8 @@ namespace QualityDepartment.Infrastructure
         {
             var connectionString = configuration.GetConnectionString("DefaultConnection");
 
+            services.AddMemoryCache();
+
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseMySQL(connectionString!));
 
@@ -48,6 +50,7 @@ namespace QualityDepartment.Infrastructure
             services.AddScoped<AdministrationService>();
             services.AddScoped<CategoryService>();
             services.AddScoped<TagService>();
+            services.AddScoped<SearchService>();
 
             var jwtKey = configuration["Jwt:Key"];
             services.AddAuthentication(options => {
