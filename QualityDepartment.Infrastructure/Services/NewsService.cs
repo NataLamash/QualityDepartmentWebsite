@@ -51,12 +51,13 @@ namespace QualityDepartment.Infrastructure.Services
 
             if (!string.IsNullOrWhiteSpace(search))
             {
-                var searchLower = search.ToLower();
+                var s = search.Trim();
                 query = query.Where(x =>
-                    x.TitleUa.ToLower().Contains(searchLower) ||
-                    x.TitleEn.ToLower().Contains(searchLower) ||
-                    x.FullTextUa.ToLower().Contains(searchLower) ||
-                    x.FullTextEn.ToLower().Contains(searchLower));
+                    EF.Functions.Like(x.TitleUa, $"%{s}%") || 
+                    EF.Functions.Like(x.FullTextUa, $"%{s}%") ||
+                    EF.Functions.Like(x.TitleEn, $"%{s}%") || 
+                    EF.Functions.Like(x.FullTextEn, $"%{s}%") ||
+                    x.Tags.Any(t => EF.Functions.Like(t.NameUa, $"%{s}%") || EF.Functions.Like(t.NameEn, $"%{s}%")));
             }
 
             if (tagIds != null && tagIds.Any())
@@ -159,8 +160,13 @@ namespace QualityDepartment.Infrastructure.Services
 
             if (!string.IsNullOrWhiteSpace(search))
             {
-                var s = search.ToLower();
-                query = query.Where(x => x.TitleUa.ToLower().Contains(s) || x.TitleEn.ToLower().Contains(s));
+                var s = search.Trim();
+                query = query.Where(x =>
+                    EF.Functions.Like(x.TitleUa, $"%{s}%") ||
+                    EF.Functions.Like(x.FullTextUa, $"%{s}%") ||
+                    EF.Functions.Like(x.TitleEn, $"%{s}%") ||
+                    EF.Functions.Like(x.FullTextEn, $"%{s}%") ||
+                    x.Tags.Any(t => EF.Functions.Like(t.NameUa, $"%{s}%") || EF.Functions.Like(t.NameEn, $"%{s}%")));
             }
 
             if (tagIds != null && tagIds.Any())
