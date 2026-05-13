@@ -7,6 +7,7 @@ import InfoRoundedIcon from '@mui/icons-material/InfoRounded';
 import CategoryRoundedIcon from '@mui/icons-material/CategoryRounded';
 import LoginRoundedIcon from '@mui/icons-material/LoginRounded';
 import { useLocation, useNavigate } from 'react-router-dom';
+import SellRoundedIcon from '@mui/icons-material/SellRounded';
 
 const sidebarItems = [
     { label: 'Dashboard', path: '/dashboard', icon: DashboardRoundedIcon },
@@ -15,6 +16,7 @@ const sidebarItems = [
     { label: 'Administration', path: '/administration', icon: GroupsRoundedIcon },
     { label: 'Useful Information', path: '/useful-information', icon: InfoRoundedIcon },
     { label: 'Categories', path: '/categories', icon: CategoryRoundedIcon },
+    { label: 'Tags', path: '/tags', icon: SellRoundedIcon },
     { label: 'Login', path: '/login', icon: LoginRoundedIcon },
 ];
 

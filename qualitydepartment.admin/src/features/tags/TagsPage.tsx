@@ -20,8 +20,8 @@ import PageHeader from '../../components/ui/PageHeader';
 import TaxonomyFormDialog from '../../components/ui/TaxonomyFormDialog';
 import DeleteConfirmDialog from '../../components/ui/DeleteConfirmDialog';
 import agent, {
-    type CategoryAdminDto,
-    type CategoryCreateUpdateDto,
+    type AdminTagDto,
+    type TagCreateUpdateDto,
 } from '../../api/agent';
 
 const getApiError = (error: unknown) => {
@@ -42,8 +42,8 @@ const getApiError = (error: unknown) => {
     return maybeAxios.response?.data?.message || 'Не вдалося виконати запит.';
 };
 
-export default function CategoriesPage() {
-    const [items, setItems] = useState<CategoryAdminDto[]>([]);
+export default function TagsPage() {
+    const [items, setItems] = useState<AdminTagDto[]>([]);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
@@ -51,23 +51,23 @@ export default function CategoriesPage() {
 
     const [formOpen, setFormOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
-    const [editingItem, setEditingItem] = useState<CategoryAdminDto | null>(null);
-    const [deletingItem, setDeletingItem] = useState<CategoryAdminDto | null>(null);
+    const [editingItem, setEditingItem] = useState<AdminTagDto | null>(null);
+    const [deletingItem, setDeletingItem] = useState<AdminTagDto | null>(null);
 
     const dialogTitle = useMemo(() => {
-        return editingItem ? 'Редагувати категорію' : 'Створити категорію';
+        return editingItem ? 'Редагувати тег' : 'Створити тег';
     }, [editingItem]);
 
-    const fetchCategories = async () => {
-        const response = await agent.Categories.list();
+    const fetchTags = async () => {
+        const response = await agent.Tags.list();
         return response.data;
     };
 
-    const reloadCategories = async () => {
+    const reloadTags = async () => {
         try {
             setLoading(true);
             setError('');
-            const data = await fetchCategories();
+            const data = await fetchTags();
             setItems(data);
         } catch (err) {
             setError(getApiError(err));
@@ -79,9 +79,9 @@ export default function CategoriesPage() {
     useEffect(() => {
     let active = true;
 
-    const loadInitialCategories = async () => {
+    const loadInitialTags = async () => {
         try {
-            const data = await fetchCategories();
+            const data = await fetchTags();
 
             if (active) {
                 setItems(data);
@@ -97,7 +97,7 @@ export default function CategoriesPage() {
         }
     };
 
-    void loadInitialCategories();
+    void loadInitialTags();
 
     return () => {
         active = false;
@@ -109,33 +109,33 @@ export default function CategoriesPage() {
         setFormOpen(true);
     };
 
-    const handleEditClick = (item: CategoryAdminDto) => {
+    const handleEditClick = (item: AdminTagDto) => {
         setEditingItem(item);
         setFormOpen(true);
     };
 
-    const handleDeleteClick = (item: CategoryAdminDto) => {
+    const handleDeleteClick = (item: AdminTagDto) => {
         setDeletingItem(item);
         setDeleteOpen(true);
     };
 
-    const handleSubmit = async (values: CategoryCreateUpdateDto) => {
+    const handleSubmit = async (values: TagCreateUpdateDto) => {
         try {
             setSubmitting(true);
             setError('');
             setSuccessMessage('');
 
             if (editingItem) {
-                await agent.Categories.update(editingItem.id, values);
-                setSuccessMessage('Категорію оновлено.');
+                await agent.Tags.update(editingItem.id, values);
+                setSuccessMessage('Тег оновлено.');
             } else {
-                await agent.Categories.create(values);
-                setSuccessMessage('Категорію створено.');
+                await agent.Tags.create(values);
+                setSuccessMessage('Тег створено.');
             }
 
             setFormOpen(false);
             setEditingItem(null);
-            await reloadCategories();
+            await reloadTags();
         } catch (err) {
             setError(getApiError(err));
         } finally {
@@ -151,11 +151,11 @@ export default function CategoriesPage() {
             setError('');
             setSuccessMessage('');
 
-            await agent.Categories.delete(deletingItem.id);
-            setSuccessMessage('Категорію видалено.');
+            await agent.Tags.delete(deletingItem.id);
+            setSuccessMessage('Тег видалено.');
             setDeleteOpen(false);
             setDeletingItem(null);
-            await reloadCategories();
+            await reloadTags();
         } catch (err) {
             setError(getApiError(err));
         } finally {
@@ -166,8 +166,8 @@ export default function CategoriesPage() {
     return (
         <Box>
             <PageHeader
-                title="Categories"
-                description="Керування категоріями документів для використання у формах документів."
+                title="Tags"
+                description="Керування тегами для новин."
             />
 
             {error && (
@@ -202,10 +202,10 @@ export default function CategoriesPage() {
                 >
                     <Box>
                         <Typography variant="h6" sx={{ mb: 1 }}>
-                            Список категорій
+                            Список тегів
                         </Typography>
                         <Typography sx={{ color: '#666' }}>
-                            Створюй, редагуй та видаляй категорії документів.
+                            Створюй, редагуй та видаляй теги для новин.
                         </Typography>
                     </Box>
 
@@ -215,7 +215,7 @@ export default function CategoriesPage() {
                         onClick={handleCreateClick}
                         sx={{ borderRadius: '18px', px: 2.5, py: 1.2 }}
                     >
-                        Створити категорію
+                        Створити тег
                     </Button>
                 </Box>
 
@@ -238,7 +238,7 @@ export default function CategoriesPage() {
                         }}
                     >
                         <Typography sx={{ color: '#777' }}>
-                            Поки що немає жодної категорії.
+                            Поки що немає жодного тега.
                         </Typography>
                     </Box>
                 ) : (
@@ -249,7 +249,7 @@ export default function CategoriesPage() {
                                     <TableCell sx={{ fontWeight: 700 }}>ID</TableCell>
                                     <TableCell sx={{ fontWeight: 700 }}>Назва (UA)</TableCell>
                                     <TableCell sx={{ fontWeight: 700 }}>Name (EN)</TableCell>
-                                    <TableCell sx={{ fontWeight: 700 }}>Documents Count</TableCell>
+                                    <TableCell sx={{ fontWeight: 700 }}>News Count</TableCell>
                                     <TableCell align="right" sx={{ fontWeight: 700 }}>
                                         Дії
                                     </TableCell>
@@ -262,7 +262,7 @@ export default function CategoriesPage() {
                                         <TableCell>{item.id}</TableCell>
                                         <TableCell>{item.nameUa}</TableCell>
                                         <TableCell>{item.nameEn}</TableCell>
-                                        <TableCell>{item.documentsCount}</TableCell>
+                                        <TableCell>{item.newsCount}</TableCell>
                                         <TableCell align="right">
                                             <IconButton onClick={() => handleEditClick(item)}>
                                                 <EditRoundedIcon />
@@ -297,7 +297,7 @@ export default function CategoriesPage() {
 
             <DeleteConfirmDialog
                 open={deleteOpen}
-                title="Видалити категорію?"
+                title="Видалити тег?"
                 description={`Ви впевнені, що хочете видалити "${deletingItem?.nameUa ?? ''}"?`}
                 loading={submitting}
                 onClose={() => {

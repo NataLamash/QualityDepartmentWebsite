@@ -1,20 +1,29 @@
-import { Box, Typography } from '@mui/material';
-import { useLocation } from 'react-router-dom';
+import { Box, Button, Typography } from '@mui/material';
+import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../features/auth/AuthProvider';
 
 const titleMap: Record<string, string> = {
     '/dashboard': 'Dashboard',
-    '/login': 'Login',
     '/news': 'News',
     '/documents': 'Documents',
-    '/administration-members': 'Administration Members',
+    '/administration': 'Administration Members',
     '/useful-information': 'Useful Information',
     '/categories': 'Categories',
+    '/tags': 'Tags',
 };
 
 export default function AdminHeader() {
     const location = useLocation();
+    const navigate = useNavigate();
+    const { user, logout } = useAuth();
 
     const currentTitle = titleMap[location.pathname] ?? 'Admin Panel';
+
+    const handleLogout = () => {
+        logout();
+        navigate('/login', { replace: true });
+    };
 
     return (
         <Box
@@ -35,6 +44,7 @@ export default function AdminHeader() {
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     gap: 2,
+                    flexWrap: 'wrap',
                 }}
             >
                 <Box>
@@ -46,18 +56,37 @@ export default function AdminHeader() {
                     </Typography>
                 </Box>
 
-                <Box
-                    sx={{
-                        px: 1.5,
-                        py: 0.8,
-                        borderRadius: '999px',
-                        bgcolor: 'rgba(184,0,0,0.08)',
-                        color: '#B80000',
-                        fontWeight: 700,
-                        fontSize: '0.9rem',
-                    }}
-                >
-                    Admin panel
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
+                    <Box
+                        sx={{
+                            px: 1.5,
+                            py: 0.8,
+                            borderRadius: '999px',
+                            bgcolor: 'rgba(184,0,0,0.08)',
+                            color: '#B80000',
+                            fontWeight: 700,
+                            fontSize: '0.9rem',
+                        }}
+                    >
+                        {user?.username || 'Admin'}
+                    </Box>
+
+                    <Button
+                        onClick={handleLogout}
+                        startIcon={<LogoutRoundedIcon />}
+                        sx={{
+                            borderRadius: '999px',
+                            border: '1px solid #E5E5E5',
+                            color: '#B80000',
+                            px: 2,
+                            '&:hover': {
+                                borderColor: '#B80000',
+                                bgcolor: 'rgba(184,0,0,0.04)',
+                            },
+                        }}
+                    >
+                        Logout
+                    </Button>
                 </Box>
             </Box>
 
