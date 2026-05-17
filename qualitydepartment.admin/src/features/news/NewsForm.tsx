@@ -1,7 +1,22 @@
-import { useState } from 'react';
-import { TextField, Button, Stack, Box, Typography, CircularProgress, Link } from '@mui/material';
+import { useEffect, useState } from 'react';
+import {
+    TextField,
+    Button,
+    Stack,
+    Box,
+    Typography,
+    CircularProgress,
+    Link,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+    Chip,
+    OutlinedInput,
+} from '@mui/material';
+import type { SelectChangeEvent } from '@mui/material/Select';
 import ImageIcon from '@mui/icons-material/Image';
-import agent from '../../api/agent';
+import agent, { type AdminTagDto } from '../../api/agent';
 
 interface NewsFormProps {
     initialData?: any;
@@ -11,6 +26,42 @@ interface NewsFormProps {
 export default function NewsForm({ initialData, onSuccess }: NewsFormProps) {
     const [loading, setLoading] = useState(false);
     const [photo, setPhoto] = useState<File | null>(null);
+
+    const [availableTags, setAvailableTags] = useState<AdminTagDto[]>([]);
+    const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
+    const [tagsLoading, setTagsLoading] = useState(true);
+
+    useEffect(() => {
+        let active = true;
+
+        const loadTags = async () => {
+            try {
+                const response = await agent.Tags.list();
+                if (!active) return;
+
+                setAvailableTags(response.data);
+
+                const initialIds =
+                    initialData?.tagIds ??
+                    initialData?.tags?.map((tag: { id: number }) => tag.id) ??
+                    [];
+
+                setSelectedTagIds(initialIds);
+            } catch (error) {
+                console.error('Tags load error:', error);
+            } finally {
+                if (active) {
+                    setTagsLoading(false);
+                }
+            }
+        };
+
+        void loadTags();
+
+        return () => {
+            active = false;
+        };
+    }, [initialData]);
 
     const formatToLocal = (dateString?: string) => {
         if (!dateString) return '';
@@ -23,15 +74,21 @@ export default function NewsForm({ initialData, onSuccess }: NewsFormProps) {
         const day = String(date.getDate()).padStart(2, '0');
         const hours = String(date.getHours()).padStart(2, '0');
         const minutes = String(date.getMinutes()).padStart(2, '0');
-        
+
         return `${year}-${month}-${day}T${hours}:${minutes}`;
+    };
+
+    const handleTagsChange = (event: SelectChangeEvent<number[]>) => {
+        const value = event.target.value;
+        setSelectedTagIds(typeof value === 'string' ? value.split(',').map(Number) : value);
     };
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setLoading(true);
+
         const formData = new FormData(event.currentTarget);
-        
+
         const localTime = formData.get('PublishDate') as string;
         if (localTime) {
             const dateObj = new Date(localTime);
@@ -45,16 +102,23 @@ export default function NewsForm({ initialData, onSuccess }: NewsFormProps) {
             formData.set('KeepOldPhoto', 'true');
         }
 
+        formData.delete('TagIds');
+        selectedTagIds.forEach((id) => {
+            formData.append('TagIds', String(id));
+        });
+
         try {
             if (initialData) {
                 await agent.News.update(initialData.id, formData);
             } else {
                 await agent.News.create(formData);
             }
+
             onSuccess();
         } catch (error: any) {
-            console.error("News save error:", error);
-            const serverError = error.response?.data?.errors?.[0] || "Помилка при збереженні новини.";
+            console.error('News save error:', error);
+            const serverError =
+                error.response?.data?.errors?.[0] || 'Помилка при збереженні новини.';
             alert(serverError);
         } finally {
             setLoading(false);
@@ -65,50 +129,115 @@ export default function NewsForm({ initialData, onSuccess }: NewsFormProps) {
         <form onSubmit={handleSubmit} key={initialData?.id || 'new-news-form'}>
             <Stack spacing={2.5} sx={{ mt: 2 }}>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                    <TextField 
-                        name="TitleUa" label="Заголовок (UA)" fullWidth 
-                        defaultValue={initialData?.titleUa || ''} required 
+                    <TextField
+                        name="TitleUa"
+                        label="Заголовок (UA)"
+                        fullWidth
+                        defaultValue={initialData?.titleUa || ''}
+                        required
                         size="small"
                     />
-                    <TextField 
-                        name="TitleEn" label="Title (EN)" fullWidth 
-                        defaultValue={initialData?.titleEn || ''} required 
+                    <TextField
+                        name="TitleEn"
+                        label="Title (EN)"
+                        fullWidth
+                        defaultValue={initialData?.titleEn || ''}
+                        required
                         size="small"
                     />
                 </Stack>
 
-                <TextField 
+                <TextField
                     label="Дата публікації"
-                    name="PublishDate" 
-                    type="datetime-local" 
+                    name="PublishDate"
+                    type="datetime-local"
                     fullWidth
-                    defaultValue={formatToLocal(initialData?.publishDate) || formatToLocal(new Date().toISOString())}
+                    defaultValue={
+                        formatToLocal(initialData?.publishDate) ||
+                        formatToLocal(new Date().toISOString())
+                    }
                     slotProps={{ inputLabel: { shrink: true } }}
                     required
                     size="small"
                 />
 
-                <TextField 
-                    name="FullTextUa" label="Текст новини (UA)" multiline rows={4} 
-                    defaultValue={initialData?.fullTextUa || ''} required 
-                    size="small"
-                />
-                
-                <TextField 
-                    name="FullTextEn" label="News Text (EN)" multiline rows={4} 
-                    defaultValue={initialData?.fullTextEn || ''} required 
+                <FormControl fullWidth size="small" disabled={tagsLoading}>
+                    <InputLabel id="news-tags-label">Теги</InputLabel>
+                    <Select
+                        labelId="news-tags-label"
+                        multiple
+                        value={selectedTagIds}
+                        onChange={handleTagsChange}
+                        input={<OutlinedInput label="Теги" />}
+                        renderValue={(selected) => (
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                {selected.map((id) => {
+                                    const tag = availableTags.find((item) => item.id === id);
+                                    return (
+                                        <Chip
+                                            key={id}
+                                            label={tag?.nameUa ?? id}
+                                            size="small"
+                                        />
+                                    );
+                                })}
+                            </Box>
+                        )}
+                    >
+                        {availableTags.map((tag) => (
+                            <MenuItem key={tag.id} value={tag.id}>
+                                {tag.nameUa}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+
+                <TextField
+                    name="FullTextUa"
+                    label="Текст новини (UA)"
+                    multiline
+                    rows={4}
+                    defaultValue={initialData?.fullTextUa || ''}
+                    required
                     size="small"
                 />
 
-                <Box sx={{ p: 2, border: '1px dashed #ccc', borderRadius: '12px', bgcolor: '#fcfcfc' }}>
-                    <Typography variant="caption" sx={{ display: 'block', mb: 1, fontWeight: 700, color: '#555', textTransform: 'uppercase' }}>
-                        {initialData ? "Оновити фото" : "Головне фото*"}
+                <TextField
+                    name="FullTextEn"
+                    label="News Text (EN)"
+                    multiline
+                    rows={4}
+                    defaultValue={initialData?.fullTextEn || ''}
+                    required
+                    size="small"
+                />
+
+                <Box
+                    sx={{
+                        p: 2,
+                        border: '1px dashed #ccc',
+                        borderRadius: '12px',
+                        bgcolor: '#fcfcfc',
+                    }}
+                >
+                    <Typography
+                        variant="caption"
+                        sx={{
+                            display: 'block',
+                            mb: 1,
+                            fontWeight: 700,
+                            color: '#555',
+                            textTransform: 'uppercase',
+                        }}
+                    >
+                        {initialData ? 'Оновити фото' : 'Головне фото*'}
                     </Typography>
-                    
-                    <input 
-                        type="file" accept="image/*"
-                        onChange={(e) => setPhoto(e.target.files?.[0] || null)} 
-                        required={!initialData} 
+
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => setPhoto(e.target.files?.[0] || null)}
+                        required={!initialData}
                         style={{ fontSize: '14px' }}
                     />
 
@@ -116,11 +245,15 @@ export default function NewsForm({ initialData, onSuccess }: NewsFormProps) {
                         <Stack direction="row" spacing={1} sx={{ mt: 1.5, alignItems: 'center' }}>
                             <ImageIcon sx={{ fontSize: 18, color: '#BA0000' }} />
                             <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                                Поточне: 
-                                <Link 
-                                    href={`${import.meta.env.VITE_API_URL?.replace('/api', '')}/${initialData.photoPath.replace(/^\//, '')}`}                                    
-                                    target="_blank" 
-                                    sx={{ ml: 0.5, color: '#BA0000', textDecoration: 'none' }}
+                                Поточне:
+                                <Link
+                                    href={`${import.meta.env.VITE_API_URL?.replace('/api', '')}/${initialData.photoPath.replace(/^\//, '')}`}
+                                    target="_blank"
+                                    sx={{
+                                        ml: 0.5,
+                                        color: '#BA0000',
+                                        textDecoration: 'none',
+                                    }}
                                 >
                                     {initialData.photoPath.split('/').pop()}
                                 </Link>
@@ -129,18 +262,27 @@ export default function NewsForm({ initialData, onSuccess }: NewsFormProps) {
                     )}
                 </Box>
 
-                <Button 
-                    type="submit" variant="contained" size="large" disabled={loading}
-                    sx={{ 
-                        bgcolor: '#BA0000', 
-                        borderRadius: '12px', 
-                        py: 1.5, 
+                <Button
+                    type="submit"
+                    variant="contained"
+                    size="large"
+                    disabled={loading}
+                    sx={{
+                        bgcolor: '#BA0000',
+                        borderRadius: '12px',
+                        py: 1.5,
                         fontWeight: 700,
                         textTransform: 'none',
-                        '&:hover': { bgcolor: '#8e0000' }
+                        '&:hover': { bgcolor: '#8e0000' },
                     }}
                 >
-                    {loading ? <CircularProgress size={24} color="inherit" /> : (initialData ? "Зберегти зміни" : "Опублікувати новину")}
+                    {loading ? (
+                        <CircularProgress size={24} color="inherit" />
+                    ) : initialData ? (
+                        'Зберегти зміни'
+                    ) : (
+                        'Опублікувати новину'
+                    )}
                 </Button>
             </Stack>
         </form>

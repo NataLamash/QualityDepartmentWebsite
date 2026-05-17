@@ -6,13 +6,15 @@ import InfoRoundedIcon from '@mui/icons-material/InfoRounded';
 import CategoryRoundedIcon from '@mui/icons-material/CategoryRounded';
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/ui/PageHeader';
+import SellRoundedIcon from '@mui/icons-material/SellRounded';
 
 const modules = [
     { title: 'News', path: '/news', icon: FeedRoundedIcon },
     { title: 'Documents', path: '/documents', icon: DescriptionRoundedIcon },
-    { title: 'Administration', path: '/administration-members', icon: GroupsRoundedIcon },
+    { title: 'Administration', path: '/administration', icon: GroupsRoundedIcon },
     { title: 'Useful Information', path: '/useful-information', icon: InfoRoundedIcon },
     { title: 'Categories', path: '/categories', icon: CategoryRoundedIcon },
+    { title: 'Tags', path: '/tags', icon: SellRoundedIcon },
 ];
 
 export default function DashboardPage() {
