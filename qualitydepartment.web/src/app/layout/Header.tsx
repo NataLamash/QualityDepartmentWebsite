@@ -34,6 +34,18 @@ export default function Header() {
     const [accessAnchor, setAccessAnchor] = useState<null | HTMLElement>(null);
     const [mobileOpen, setMobileOpen] = useState(false);
 
+    const [searchValue, setSearchValue] = useState('');
+
+const handleSearchSubmit = () => {
+    const trimmed = searchValue.trim();
+
+    if (trimmed.length < 3) {
+        return;
+    }
+
+    navigate(`/search?q=${encodeURIComponent(trimmed)}`);
+};
+
     const menuItems = [
         { ua: 'Головна', en: 'Home', path: '/' },
         { ua: 'Новини', en: 'News', path: '/news' },
@@ -113,9 +125,27 @@ export default function Header() {
                             <Search>
                                 <InputBase
                                     placeholder={i18n.language === 'en' ? 'Search' : 'Пошук'}
+                                    value={searchValue}
+                                    onChange={(e) => setSearchValue(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            handleSearchSubmit();
+                                        }
+                                    }}
                                     sx={{ color: '#333', p: '6px 15px', fontSize: '0.9rem', flex: 1 }}
                                 />
-                                <Box sx={{ display: 'flex', alignItems: 'center', borderLeft: '1.5px solid #BA0000', height: '20px', px: 1, cursor: 'pointer' }}>
+                                <Box
+                                    onClick={handleSearchSubmit}
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        borderLeft: '1.5px solid #BA0000',
+                                        height: '20px',
+                                        px: 1,
+                                        cursor: 'pointer',
+                                    }}
+                                >
                                     <SearchIcon sx={{ color: '#BA0000', fontSize: '1.1rem' }} />
                                 </Box>
                             </Search>
@@ -151,9 +181,17 @@ export default function Header() {
                     <Search>
                         <InputBase
                             placeholder={i18n.language === 'en' ? 'Search' : 'Пошук'}
+                            value={searchValue}
+                            onChange={(e) => setSearchValue(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    handleSearchSubmit();
+                                }
+                            }}
                             sx={{ color: '#333', p: '8px 20px', fontSize: '1rem', flex: 1 }}
                         />
-                        <IconButton sx={{ p: '10px' }}>
+                        <IconButton sx={{ p: '10px' }} onClick={handleSearchSubmit}>
                             <SearchIcon sx={{ color: '#BA0000' }} />
                         </IconButton>
                     </Search>

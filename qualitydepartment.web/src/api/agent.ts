@@ -53,6 +53,15 @@ export interface DocumentCategoryItem {
     [key: string]: unknown;
 }
 
+export interface GlobalSearchResultItem {
+    type: 'News' | 'Document' | 'ExternalLink' | string;
+    id: number;
+    title: string;
+    shortDescription?: string | null;
+    link: string;
+    publishDate: string;
+}
+
 export interface ExternalLink {
     id: number;
     url: string;
@@ -136,6 +145,12 @@ const agent = {
         list: (lang: string) => 
             requests.get<ExternalLink[]>(`/external-links?lang=${lang}`),
     },
+
+    Search: {
+    global: (query: string, lang: string) =>
+        requests.get<GlobalSearchResultItem[]>(`/search?query=${encodeURIComponent(query)}&lang=${lang}`),
+    },
+
 };
 
 export default agent;

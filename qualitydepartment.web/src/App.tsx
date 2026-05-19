@@ -7,6 +7,8 @@ import DocumentPage from './features/documents/DocumentPage';
 import NewsPage from './features/news/NewsPage';
 import QualityAssessmentPage from './features/info/QualityAssessmentPage';
 import NewsDetailsPage from './features/news/NewsDetailsPage';
+import SearchPage from './features/search/SearchPage';
+import DocumentSearchPreviewPage from './features/search/DocumentSearchPreviewPage';
 
 function App() {
     return (
@@ -19,7 +21,8 @@ function App() {
                     <Route path="/news" element={<NewsPage />} />
                     <Route path="/archive" element={<DocumentPage />} />
                     <Route path="/info" element={<QualityAssessmentPage />} />
-                    <Route path="/news" element={<NewsPage />} />
+                    <Route path="/search" element={<SearchPage />} />
+                    <Route path="/documents/:id/preview" element={<DocumentSearchPreviewPage />} />
                     <Route path="/news/:id" element={<NewsDetailsPage />} />
                 </Routes>
             </Box>
