@@ -33,6 +33,7 @@ interface Props {
     onDateChange: (value: string) => void;
     onSearchChange: (value: string) => void;
     onSortChange: (value: SortMode) => void;
+    isQualityPage?: boolean; 
 }
 
 export default function DocumentsFilterPopover({
@@ -60,6 +61,7 @@ export default function DocumentsFilterPopover({
     onDateChange,
     onSearchChange,
     onSortChange,
+    isQualityPage = false, 
 }: Props) {
     return (
         <Popover
@@ -79,22 +81,24 @@ export default function DocumentsFilterPopover({
                 </Typography>
 
                 <Box sx={popoverFieldsWrapSx}>
-                    <TextField
-                        select
-                        fullWidth
-                        size="small"
-                        label={categoryLabel}
-                        value={tempCategory}
-                        onChange={(e) => onCategoryChange(e.target.value)}
-                        slotProps={{ input: { sx: { borderRadius: '12px' } } }}
-                    >
-                        <MenuItem value="all">{allCategoriesLabel}</MenuItem>
-                        {categories.map((category) => (
-                            <MenuItem key={category.id} value={category.name}>
-                                {category.name}
-                            </MenuItem>
-                        ))}
-                    </TextField>
+                    {!isQualityPage && (
+                        <TextField
+                            select
+                            fullWidth
+                            size="small"
+                            label={categoryLabel}
+                            value={tempCategory}
+                            onChange={(e) => onCategoryChange(e.target.value)}
+                            slotProps={{ input: { sx: { borderRadius: '12px' } } }}
+                        >
+                            <MenuItem value="all">{allCategoriesLabel}</MenuItem>
+                            {categories.map((category) => (
+                                <MenuItem key={category.id} value={category.name}>
+                                    {category.name}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                    )}
 
                     <TextField
                         type="date"

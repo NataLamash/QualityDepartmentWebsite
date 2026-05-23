@@ -2,19 +2,16 @@ import axios, { type AxiosResponse } from 'axios';
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
-export interface DocumentCategoryParams {
-    lang: string;
-    isQualityEvaluation?: boolean;
-}
-
-export interface DocumentListParams {
+export interface BaseDocumentParams {
     lang: string;
     pageNumber?: number;
     pageSize?: number;
     search?: string;
     sort?: string;
+}
+
+export interface DocumentListParams extends BaseDocumentParams {
     categoryIds?: number[];
-    exceptCategoryIds?: number[];
 }
 
 export interface NewsItem {
@@ -154,8 +151,15 @@ const agent = {
         list: (params: DocumentListParams) =>
             requests.get<DocumentsListResponse>('/documents', { params }),
 
-        categories: (params: DocumentCategoryParams) =>
-            requests.get<DocumentCategoryItem[]>('/documents/categories', { params }),
+        categories: (lang: string) =>
+            requests.get<DocumentCategoryItem[]>(`/documents/categories?lang=${lang}`),
+    },
+    QualityAssessment: {
+        getInternal: (params: BaseDocumentParams) =>
+            requests.get<DocumentsListResponse>('/quality-assessment/internal', { params }),
+
+        getExternal: (params: BaseDocumentParams) =>
+            requests.get<DocumentsListResponse>('/quality-assessment/external', { params }),
     },
     ExternalLinks: {
         list: (lang: string) =>
