@@ -2,6 +2,21 @@ import axios, { type AxiosResponse } from 'axios';
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
+export interface DocumentCategoryParams {
+    lang: string;
+    isQualityEvaluation?: boolean;
+}
+
+export interface DocumentListParams {
+    lang: string;
+    pageNumber?: number;
+    pageSize?: number;
+    search?: string;
+    sort?: string;
+    categoryIds?: number[];
+    exceptCategoryIds?: number[];
+}
+
 export interface NewsItem {
     id: number;
     title: string;
@@ -103,8 +118,8 @@ axios.interceptors.response.use(
 );
 
 const requests = {
-    get: <T>(url: string) =>
-        axios.get<{ data: T }>(url).then((res) => responseBody<T>(res)),
+    get: <T>(url: string, config?: object) =>
+        axios.get<{ data: T }>(url, config).then((res) => responseBody<T>(res)),
     post: <T>(url: string, body: object) =>
         axios.post<{ data: T }>(url, body).then((res) => responseBody<T>(res)),
 };
@@ -136,21 +151,20 @@ const agent = {
             requests.get<NewsItem>(`/news/${id}?lang=${lang}`),
     },
     Documents: {
-    list: (lang: string) =>
-        requests.get<DocumentsListResponse>(`/documents?lang=${lang}`),
-    categories: (lang: string) =>
-        requests.get<DocumentCategoryItem[]>(`/documents/categories?lang=${lang}`),
+        list: (params: DocumentListParams) =>
+            requests.get<DocumentsListResponse>('/documents', { params }),
+
+        categories: (params: DocumentCategoryParams) =>
+            requests.get<DocumentCategoryItem[]>('/documents/categories', { params }),
     },
     ExternalLinks: {
-        list: (lang: string) => 
+        list: (lang: string) =>
             requests.get<ExternalLink[]>(`/external-links?lang=${lang}`),
     },
-
     Search: {
-    global: (query: string, lang: string) =>
-        requests.get<GlobalSearchResultItem[]>(`/search?query=${encodeURIComponent(query)}&lang=${lang}`),
+        global: (query: string, lang: string) =>
+            requests.get<GlobalSearchResultItem[]>(`/search?query=${encodeURIComponent(query)}&lang=${lang}`),
     },
-
 };
 
 export default agent;

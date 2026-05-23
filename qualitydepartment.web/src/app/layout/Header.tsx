@@ -7,7 +7,7 @@ import { styled } from '@mui/material/styles';
 import SearchIcon from '@mui/icons-material/Search';
 import LanguageIcon from '@mui/icons-material/Language';
 import MenuIcon from '@mui/icons-material/Menu';
-import { NavLink, useNavigate } from 'react-router-dom'; 
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 const Search = styled('div')(({ theme }) => ({
@@ -29,28 +29,43 @@ const Search = styled('div')(({ theme }) => ({
 
 export default function Header() {
     const { i18n } = useTranslation();
-    const navigate = useNavigate(); 
+    const navigate = useNavigate();
     const [langAnchor, setLangAnchor] = useState<null | HTMLElement>(null);
     const [accessAnchor, setAccessAnchor] = useState<null | HTMLElement>(null);
     const [mobileOpen, setMobileOpen] = useState(false);
-
     const [searchValue, setSearchValue] = useState('');
 
-const handleSearchSubmit = () => {
-    const trimmed = searchValue.trim();
+    const [qualityAnchor, setQualityAnchor] = useState<null | HTMLElement>(null);
 
-    if (trimmed.length < 3) {
-        return;
-    }
+    const handleQualityOpen = (event: React.MouseEvent<HTMLElement>) => {
+        setQualityAnchor(event.currentTarget);
+    };
 
-    navigate(`/search?q=${encodeURIComponent(trimmed)}`);
-};
+    const handleQualityClose = () => {
+        setQualityAnchor(null);
+    };
+
+    const handleSearchSubmit = () => {
+        const trimmed = searchValue.trim();
+
+        if (trimmed.length < 3) {
+            return;
+        }
+
+        navigate(`/search?q=${encodeURIComponent(trimmed)}`);
+    };
 
     const menuItems = [
         { ua: 'Головна', en: 'Home', path: '/' },
         { ua: 'Новини', en: 'News', path: '/news' },
         { ua: 'Архів', en: 'Archive', path: '/archive' },
-        { ua: 'Оцінювання якості освіти', en: 'Assessing the quality of education', path: '/info' },
+        {
+            ua: 'Оцінювання якості',
+            en: 'Quality Evaluation',
+            path: '/quality-evaluation',
+            hasDropdown: true
+        },
+        { ua: 'Корисні посилання', en: 'Useful Links', path: '/info' },
         { ua: 'Опитування', en: 'Surveys', path: '/surveys' },
     ];
 
@@ -92,7 +107,7 @@ const handleSearchSubmit = () => {
                             <Box
                                 component="img"
                                 src="/logo-knu.png"
-                                onClick={() => navigate('/')} 
+                                onClick={() => navigate('/')}
                                 sx={{
                                     height: { xs: 70, md: 110 },
                                     width: 'auto',
@@ -101,22 +116,85 @@ const handleSearchSubmit = () => {
                             />
                         </Box>
 
-                        <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: { md: 1.5, lg: 3 } }}>
-                            {menuItems.map((item) => (
-                                <Link
-                                    key={item.ua}
-                                    component={NavLink}
-                                    to={item.path}
-                                    sx={{
-                                        color: '#333', fontWeight: 700, textDecoration: 'none', fontSize: '1.05rem',
-                                        position: 'relative', '&.active': { color: '#BA0000' },
-                                        '&:hover': { color: '#BA0000' },
-                                        '&.active::after': { content: '""', position: 'absolute', bottom: -5, left: 0, width: '100%', height: '2px', bgcolor: '#BA0000' }
-                                    }}
-                                >
-                                    {i18n.language === 'en' ? item.en : item.ua}
-                                </Link>
-                            ))}
+                        <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: { md: 1.5, lg: 3 }, alignItems: 'center' }}>
+                            {menuItems.map((item) => {
+                                const label = i18n.language === 'en' ? item.en : item.ua;
+
+                                if (item.hasDropdown) {
+                                    return (
+                                        <Box
+                                            key={item.ua}
+                                            onMouseEnter={handleQualityOpen}
+                                            onMouseLeave={handleQualityClose}
+                                            sx={{ display: 'inline-block', position: 'relative' }}
+                                        >
+                                            <Link
+                                                component={NavLink}
+                                                to={item.path}
+                                                sx={{
+                                                    color: '#333', fontWeight: 700, textDecoration: 'none', fontSize: '1.05rem',
+                                                    position: 'relative', display: 'block', py: 1,
+                                                    '&.active': { color: '#BA0000' },
+                                                    '&:hover': { color: '#BA0000' },
+                                                    '&.active::after': { content: '""', position: 'absolute', bottom: 0, left: 0, width: '100%', height: '2px', bgcolor: '#BA0000' }
+                                                }}
+                                            >
+                                                {label}
+                                            </Link>
+
+                                            <Menu
+                                                anchorEl={qualityAnchor}
+                                                open={Boolean(qualityAnchor)}
+                                                onClose={handleQualityClose}
+                                                disableAutoFocusItem
+                                                slotProps={{
+                                                    paper: {
+                                                        onMouseEnter: () => setQualityAnchor(qualityAnchor),
+                                                        onMouseLeave: handleQualityClose,
+                                                        sx: {
+                                                            borderRadius: '12px',
+                                                            boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+                                                            mt: 0.5,
+                                                            border: '1px solid #eee'
+                                                        }
+                                                    }
+                                                }}
+                                                anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                                                transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                                            >
+                                                <MenuItem
+                                                    onClick={() => { handleQualityClose(); navigate('/quality-evaluation?category=internal'); }}
+                                                    sx={{ fontWeight: 600, fontSize: '0.95rem', px: 3, py: 1, '&:hover': { color: '#BA0000' } }}
+                                                >
+                                                    {i18n.language === 'en' ? 'Internal Quality Evaluation' : 'Внутрішнє оцінювання якості'}
+                                                </MenuItem>
+                                                <MenuItem
+                                                    onClick={() => { handleQualityClose(); navigate('/quality-evaluation?category=external'); }}
+                                                    sx={{ fontWeight: 600, fontSize: '0.95rem', px: 3, py: 1, '&:hover': { color: '#BA0000' } }}
+                                                >
+                                                    {i18n.language === 'en' ? 'External Quality Evaluation' : 'Зовнішнє оцінювання якості'}
+                                                </MenuItem>
+                                            </Menu>
+                                        </Box>
+                                    );
+                                }
+
+                                return (
+                                    <Link
+                                        key={item.ua}
+                                        component={NavLink}
+                                        to={item.path}
+                                        sx={{
+                                            color: '#333', fontWeight: 700, textDecoration: 'none', fontSize: '1.05rem',
+                                            position: 'relative', '&.active': { color: '#BA0000' },
+                                            '&:hover': { color: '#BA0000' },
+                                            '&.active::after': { content: '""', position: 'absolute', bottom: -5, left: 0, width: '100%', height: '2px', bgcolor: '#BA0000' }
+                                        }}
+                                    >
+                                        {label}
+                                    </Link>
+                                );
+                            })}
                         </Box>
                     </Box>
 
