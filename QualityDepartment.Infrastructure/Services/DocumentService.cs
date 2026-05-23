@@ -203,7 +203,35 @@ namespace QualityDepartment.Infrastructure.Services
 
         public async Task<PagedResultDto<DocumentAdminDto>> GetAdminDocumentsAsync(int page, int pageSize, string? search)
         {
-            var query = _context.Documents.Include(d => d.Category).AsNoTracking();
+            var query = _context.Documents
+                .Include(d => d.Category)
+                .AsNoTracking()
+                .Where(d => d.Category.NameUa != "Внутрішнє оцінювання якості" &&
+                            d.Category.NameUa != "Зовнішнє оцінювання якості");
+
+            return await ExecuteAdminPagedQueryAsync(query, page, pageSize, search);
+        }
+
+        public async Task<PagedResultDto<DocumentAdminDto>> GetAdminDocumentsByCategoryNameAsync(string categoryNameUa, int page, int pageSize, string? search)
+        {
+            var query = _context.Documents
+                .Include(d => d.Category)
+                .AsNoTracking()
+                .Where(d => d.Category.NameUa == categoryNameUa);
+
+            return await ExecuteAdminPagedQueryAsync(query, page, pageSize, search);
+        }
+
+        public async Task<int?> GetCategoryIdByNameAsync(string nameUa)
+        {
+            var category = await _context.DocumentCategories
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.NameUa == nameUa);
+            return category?.Id;
+        }
+
+        private async Task<PagedResultDto<DocumentAdminDto>> ExecuteAdminPagedQueryAsync(IQueryable<Document> query, int page, int pageSize, string? search)
+        {
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var s = search.Trim();
@@ -247,7 +275,6 @@ namespace QualityDepartment.Infrastructure.Services
             var doc = _mapper.Map<Document>(dto);
             doc.CreatedAt = DateTime.UtcNow;
             doc.CreatorId = userId;
-            //doc.ExternalType = false;
             doc.FilePath = await _fileService.SaveFileAsync(dto.File, saveFolder);
 
             _context.Documents.Add(doc);

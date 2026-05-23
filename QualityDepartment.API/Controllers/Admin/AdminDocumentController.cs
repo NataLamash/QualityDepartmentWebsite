@@ -38,6 +38,26 @@ namespace QualityDepartment.API.Controllers.Admin
             return Ok(ApiResponse<PagedResultDto<DocumentAdminDto>>.SuccessResponse(result));
         }
 
+        [HttpGet("internal-assessment")]
+        public async Task<ActionResult<ApiResponse<PagedResultDto<DocumentAdminDto>>>> GetInternalAssessment(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? search = null)
+        {
+            var result = await _docService.GetAdminDocumentsByCategoryNameAsync("Внутрішнє оцінювання якості", page, pageSize, search);
+            return Ok(ApiResponse<PagedResultDto<DocumentAdminDto>>.SuccessResponse(result));
+        }
+
+        [HttpGet("external-assessment")]
+        public async Task<ActionResult<ApiResponse<PagedResultDto<DocumentAdminDto>>>> GetExternalAssessment(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? search = null)
+        {
+            var result = await _docService.GetAdminDocumentsByCategoryNameAsync("Зовнішнє оцінювання якості", page, pageSize, search);
+            return Ok(ApiResponse<PagedResultDto<DocumentAdminDto>>.SuccessResponse(result));
+        }
+
         [HttpPost]
         public async Task<ActionResult<ApiResponse<DocumentAdminDto>>> Create([FromForm] DocumentCreateDto dto)
         {

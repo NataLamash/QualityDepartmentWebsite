@@ -63,5 +63,21 @@ namespace QualityDepartment.API.Controllers
             var categories = await _documentService.GetCategoriesLookupAsync(lang);
             return Ok(ApiResponse<List<LookupDto>>.SuccessResponse(categories));
         }
+
+        [HttpGet("categories/internal-id")]
+        public async Task<ActionResult<ApiResponse<int>>> GetInternalCategoryId()
+        {
+            var id = await _documentService.GetCategoryIdByNameAsync("Внутрішнє оцінювання якості");
+            if (id == null) return NotFound(ApiResponse<int>.FailureResponse(new List<string> { "CATEGORY_NOT_FOUND" }));
+            return Ok(ApiResponse<int>.SuccessResponse(id.Value));
+        }
+
+        [HttpGet("categories/external-id")]
+        public async Task<ActionResult<ApiResponse<int>>> GetExternalCategoryId()
+        {
+            var id = await _documentService.GetCategoryIdByNameAsync("Зовнішнє оцінювання якості");
+            if (id == null) return NotFound(ApiResponse<int>.FailureResponse(new List<string> { "CATEGORY_NOT_FOUND" }));
+            return Ok(ApiResponse<int>.SuccessResponse(id.Value));
+        }
     }
 }

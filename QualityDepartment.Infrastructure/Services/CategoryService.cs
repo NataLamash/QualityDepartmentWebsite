@@ -43,6 +43,7 @@ namespace QualityDepartment.Infrastructure.Services
             var categories = await _context.DocumentCategories
                 .Include(c => c.Documents)
                 .AsNoTracking()
+                .Where(c => c.NameUa != "Внутрішнє оцінювання якості" && c.NameUa != "Зовнішнє оцінювання якості")
                 .ToListAsync();
 
             return _mapper.Map<List<CategoryAdminDto>>(categories);
@@ -66,13 +67,13 @@ namespace QualityDepartment.Infrastructure.Services
             var category = await _context.DocumentCategories.FindAsync(id);
             if (category == null) return (false, "CATEGORY_NOT_FOUND");
 
-            if (await _context.DocumentCategories
-                .AnyAsync(c => c.NameUa == dto.NameUa
-                && c.Id != id))
+            if (category.NameUa == "Внутрішнє оцінювання якості" || category.NameUa == "Зовнішнє оцінювання якості")
+                return (false, "SYSTEM_CATEGORY_CANNOT_BE_MODIFIED");
+
+            if (await _context.DocumentCategories.AnyAsync(c => c.NameUa == dto.NameUa && c.Id != id))
                 return (false, "CATEGORY_ALREADY_EXISTS");
 
             _mapper.Map(dto, category);
-
             await _context.SaveChangesAsync();
             return (true, null);
         }
