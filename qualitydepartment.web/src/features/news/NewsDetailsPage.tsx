@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     Box, Container, Typography, Stack, Button,
-    Divider, CircularProgress, Paper, Grid 
+    Divider, CircularProgress, Paper
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -94,9 +94,9 @@ export default function NewsDetailsPage() {
             </Box>
 
             <Container maxWidth="lg">
-                <Grid container spacing={6}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
 
-                    <Grid item xs={12} md={8}>
+                    <Box sx={{ width: '100%' }}>
                         <Box sx={{
                             '& p': { fontSize: '1.2rem', lineHeight: 1.8, mb: 3, color: '#333' },
                             '& img': { maxWidth: '100%', borderRadius: '20px', my: 2 },
@@ -104,43 +104,67 @@ export default function NewsDetailsPage() {
                         }}>
                             <div dangerouslySetInnerHTML={{ __html: news.fullText || '' }} />
                         </Box>
-                        <Divider sx={{ my: 6 }} />
-                    </Grid>
+                        <Divider sx={{ mt: 6, mb: 4 }} />
+                    </Box>
 
-                    <Grid item xs={12} md={4}>
-                        <Paper
-                            elevation={0}
-                            sx={{ p: 4, bgcolor: '#f9f9f9', borderRadius: '30px', position: { md: 'sticky' }, top: 100, mb: 4 }}
-                        >
-                            <Typography variant="h5" sx={{ fontWeight: 800, mb: 4 }}>
+                    {latestNews.length > 0 && (
+                        <Box sx={{ mb: 6, width: '100%' }}>
+                            <Typography variant="h4" sx={{ fontWeight: 800, mb: 4 }}>
                                 {i18n.language === 'en' ? 'Latest News' : 'Останні новини'}
                             </Typography>
-                            <Stack spacing={4}>
+
+                            <Box sx={{
+                                display: 'flex',
+                                flexDirection: { xs: 'column', sm: 'row' },
+                                flexWrap: 'wrap',
+                                gap: 4
+                            }}>
                                 {latestNews.map((item) => (
                                     <Box
                                         key={item.id}
-                                        onClick={() => navigate(`/news/${item.id}`)}
-                                        sx={{ cursor: 'pointer', '&:hover img': { transform: 'scale(1.05)' } }}
+                                        sx={{
+                                            width: { xs: '100%', sm: 'calc(50% - 16px)', md: 'calc(33.333% - 22px)' },
+                                            display: 'flex'
+                                        }}
                                     >
-                                        <Box sx={{ width: '100%', height: 150, borderRadius: '20px', overflow: 'hidden', mb: 2 }}>
-                                            <Box
-                                                component="img"
-                                                src={getFullImagePath(item.photoPath)}
-                                                sx={{ width: '100%', height: '100%', objectFit: 'cover', transition: '0.4s' }}
-                                            />
-                                        </Box>
-                                        <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.3, mb: 1 }}>
-                                            {item.title}
-                                        </Typography>
-                                        <Typography variant="caption" color="text.secondary">
-                                            {new Date(item.publishDate).toLocaleDateString()}
-                                        </Typography>
+                                        <Paper
+                                            elevation={0}
+                                            onClick={() => navigate(`/news/${item.id}`)}
+                                            sx={{
+                                                cursor: 'pointer',
+                                                bgcolor: '#f9f9f9',
+                                                p: 2.5,
+                                                borderRadius: '24px',
+                                                width: '100%',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                transition: '0.3s',
+                                                '&:hover': {
+                                                    boxShadow: '0 10px 25px rgba(0,0,0,0.05)',
+                                                    '& img': { transform: 'scale(1.03)' }
+                                                }
+                                            }}
+                                        >
+                                            <Box sx={{ width: '100%', height: 180, borderRadius: '16px', overflow: 'hidden', mb: 2 }}>
+                                                <Box
+                                                    component="img"
+                                                    src={getFullImagePath(item.photoPath)}
+                                                    sx={{ width: '100%', height: '100%', objectFit: 'cover', transition: '0.4s' }}
+                                                />
+                                            </Box>
+                                            <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.3, mb: 1, fontSize: '1.1rem' }}>
+                                                {item.title}
+                                            </Typography>
+                                            <Typography variant="caption" color="text.secondary" sx={{ mt: 'auto' }}>
+                                                {new Date(item.publishDate).toLocaleDateString()}
+                                            </Typography>
+                                        </Paper>
                                     </Box>
                                 ))}
-                            </Stack>
-                        </Paper>
-                    </Grid>
-                </Grid>
+                            </Box>
+                        </Box>
+                    )}
+                </Box>
             </Container>
         </Box>
     );
