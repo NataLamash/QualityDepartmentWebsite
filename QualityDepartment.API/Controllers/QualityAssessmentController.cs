@@ -17,14 +17,14 @@ namespace QualityDepartment.API.Controllers
         }
 
         [HttpGet("internal")]
-        public async Task<ActionResult<ApiResponse<PagedResultDto<DocumentListItemDto>>>> GetInternal([FromQuery] DocumentParams docParams)
+        public async Task<ActionResult<ApiResponse<PagedResultDto<DocumentListItemDto>>>> GetInternal([FromQuery] BaseDocumentParams docParams)
         {
             var result = await _documentService.GetDocumentsByCategoryNameAsync("Внутрішнє оцінювання якості", docParams);
             return Ok(ApiResponse<PagedResultDto<DocumentListItemDto>>.SuccessResponse(result));
         }
 
         [HttpGet("external")]
-        public async Task<ActionResult<ApiResponse<PagedResultDto<DocumentListItemDto>>>> GetExternal([FromQuery] DocumentParams docParams)
+        public async Task<ActionResult<ApiResponse<PagedResultDto<DocumentListItemDto>>>> GetExternal([FromQuery] BaseDocumentParams docParams)
         {
             var result = await _documentService.GetDocumentsByCategoryNameAsync("Зовнішнє оцінювання якості", docParams);
             return Ok(ApiResponse<PagedResultDto<DocumentListItemDto>>.SuccessResponse(result));

@@ -43,7 +43,7 @@ namespace QualityDepartment.Infrastructure.Services
             return await ExecutePagedQueryAsync(query, p);
         }
 
-        public async Task<PagedResultDto<DocumentListItemDto>> GetDocumentsByCategoryNameAsync(string categoryNameUa, DocumentParams p)
+        public async Task<PagedResultDto<DocumentListItemDto>> GetDocumentsByCategoryNameAsync(string categoryNameUa, BaseDocumentParams p)
         {
             var nowUtc = DateTime.UtcNow;
 
@@ -56,7 +56,7 @@ namespace QualityDepartment.Infrastructure.Services
             return await ExecutePagedQueryAsync(query, p);
         }
 
-        private async Task<PagedResultDto<DocumentListItemDto>> ExecutePagedQueryAsync(IQueryable<Document> query, DocumentParams p)
+        private async Task<PagedResultDto<DocumentListItemDto>> ExecutePagedQueryAsync(IQueryable<Document> query, BaseDocumentParams p)
         {
             if (!string.IsNullOrWhiteSpace(p.Search))
             {
@@ -71,9 +71,9 @@ namespace QualityDepartment.Infrastructure.Services
                 );
             }
 
-            if (p.CategoryIds != null && p.CategoryIds.Any())
+            if (p is DocumentParams docParams && docParams.CategoryIds != null && docParams.CategoryIds.Any())
             {
-                query = query.Where(x => p.CategoryIds.Contains(x.CategoryId));
+                query = query.Where(x => docParams.CategoryIds.Contains(x.CategoryId));
             }
 
             query = p.Sort switch
@@ -247,7 +247,7 @@ namespace QualityDepartment.Infrastructure.Services
             var doc = _mapper.Map<Document>(dto);
             doc.CreatedAt = DateTime.UtcNow;
             doc.CreatorId = userId;
-            doc.ExternalType = false;
+            //doc.ExternalType = false;
             doc.FilePath = await _fileService.SaveFileAsync(dto.File, saveFolder);
 
             _context.Documents.Add(doc);
