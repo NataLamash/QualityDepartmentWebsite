@@ -147,6 +147,21 @@ const agent = {
         details: (id: number, lang: string) =>
             requests.get<NewsItem>(`/news/${id}?lang=${lang}`),
     },
+    Events: {
+        listPaged: (
+            page: number,
+            pageSize: number,
+            lang: string,
+            sortOrder: string,
+            search?: string,
+            date?: string
+        ) => {
+            let url = `/events?page=${page}&pageSize=${pageSize}&lang=${lang}&sortOrder=${sortOrder}`;
+            if (search) url += `&search=${encodeURIComponent(search)}`;
+            if (date) url += `&date=${date}`;
+            return requests.get<PagedResponse<NewsItem>>(url);
+        },
+    },
     Documents: {
         list: (params: DocumentListParams) =>
             requests.get<DocumentsListResponse>('/documents', { params }),
