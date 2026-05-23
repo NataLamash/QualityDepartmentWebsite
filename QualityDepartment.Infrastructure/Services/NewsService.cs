@@ -148,18 +148,33 @@ namespace QualityDepartment.Infrastructure.Services
             return _mapper.Map<NewsAdminDetailsDto>(entity);
         }
 
-        public async Task<PagedResultDto<NewsAdminDto>> GetAdminNewsAsync(
-            int page = 1,
-            int pageSize = 10,
-            string? search = null,
-            List<int>? tagIds = null)
+        public async Task<PagedResultDto<NewsAdminDto>> GetAdminNewsAsync(int page = 1, int pageSize = 10, string? search = null)
+        {
+            IQueryable<New> query = _context.News
+                .AsNoTracking()
+                .Include(n => n.Creator)
+                .Include(n => n.Tags)
+                .Where(x => !x.Tags.Any(t => t.NameUa == "Заходи"));
+
+            return await ExecuteAdminPagedNewsQueryAsync(query, page, pageSize, search);
+        }
+
+        public async Task<PagedResultDto<NewsAdminDto>> GetAdminEventsAsync(int page = 1, int pageSize = 10, string? search = null)
+        {
+            IQueryable<New> query = _context.News
+                .AsNoTracking()
+                .Include(n => n.Creator)
+                .Include(n => n.Tags)
+                .Where(x => x.Tags.Any(t => t.NameUa == "Заходи"));
+
+            return await ExecuteAdminPagedNewsQueryAsync(query, page, pageSize, search);
+        }
+
+        private async Task<PagedResultDto<NewsAdminDto>> ExecuteAdminPagedNewsQueryAsync(IQueryable<New> query, int page, int pageSize, string? search)
         {
             if (page < 1) page = 1;
             if (pageSize < 1) pageSize = 10;
             if (pageSize > 100) pageSize = 100;
-            IQueryable<New> query = _context.News
-                .AsNoTracking()
-                .Include(n => n.Creator);
 
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -172,18 +187,10 @@ namespace QualityDepartment.Infrastructure.Services
                     x.Tags.Any(t => EF.Functions.Like(t.NameUa, $"%{s}%") || EF.Functions.Like(t.NameEn, $"%{s}%")));
             }
 
-            if (tagIds != null && tagIds.Any())
-            {
-                query = query.Where(x => x.Tags.Any(t => tagIds.Contains(t.Id)));
-            }
-
             query = query.OrderByDescending(x => x.PublishDate);
 
             var totalCount = await query.CountAsync();
-            var newsList = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+            var newsList = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
 
             return new PagedResultDto<NewsAdminDto>
             {

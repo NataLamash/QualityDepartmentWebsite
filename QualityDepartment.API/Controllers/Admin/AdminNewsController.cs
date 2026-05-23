@@ -37,6 +37,16 @@ namespace QualityDepartment.API.Controllers.Admin
             return Ok(ApiResponse<PagedResultDto<NewsAdminDto>>.SuccessResponse(result));
         }
 
+        [HttpGet("events")]
+        public async Task<ActionResult<ApiResponse<PagedResultDto<NewsAdminDto>>>> GetAllEvents(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? search = null)
+        {
+            var result = await _newsService.GetAdminEventsAsync(page, pageSize, search);
+            return Ok(ApiResponse<PagedResultDto<NewsAdminDto>>.SuccessResponse(result));
+        }
+
         [HttpPost]
         public async Task<ActionResult<ApiResponse<NewsAdminDto>>> Create([FromForm] NewsCreateDto dto)
         {
