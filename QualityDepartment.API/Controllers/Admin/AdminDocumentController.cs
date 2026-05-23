@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 namespace QualityDepartment.API.Controllers.Admin
 {
-    //[Authorize(Policy = "AdminOnly")]
+    [Authorize(Policy = "AdminOnly")]
     [ApiController]
     [Route("api/admin/documents")]
     public class AdminDocumentController : ControllerBase
@@ -41,8 +41,7 @@ namespace QualityDepartment.API.Controllers.Admin
         [HttpPost]
         public async Task<ActionResult<ApiResponse<DocumentAdminDto>>> Create([FromForm] DocumentCreateDto dto)
         {
-            //var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var userId = 1;
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             var (result, errorCode) = await _docService.CreateAsync(dto, userId);
 
             if (errorCode != null) return BadRequest(ApiResponse<DocumentAdminDto>.FailureResponse(new List<string> { errorCode }));
@@ -52,8 +51,7 @@ namespace QualityDepartment.API.Controllers.Admin
         [HttpPut("{id:int}")]
         public async Task<ActionResult<ApiResponse<DocumentAdminDto>>> Update(int id, [FromForm] DocumentUpdateDto dto)
         {
-            //var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var userId = 1;
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             var (result, success, errorCode) = await _docService.UpdateAsync(id, dto, userId);
 
             if (errorCode != null) return BadRequest(ApiResponse<DocumentAdminDto>.FailureResponse(new List<string> { errorCode }));
