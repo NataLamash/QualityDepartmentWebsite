@@ -36,8 +36,28 @@ namespace QualityDepartment.Infrastructure.Services
                 .Include(d => d.Category)
                 .AsNoTracking()
                 .AsQueryable()
-                .Where(d => d.PublishDate <= nowUtc); 
+                .Where(d => d.PublishDate <= nowUtc &&
+                            d.Category.NameUa != "Внутрішнє оцінювання якості" &&
+                            d.Category.NameUa != "Зовнішнє оцінювання якості");
 
+            return await ExecutePagedQueryAsync(query, p);
+        }
+
+        public async Task<PagedResultDto<DocumentListItemDto>> GetDocumentsByCategoryNameAsync(string categoryNameUa, DocumentParams p)
+        {
+            var nowUtc = DateTime.UtcNow;
+
+            var query = _context.Documents
+                .Include(d => d.Category)
+                .AsNoTracking()
+                .AsQueryable()
+                .Where(d => d.PublishDate <= nowUtc && d.Category.NameUa == categoryNameUa);
+
+            return await ExecutePagedQueryAsync(query, p);
+        }
+
+        private async Task<PagedResultDto<DocumentListItemDto>> ExecutePagedQueryAsync(IQueryable<Document> query, DocumentParams p)
+        {
             if (!string.IsNullOrWhiteSpace(p.Search))
             {
                 var s = p.Search.Trim();
@@ -166,6 +186,7 @@ namespace QualityDepartment.Infrastructure.Services
         {
             return await _context.DocumentCategories
                 .AsNoTracking()
+                .Where(c => c.NameUa != "Внутрішнє оцінювання якості" && c.NameUa != "Зовнішнє оцінювання якості")
                 .Select(c => new LookupDto { Id = c.Id, Name = lang == "en" ? c.NameEn : c.NameUa })
                 .ToListAsync();
         }
