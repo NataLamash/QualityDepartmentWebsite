@@ -170,7 +170,7 @@ namespace QualityDepartment.Infrastructure.Services
         public async Task<(Stream stream, string contentType, string fileName)?> GetDocumentPreviewAsync(int id)
         {
             var doc = await _context.Documents.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
-            if (doc == null || doc.ExternalType) return null;
+            if (doc == null) return null;
 
             var ext = Path.GetExtension(doc.FilePath).ToLowerInvariant();
             if (!(new[] { ".pdf", ".jpg", ".jpeg", ".png" }).Contains(ext)) return null;

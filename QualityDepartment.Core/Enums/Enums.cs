@@ -1,4 +1,6 @@
-﻿namespace QualityDepartment.Core.Enums;
+﻿using System.Text.Json.Serialization;
+
+namespace QualityDepartment.Core.Enums;
 
 public enum QuestionType
 {
@@ -13,9 +15,13 @@ public enum FeedbackStatus
     Resolved = 3
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum SearchEntityType
 {
     News = 1,
-    Document = 2,
-    ExternalLink = 3
+    Event = 2,
+    Document = 3,
+    InternalAssessment = 4,
+    ExternalAssessment = 5,
+    ExternalLink = 6
 }
