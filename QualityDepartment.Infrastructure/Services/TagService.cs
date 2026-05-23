@@ -24,8 +24,9 @@ namespace QualityDepartment.Infrastructure.Services
         public async Task<List<TagDto>> GetTagsAsync(string lang = "ua")
         {
             var tags = await _context.Tags
-            .AsNoTracking()
-            .ToListAsync();
+                .AsNoTracking()
+                .Where(t => t.NameUa != "Заходи")
+                .ToListAsync();
 
             return _mapper.Map<List<TagDto>>(tags, opt => opt.Items["lang"] = lang);
         }
@@ -39,8 +40,20 @@ namespace QualityDepartment.Infrastructure.Services
         }
         public async Task<List<AdminTagDto>> GetAllAdminAsync()
         {
-            var tags = await _context.Tags.AsNoTracking().ToListAsync();
+            var tags = await _context.Tags
+                .AsNoTracking()
+                .Where(t => t.NameUa != "Заходи")
+                .ToListAsync();
+
             return _mapper.Map<List<AdminTagDto>>(tags);
+        }
+
+        public async Task<int?> GetTagIdByNameAsync(string nameUa)
+        {
+            var tag = await _context.Tags
+                .AsNoTracking()
+                .FirstOrDefaultAsync(t => t.NameUa == nameUa);
+            return tag?.Id;
         }
 
         public async Task<(AdminTagDto? Result, string? ErrorCode)> CreateAsync(TagCreateUpdateDto dto)
@@ -59,9 +72,10 @@ namespace QualityDepartment.Infrastructure.Services
             var tag = await _context.Tags.FindAsync(id);
             if (tag == null) return (false, "TAG_NOT_FOUND");
 
-            if(await _context.Tags
-                .AnyAsync(c => c.NameUa == dto.NameUa
-                && c.Id != id))
+            if (tag.NameUa == "Заходи")
+                return (false, "SYSTEM_TAG_CANNOT_BE_MODIFIED");
+
+            if (await _context.Tags.AnyAsync(c => c.NameUa == dto.NameUa && c.Id != id))
                 return (false, "TAG_ALREADY_EXISTS");
 
             _mapper.Map(dto, tag);
@@ -69,13 +83,17 @@ namespace QualityDepartment.Infrastructure.Services
             return (true, null);
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<(bool success, string? errorCode)> DeleteAsync(int id)
         {
             var tag = await _context.Tags.FindAsync(id);
-            if (tag == null) return false;
+            if (tag == null) return (false, "TAG_NOT_FOUND");
+
+            if (tag.NameUa == "Заходи")
+                return (false, "SYSTEM_TAG_CANNOT_BE_MODIFIED");
 
             _context.Tags.Remove(tag);
-            return await _context.SaveChangesAsync() > 0;
+            await _context.SaveChangesAsync();
+            return (true, null);
         }
     }
 }

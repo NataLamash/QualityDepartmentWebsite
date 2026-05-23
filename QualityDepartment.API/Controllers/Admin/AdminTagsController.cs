@@ -62,11 +62,11 @@ namespace QualityDepartment.API.Controllers.Admin
         [HttpDelete("{id}")]
         public async Task<ActionResult<ApiResponse<bool>>> Delete(int id)
         {
-            var success = await _tagService.DeleteAsync(id);
+            var (success, errorCode) = await _tagService.DeleteAsync(id);
 
             if (!success)
             {
-                return NotFound(ApiResponse<bool>.FailureResponse(new List<string> { "TAG_NOT_FOUND" }));
+                return BadRequest(ApiResponse<bool>.FailureResponse(new List<string> { errorCode ?? "DELETE_FAILED" }));
             }
 
             return Ok(ApiResponse<bool>.SuccessResponse(true, "TAG_DELETED_SUCCESS"));
