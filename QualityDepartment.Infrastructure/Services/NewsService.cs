@@ -28,23 +28,37 @@ namespace QualityDepartment.Infrastructure.Services
         }
 
         public async Task<PagedResultDto<NewsListItemDto>> GetNewsAsync(
-            int page = 1,
-            int pageSize = 10,
-            string sortOrder = "desc",
-            string? status = "published",
-            string lang = "ua",
-            string? search = null,
-            string? date = null,
-            List<int>? tagIds = null)
+                    int page, int pageSize, string sortOrder, string? status, string lang,
+                    string? search, string? date, List<int>? tagIds)
+        {
+            IQueryable<New> query = _context.News
+                .Include(x => x.Tags)
+                .AsNoTracking()
+                .Where(x => !x.Tags.Any(t => t.NameUa == "Заходи"));
+
+            return await ExecutePagedNewsQueryAsync(query, page, pageSize, sortOrder, status, lang, search, date, tagIds);
+        }
+        public async Task<PagedResultDto<NewsListItemDto>> GetEventsAsync(
+            int page, int pageSize, string sortOrder, string? status, string lang,
+            string? search, string? date)
+        {
+            IQueryable<New> query = _context.News
+                .Include(x => x.Tags)
+                .AsNoTracking()
+                .Where(x => x.Tags.Any(t => t.NameUa == "Заходи"));
+
+            return await ExecutePagedNewsQueryAsync(query, page, pageSize, sortOrder, status, lang, search, date, null);
+        }
+
+        private async Task<PagedResultDto<NewsListItemDto>> ExecutePagedNewsQueryAsync(
+            IQueryable<New> query, int page, int pageSize, string sortOrder, string? status, string lang,
+            string? search, string? date, List<int>? tagIds)
         {
             if (page < 1) page = 1;
             if (pageSize < 1) pageSize = 10;
             if (pageSize > 100) pageSize = 100;
 
-            IQueryable<QualityDepartment.Core.Entities.New> query = _context.News.AsNoTracking();
-
-            if (!string.IsNullOrWhiteSpace(status) &&
-                status.Equals("published", StringComparison.OrdinalIgnoreCase))
+            if (!string.IsNullOrWhiteSpace(status) && status.Equals("published", StringComparison.OrdinalIgnoreCase))
             {
                 query = query.Where(x => x.PublishDate <= DateTime.UtcNow);
             }
@@ -53,9 +67,9 @@ namespace QualityDepartment.Infrastructure.Services
             {
                 var s = search.Trim();
                 query = query.Where(x =>
-                    EF.Functions.Like(x.TitleUa, $"%{s}%") || 
+                    EF.Functions.Like(x.TitleUa, $"%{s}%") ||
                     EF.Functions.Like(x.FullTextUa, $"%{s}%") ||
-                    EF.Functions.Like(x.TitleEn, $"%{s}%") || 
+                    EF.Functions.Like(x.TitleEn, $"%{s}%") ||
                     EF.Functions.Like(x.FullTextEn, $"%{s}%") ||
                     x.Tags.Any(t => EF.Functions.Like(t.NameUa, $"%{s}%") || EF.Functions.Like(t.NameEn, $"%{s}%")));
             }
@@ -70,18 +84,13 @@ namespace QualityDepartment.Infrastructure.Services
                 if (date.Contains(":"))
                 {
                     var dates = date.Split(':');
-
                     if (DateTime.TryParse(dates[0], out var startDate))
                     {
-                        DateTime endDate;
-                        if (dates.Length < 2 || string.IsNullOrWhiteSpace(dates[1]) || !DateTime.TryParse(dates[1], out endDate))
-                        {
-                            endDate = startDate;
-                        }
+                        DateTime endDate = (dates.Length < 2 || string.IsNullOrWhiteSpace(dates[1]) || !DateTime.TryParse(dates[1], out var parsedEnd))
+                            ? startDate : parsedEnd;
 
                         var startOfDay = startDate.Date;
                         var endOfDay = endDate.Date.AddDays(1).AddTicks(-1);
-
                         query = query.Where(x => x.PublishDate >= startOfDay && x.PublishDate <= endOfDay);
                     }
                 }
@@ -96,15 +105,9 @@ namespace QualityDepartment.Infrastructure.Services
                 : query.OrderByDescending(x => x.PublishDate);
 
             var totalCount = await query.CountAsync();
+            var newsList = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
 
-            var newsList = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            var items = _mapper.Map<List<NewsListItemDto>>(
-                newsList,
-                opt => opt.Items["lang"] = lang);
+            var items = _mapper.Map<List<NewsListItemDto>>(newsList, opt => opt.Items["lang"] = lang);
 
             return new PagedResultDto<NewsListItemDto>
             {
@@ -116,18 +119,18 @@ namespace QualityDepartment.Infrastructure.Services
             };
         }
 
+
         public async Task<NewsDetailsDto?> GetNewsByIdAsync(int id, string lang = "ua")
         {
             var entity = await _context.News
+                .Include(x => x.Tags)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == id && x.PublishDate <= DateTime.UtcNow);
 
             if (entity == null)
                 return null;
 
-            return _mapper.Map<NewsDetailsDto>(
-                entity,
-                opt => opt.Items["lang"] = lang);
+            return _mapper.Map<NewsDetailsDto>(entity, opt => opt.Items["lang"] = lang);
         }
 
         public async Task<NewsAdminDetailsDto?> GetAdminByIdAsync(int id)
