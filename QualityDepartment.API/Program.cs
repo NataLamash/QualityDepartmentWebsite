@@ -44,6 +44,7 @@ builder.Services.AddControllers()
     {
         options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
         options.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
+        options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver();
     });
 
 builder.Services.AddEndpointsApiExplorer();
@@ -51,6 +52,7 @@ builder.Services.AddEndpointsApiExplorer();
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseMiddleware<CustomAuthMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
