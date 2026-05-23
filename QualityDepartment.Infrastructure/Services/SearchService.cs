@@ -49,10 +49,13 @@ namespace QualityDepartment.Infrastructure.Services
                 .Select(n => new GlobalSearchResultDto
                 {
                     Id = n.Id,
-                    Type = SearchEntityType.News,
+                    Type = n.Tags
+                        .Any(t => t.NameUa == "Заходи") ? 
+                            SearchEntityType.Event : 
+                            SearchEntityType.News,
                     Title = lang == "en" ? n.TitleEn : n.TitleUa,
                     ShortDescription = lang == "en" ? n.FullTextEn : n.FullTextUa,
-                    Link = $"/news/{n.Id}",
+                    Link =  $"/news/{n.Id}",
                     PublishDate = n.PublishDate
                 }).Take(15).ToListAsync();
 
@@ -70,7 +73,9 @@ namespace QualityDepartment.Infrastructure.Services
                 .Select(d => new GlobalSearchResultDto
                 {
                     Id = d.Id,
-                    Type = SearchEntityType.Document,
+                    Type = d.Category.NameUa == "Внутрішнє оцінювання якості" ? SearchEntityType.InternalAssessment :
+                           d.Category.NameUa == "Зовнішнє оцінювання якості" ? SearchEntityType.ExternalAssessment :
+                           SearchEntityType.Document,
                     Title = lang == "en" ? d.NameEn : d.NameUa,
                     ShortDescription = lang == "en" ? d.DescriptionEn : d.DescriptionUa,
                     Link = $"/documents/{d.Id}/preview",

@@ -1,19 +1,18 @@
 ﻿using QualityDepartment.Core.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace QualityDepartment.Core.DTOs.Admin.Search
 {
     public class GlobalSearchResultDto
     {
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(StringEnumConverter))]
         public SearchEntityType Type { get; set; }
         public int Id { get; set; }
         public string Title { get; set; } = null!;
         public string? ShortDescription { get; set; }
         public string Link { get; set; } = null!;
+        [JsonIgnore]
         public DateTime PublishDate { get; set; }
     }
 }
