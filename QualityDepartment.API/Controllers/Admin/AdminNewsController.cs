@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 namespace QualityDepartment.API.Controllers.Admin
 {
-    //[Authorize(Policy = "AdminOnly")]
+    [Authorize(Policy = "AdminOnly")]
     [ApiController]
     [Route("api/admin/news")]
     public class AdminNewsController : ControllerBase
@@ -40,8 +40,7 @@ namespace QualityDepartment.API.Controllers.Admin
         [HttpPost]
         public async Task<ActionResult<ApiResponse<NewsAdminDto>>> Create([FromForm] NewsCreateDto dto)
         {
-            //var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var userId = 1;
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             var (result, errorCode) = await _newsService.CreateAsync(dto, userId);
 
             if (errorCode != null)
@@ -53,8 +52,7 @@ namespace QualityDepartment.API.Controllers.Admin
         [HttpPut("{id:int}")]
         public async Task<ActionResult<ApiResponse<string>>> Update(int id, [FromForm] NewsUpdateDto dto)
         {
-            //var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var userId = 1;
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             var (result, success, errorCode) = await _newsService.UpdateAsync(id, dto, userId);
 
             if (errorCode  != null)

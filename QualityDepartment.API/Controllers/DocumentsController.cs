@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using QualityDepartment.Core.DTOs.Common;
 using QualityDepartment.Core.DTOs.Documents;
-using QualityDepartment.Infrastructure.Services; 
+using QualityDepartment.Infrastructure.Services;
 
 namespace QualityDepartment.API.Controllers
 {
@@ -20,12 +20,7 @@ namespace QualityDepartment.API.Controllers
         public async Task<ActionResult<ApiResponse<PagedResultDto<DocumentListItemDto>>>> GetDocuments([FromQuery] DocumentParams docParams)
         {
             var result = await _documentService.GetDocumentsAsync(docParams);
-
-            return Ok(new ApiResponse<PagedResultDto<DocumentListItemDto>>
-            {
-                Success = true,
-                Data = result
-            });
+            return Ok(ApiResponse<PagedResultDto<DocumentListItemDto>>.SuccessResponse(result));
         }
 
         [HttpGet("{id:int}")]
@@ -34,18 +29,9 @@ namespace QualityDepartment.API.Controllers
             var result = await _documentService.GetDocumentByIdAsync(id, lang);
 
             if (result == null)
-            {
-                return NotFound(ApiResponse<object>.FailureResponse(
-                    new List<string> { "Document with ID {id} does not exist." }, 
-                    "Документ не знайдено"
-                ));
-            }
+                return NotFound(ApiResponse<DocumentDetailsDto>.FailureResponse(new List<string> { "DOCUMENT_NOT_FOUND" }));
 
-            return Ok(new ApiResponse<DocumentDetailsDto>
-            {
-                Success = true,
-                Data = result
-            });
+            return Ok(ApiResponse<DocumentDetailsDto>.SuccessResponse(result));
         }
 
         [HttpGet("{id}/download")]
@@ -54,12 +40,7 @@ namespace QualityDepartment.API.Controllers
             var fileResult = await _documentService.DownloadDocumentAsync(id);
 
             if (fileResult == null)
-            {
-                return NotFound(ApiResponse<object>.FailureResponse(
-                    new List<string> { $"File with ID {id} not found." },
-                    "Файл не знайдено"
-                ));
-            }
+                return NotFound(ApiResponse<object>.FailureResponse(new List<string> { "FILE_NOT_FOUND" }));
 
             return File(fileResult.Value.stream, fileResult.Value.contentType, fileResult.Value.fileName);
         }
@@ -70,14 +51,9 @@ namespace QualityDepartment.API.Controllers
             var fileResult = await _documentService.GetDocumentPreviewAsync(id);
 
             if (fileResult == null)
-            {
-                return BadRequest(ApiResponse<object>.FailureResponse(
-                    new List<string> { $"File with ID {id} not available for the preview or not found." },
-                    "Попередній перегляд недоступний для цього формату або файл не знайдено."
-                ));
-            }
+                return BadRequest(ApiResponse<object>.FailureResponse(new List<string> { "PREVIEW_UNAVAILABLE_OR_NOT_FOUND" }));
 
-            Response.Headers.Add("Content-Disposition", "inline; filename=\"" + fileResult.Value.fileName + "\"");
+            Response.Headers.Append("Content-Disposition", "inline; filename=\"" + fileResult.Value.fileName + "\"");
             return File(fileResult.Value.stream, fileResult.Value.contentType);
         }
 
@@ -85,8 +61,7 @@ namespace QualityDepartment.API.Controllers
         public async Task<ActionResult<ApiResponse<List<LookupDto>>>> GetCategories([FromQuery] string lang = "ua")
         {
             var categories = await _documentService.GetCategoriesLookupAsync(lang);
-            return Ok(new ApiResponse<List<LookupDto>> { Success = true, Data = categories });
+            return Ok(ApiResponse<List<LookupDto>>.SuccessResponse(categories));
         }
-
     }
 }

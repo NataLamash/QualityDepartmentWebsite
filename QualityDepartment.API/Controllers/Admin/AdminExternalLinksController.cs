@@ -9,7 +9,7 @@ namespace QualityDepartment.API.Controllers.Admin
 {
     [ApiController]
     [Route("api/admin/external-links")]
-    //[Authorize(Policy = "AdminOnly")]
+    [Authorize(Policy = "AdminOnly")]
     public class AdminExternalLinksController : ControllerBase
     {
         private readonly ExternalLinkService _linkService;
@@ -36,8 +36,7 @@ namespace QualityDepartment.API.Controllers.Admin
         [HttpPost]
         public async Task<ActionResult<ApiResponse<ExternalLinkAdminDetailsDto>>> Create([FromForm] ExternalLinkCreateDto dto)
         {
-            //var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
-            var userId = 1;
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
             var (result, errorCode) = await _linkService.CreateAsync(dto, userId);
 
             if (result == null) return BadRequest(ApiResponse<ExternalLinkAdminDetailsDto>.FailureResponse(new List<string> { errorCode! }));
@@ -47,8 +46,7 @@ namespace QualityDepartment.API.Controllers.Admin
         [HttpPut("{id}")]
         public async Task<ActionResult<ApiResponse<ExternalLinkAdminDetailsDto>>> Update(int id, [FromForm] ExternalLinkUpdateDto dto)
         {
-            //var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
-            var userId = 1;
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
             var (result, success, errorCode) = await _linkService.UpdateAsync(id, dto, userId);
 
             if (!success) return BadRequest(ApiResponse<ExternalLinkAdminDetailsDto>.FailureResponse(new List<string> { errorCode! }));

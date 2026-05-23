@@ -36,8 +36,28 @@ namespace QualityDepartment.Infrastructure.Services
                 .Include(d => d.Category)
                 .AsNoTracking()
                 .AsQueryable()
-                .Where(d => d.PublishDate <= nowUtc); 
+                .Where(d => d.PublishDate <= nowUtc &&
+                            d.Category.NameUa != "Внутрішнє оцінювання якості" &&
+                            d.Category.NameUa != "Зовнішнє оцінювання якості");
 
+            return await ExecutePagedQueryAsync(query, p);
+        }
+
+        public async Task<PagedResultDto<DocumentListItemDto>> GetDocumentsByCategoryNameAsync(string categoryNameUa, BaseDocumentParams p)
+        {
+            var nowUtc = DateTime.UtcNow;
+
+            var query = _context.Documents
+                .Include(d => d.Category)
+                .AsNoTracking()
+                .AsQueryable()
+                .Where(d => d.PublishDate <= nowUtc && d.Category.NameUa == categoryNameUa);
+
+            return await ExecutePagedQueryAsync(query, p);
+        }
+
+        private async Task<PagedResultDto<DocumentListItemDto>> ExecutePagedQueryAsync(IQueryable<Document> query, BaseDocumentParams p)
+        {
             if (!string.IsNullOrWhiteSpace(p.Search))
             {
                 var s = p.Search.Trim();
@@ -51,9 +71,9 @@ namespace QualityDepartment.Infrastructure.Services
                 );
             }
 
-            if (p.CategoryIds != null && p.CategoryIds.Any())
+            if (p is DocumentParams docParams && docParams.CategoryIds != null && docParams.CategoryIds.Any())
             {
-                query = query.Where(x => p.CategoryIds.Contains(x.CategoryId));
+                query = query.Where(x => docParams.CategoryIds.Contains(x.CategoryId));
             }
 
             query = p.Sort switch
@@ -166,6 +186,7 @@ namespace QualityDepartment.Infrastructure.Services
         {
             return await _context.DocumentCategories
                 .AsNoTracking()
+                .Where(c => c.NameUa != "Внутрішнє оцінювання якості" && c.NameUa != "Зовнішнє оцінювання якості")
                 .Select(c => new LookupDto { Id = c.Id, Name = lang == "en" ? c.NameEn : c.NameUa })
                 .ToListAsync();
         }
@@ -226,7 +247,7 @@ namespace QualityDepartment.Infrastructure.Services
             var doc = _mapper.Map<Document>(dto);
             doc.CreatedAt = DateTime.UtcNow;
             doc.CreatorId = userId;
-            doc.ExternalType = false;
+            //doc.ExternalType = false;
             doc.FilePath = await _fileService.SaveFileAsync(dto.File, saveFolder);
 
             _context.Documents.Add(doc);
