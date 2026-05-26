@@ -31,9 +31,10 @@ export default function DocumentPage({ isQualityPage = false }: DocumentPageProp
     const [searchParams] = useSearchParams();
 
     const text = {
+
         title: isQualityPage
             ? (lang === 'en' ? 'Quality Evaluation' : 'Оцінювання якості')
-            : (lang === 'en' ? 'Archive' : 'Архів'),
+            : (lang === 'en' ? 'Documents' : 'Документи'),
         filters: lang === 'en' ? 'Filters' : 'Фільтри',
         category: lang === 'en' ? 'Category' : 'Категорія',
         date: lang === 'en' ? 'Choose date' : 'Оберіть дату',

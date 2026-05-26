@@ -50,7 +50,7 @@ export default function AdminHeader() {
             >
                 <Box>
                     <Typography sx={{ color: '#777', fontSize: '0.85rem', mb: 0.5 }}>
-                        Quality Department / Admin
+                        Відділ якості / Адмін-панель
                     </Typography>
                     <Typography variant="h5" sx={{ color: '#1a1a1a' }}>
                         {currentTitle}
@@ -69,7 +69,7 @@ export default function AdminHeader() {
                             fontSize: '0.9rem',
                         }}
                     >
-                        {user?.username || 'Admin'}
+                        {user?.username || 'Адміністратор'}
                     </Box>
 
                     <Button
@@ -86,7 +86,7 @@ export default function AdminHeader() {
                             },
                         }}
                     >
-                        Logout
+                        Вийти
                     </Button>
                 </Box>
             </Box>

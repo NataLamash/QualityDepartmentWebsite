@@ -130,7 +130,7 @@ export default function DocumentsAdminPage() {
             </TableContainer>
 
             <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
-                <DialogTitle sx={{ fontWeight: 800 }}>
+                <DialogTitle sx={{ fontWeight: 800, color: '#BA0000' }}>
                     {selectedDoc ? 'Редагування документа' : 'Додавання документа'}
                 </DialogTitle>
                 <DialogContent>

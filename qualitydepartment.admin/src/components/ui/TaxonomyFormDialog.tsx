@@ -51,7 +51,7 @@ export default function TaxonomyFormDialog({
 
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-            <DialogTitle>{title}</DialogTitle>
+            <DialogTitle sx={{ fontWeight: 800, color: '#BA0000' }}>{title}</DialogTitle>
 
             <Box
                 component="form"
@@ -62,7 +62,7 @@ export default function TaxonomyFormDialog({
                 }}
             >
                 <DialogContent>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1, color: '#BA0000' }}>
                         <TextField
                             name="nameUa"
                             label="Назва (UA)"

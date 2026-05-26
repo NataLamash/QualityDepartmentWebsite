@@ -56,14 +56,22 @@ const agent = {
     login: (body: LoginDto) =>
         requests.post<ApiResponse<AuthResponseDto>>('/admin/auth/login', body),
     },
-    News: {
-        list: (page = 1, pageSize = 50) =>
-            requests.get<any>(`/admin/news?pageNumber=${page}&pageSize=${pageSize}`),
-        details: (id: number) => requests.get<any>(`/admin/news/${id}`),
-        create: (news: FormData) => requests.post<void>('/admin/news', news),
-        update: (id: number, news: FormData) => requests.put<void>(`/admin/news/${id}`, news),
-        delete: (id: number) => requests.del<void>(`/admin/news/${id}`),
-    },
+   News: {
+    list: (page = 1, pageSize = 50, search = '') =>
+        requests.get<any>(
+            `/admin/news?page=${page}&pageSize=${pageSize}&search=${encodeURIComponent(search)}`
+        ),
+
+    eventsList: (page = 1, pageSize = 50, search = '') =>
+        requests.get<any>(
+            `/admin/news/events?page=${page}&pageSize=${pageSize}&search=${encodeURIComponent(search)}`
+        ),
+
+    details: (id: number) => requests.get<any>(`/admin/news/${id}`),
+    create: (news: FormData) => requests.post<void>('/admin/news', news),
+    update: (id: number, news: FormData) => requests.put<void>(`/admin/news/${id}`, news),
+    delete: (id: number) => requests.del<void>(`/admin/news/${id}`),
+},
 
     Documents: {
         list: (page = 1, pageSize = 10, search = '') =>
@@ -107,14 +115,17 @@ const agent = {
     },
 
     Tags: {
-        list: () => requests.get<ApiResponse<AdminTagDto[]>>('/admin/tags'),
-        details: (id: number) => requests.get<ApiResponse<AdminTagDto>>(`/admin/tags/${id}`),
-        create: (data: TagCreateUpdateDto) =>
-            requests.post<ApiResponse<AdminTagDto>>('/admin/tags', data),
-        update: (id: number, data: TagCreateUpdateDto) =>
-            requests.put<ApiResponse<boolean>>(`/admin/tags/${id}`, data),
-        delete: (id: number) =>
-            requests.del<ApiResponse<boolean>>(`/admin/tags/${id}`),
+    list: () => requests.get<ApiResponse<AdminTagDto[]>>('/admin/tags'),
+    details: (id: number) => requests.get<ApiResponse<AdminTagDto>>(`/admin/tags/${id}`),
+    create: (data: TagCreateUpdateDto) =>
+        requests.post<ApiResponse<AdminTagDto>>('/admin/tags', data),
+    update: (id: number, data: TagCreateUpdateDto) =>
+        requests.put<ApiResponse<boolean>>(`/admin/tags/${id}`, data),
+    delete: (id: number) =>
+        requests.del<ApiResponse<boolean>>(`/admin/tags/${id}`),
+
+    eventsTagId: () =>
+        requests.get<ApiResponse<number>>('/tags/events-id'),
     },
 };
 

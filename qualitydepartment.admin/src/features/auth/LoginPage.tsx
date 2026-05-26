@@ -95,7 +95,7 @@ export default function LoginPage() {
                 </Box>
 
                 <Typography variant="h4" sx={{ textAlign: 'center', mb: 1 }}>
-                    Admin Login
+                    Адмін-панель ВЗЯО
                 </Typography>
 
                 <Typography sx={{ textAlign: 'center', color: '#666', mb: 4 }}>

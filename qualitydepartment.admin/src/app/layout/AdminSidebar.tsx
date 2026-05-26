@@ -60,10 +60,10 @@ export default function AdminSidebar() {
                     />
                     <Box>
                         <Typography sx={{ fontWeight: 800, color: '#1a1a1a', lineHeight: 1.1 }}>
-                            Quality Admin
+                            Адмін-панель ВЗЯО
                         </Typography>
                         <Typography sx={{ fontSize: '0.85rem', color: '#777' }}>
-                            KNU panel
+                            КНУ
                         </Typography>
                     </Box>
                 </Box>

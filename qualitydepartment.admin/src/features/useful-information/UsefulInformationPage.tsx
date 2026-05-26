@@ -81,7 +81,7 @@ export default function UsefulInformationPage() {
     return (
         <Box sx={{ p: 4 }}>
             <Stack direction="row" sx={{ justifyContent: 'space-between', mb: 4, alignItems: 'center' }}>
-                <Typography variant="h4" sx={{ fontWeight: 800 }}>Оцінювання якості освіти</Typography>
+                <Typography variant="h4" sx={{ fontWeight: 800 }}>Корисні посилання</Typography>
                 <Button 
                     variant="contained" 
                     startIcon={<AddIcon />} 
@@ -174,7 +174,7 @@ export default function UsefulInformationPage() {
                 fullWidth
                 slotProps={{ paper: { sx: { borderRadius: '20px' } } }}
             >
-                <DialogTitle sx={{ fontWeight: 800 }}>
+                <DialogTitle sx={{ fontWeight: 800, color: '#BA0000' }}>
                     {selectedLink ? 'Редагування' : 'Створення'}
                 </DialogTitle>
                 <DialogContent>
