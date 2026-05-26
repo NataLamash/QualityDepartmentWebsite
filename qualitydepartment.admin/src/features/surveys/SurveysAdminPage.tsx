@@ -213,7 +213,7 @@ function SurveyFormDialog({
 
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
-            <DialogTitle>{title}</DialogTitle>
+            <DialogTitle sx={{ fontWeight: 800, color: '#BA0000' }}>{title}</DialogTitle>
 
             <Box key={formKey} component="form" onSubmit={(event) => void handleSubmit(event)}>
                 <DialogContent>

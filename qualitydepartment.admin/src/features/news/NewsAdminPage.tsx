@@ -113,15 +113,19 @@ export default function NewsAdminPage() {
             </TableContainer>
 
             <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
-                <DialogTitle sx={{ fontWeight: 800 }}>
+                <DialogTitle sx={{ fontWeight: 800, color: '#BA0000'}}>
                     {selectedNews ? 'Редагування новини' : 'Створення новини'}
                 </DialogTitle>
                 <DialogContent>
                     {/* КЛЮЧОВИЙ МОМЕНТ: Додано перевірку, щоб форма перерендерилася при зміні новини */}
-                    <NewsForm 
+                    <NewsForm
                         key={selectedNews?.id || 'new'}
-                        initialData={selectedNews} 
-                        onSuccess={() => { handleClose(); loadNews(); }} 
+                        initialData={selectedNews}
+                        mode="news"
+                        onSuccess={() => {
+                            handleClose();
+                            loadNews();
+                        }}
                     />
                 </DialogContent>
             </Dialog>

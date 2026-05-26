@@ -157,7 +157,7 @@ export default function AdministrationMembersPage() {
                 fullWidth
                 slotProps={{ paper: { sx: { borderRadius: '15px' } } }}
             >
-                <DialogTitle sx={{ fontWeight: 800 }}>
+                <DialogTitle sx={{ fontWeight: 800, color: '#BA0000' }}>
                     {selectedMember ? 'Редагування працівника' : 'Додати працівника'}
                 </DialogTitle>
                 <DialogContent>

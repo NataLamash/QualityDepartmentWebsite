@@ -18,35 +18,61 @@ import type { SelectChangeEvent } from '@mui/material/Select';
 import ImageIcon from '@mui/icons-material/Image';
 import agent, { type AdminTagDto } from '../../api/agent';
 
+type NewsFormMode = 'news' | 'events';
+
 interface NewsFormProps {
     initialData?: any;
     onSuccess: () => void;
+    mode?: NewsFormMode;
 }
 
-export default function NewsForm({ initialData, onSuccess }: NewsFormProps) {
+export default function NewsForm({
+    initialData,
+    onSuccess,
+    mode = 'news',
+}: NewsFormProps) {
     const [loading, setLoading] = useState(false);
     const [photo, setPhoto] = useState<File | null>(null);
 
     const [availableTags, setAvailableTags] = useState<AdminTagDto[]>([]);
     const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
     const [tagsLoading, setTagsLoading] = useState(true);
+    const [eventsTagId, setEventsTagId] = useState<number | null>(null);
 
     useEffect(() => {
         let active = true;
 
         const loadTags = async () => {
             try {
-                const response = await agent.Tags.list();
+                const [tagsResponse, eventTagResponse] = await Promise.all([
+                    agent.Tags.list(),
+                    agent.Tags.eventsTagId(),
+                ]);
+
                 if (!active) return;
 
-                setAvailableTags(response.data);
+                const eventId = eventTagResponse?.data ?? null;
+                setEventsTagId(eventId);
+
+                const allTags = tagsResponse.data || [];
+                const filteredTags =
+                    eventId == null
+                        ? allTags
+                        : allTags.filter((tag) => tag.id !== eventId);
+
+                setAvailableTags(filteredTags);
 
                 const initialIds =
                     initialData?.tagIds ??
                     initialData?.tags?.map((tag: { id: number }) => tag.id) ??
                     [];
 
-                setSelectedTagIds(initialIds);
+                const cleanedInitialIds =
+                    eventId == null
+                        ? initialIds
+                        : initialIds.filter((id: number) => id !== eventId);
+
+                setSelectedTagIds(cleanedInitialIds);
             } catch (error) {
                 console.error('Tags load error:', error);
             } finally {
@@ -65,9 +91,9 @@ export default function NewsForm({ initialData, onSuccess }: NewsFormProps) {
 
     const formatToLocal = (dateString?: string) => {
         if (!dateString) return '';
-        const normalizedDate = dateString.endsWith('Z') ? dateString : dateString + 'Z';
+        const normalizedDate = dateString.endsWith('Z') ? dateString : `${dateString}Z`;
         const date = new Date(normalizedDate);
-        if (isNaN(date.getTime())) return '';
+        if (Number.isNaN(date.getTime())) return '';
 
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -103,7 +129,19 @@ export default function NewsForm({ initialData, onSuccess }: NewsFormProps) {
         }
 
         formData.delete('TagIds');
-        selectedTagIds.forEach((id) => {
+
+        let finalTagIds: number[] = [];
+
+        if (mode === 'events') {
+            finalTagIds = eventsTagId ? [eventsTagId] : [];
+        } else {
+            finalTagIds = [...selectedTagIds];
+            if (eventsTagId) {
+                finalTagIds = finalTagIds.filter((id) => id !== eventsTagId);
+            }
+        }
+
+        finalTagIds.forEach((id) => {
             formData.append('TagIds', String(id));
         });
 
@@ -118,7 +156,7 @@ export default function NewsForm({ initialData, onSuccess }: NewsFormProps) {
         } catch (error: any) {
             console.error('News save error:', error);
             const serverError =
-                error.response?.data?.errors?.[0] || 'Помилка при збереженні новини.';
+                error.response?.data?.errors?.[0] || 'Помилка при збереженні запису.';
             alert(serverError);
         } finally {
             setLoading(false);
@@ -126,12 +164,12 @@ export default function NewsForm({ initialData, onSuccess }: NewsFormProps) {
     };
 
     return (
-        <form onSubmit={handleSubmit} key={initialData?.id || 'new-news-form'}>
+        <form onSubmit={handleSubmit} key={initialData?.id || `form-${mode}`}>
             <Stack spacing={2.5} sx={{ mt: 2 }}>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                     <TextField
                         name="TitleUa"
-                        label="Заголовок (UA)"
+                        label={mode === 'events' ? 'Назва заходу (UA)' : 'Заголовок (UA)'}
                         fullWidth
                         defaultValue={initialData?.titleUa || ''}
                         required
@@ -139,7 +177,7 @@ export default function NewsForm({ initialData, onSuccess }: NewsFormProps) {
                     />
                     <TextField
                         name="TitleEn"
-                        label="Title (EN)"
+                        label={mode === 'events' ? 'Назва заходу (EN)' : 'Title (EN)'}
                         fullWidth
                         defaultValue={initialData?.titleEn || ''}
                         required
@@ -161,40 +199,42 @@ export default function NewsForm({ initialData, onSuccess }: NewsFormProps) {
                     size="small"
                 />
 
-                <FormControl fullWidth size="small" disabled={tagsLoading}>
-                    <InputLabel id="news-tags-label">Теги</InputLabel>
-                    <Select
-                        labelId="news-tags-label"
-                        multiple
-                        value={selectedTagIds}
-                        onChange={handleTagsChange}
-                        input={<OutlinedInput label="Теги" />}
-                        renderValue={(selected) => (
-                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                {selected.map((id) => {
-                                    const tag = availableTags.find((item) => item.id === id);
-                                    return (
-                                        <Chip
-                                            key={id}
-                                            label={tag?.nameUa ?? id}
-                                            size="small"
-                                        />
-                                    );
-                                })}
-                            </Box>
-                        )}
-                    >
-                        {availableTags.map((tag) => (
-                            <MenuItem key={tag.id} value={tag.id}>
-                                {tag.nameUa}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
+                {mode === 'news' && (
+                    <FormControl fullWidth size="small" disabled={tagsLoading}>
+                        <InputLabel id="news-tags-label">Теги</InputLabel>
+                        <Select
+                            labelId="news-tags-label"
+                            multiple
+                            value={selectedTagIds}
+                            onChange={handleTagsChange}
+                            input={<OutlinedInput label="Теги" />}
+                            renderValue={(selected) => (
+                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                    {selected.map((id) => {
+                                        const tag = availableTags.find((item) => item.id === id);
+                                        return (
+                                            <Chip
+                                                key={id}
+                                                label={tag?.nameUa ?? id}
+                                                size="small"
+                                            />
+                                        );
+                                    })}
+                                </Box>
+                            )}
+                        >
+                            {availableTags.map((tag) => (
+                                <MenuItem key={tag.id} value={tag.id}>
+                                    {tag.nameUa}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                )}
 
                 <TextField
                     name="FullTextUa"
-                    label="Текст новини (UA)"
+                    label={mode === 'events' ? 'Опис заходу (UA)' : 'Текст новини (UA)'}
                     multiline
                     rows={4}
                     defaultValue={initialData?.fullTextUa || ''}
@@ -204,7 +244,7 @@ export default function NewsForm({ initialData, onSuccess }: NewsFormProps) {
 
                 <TextField
                     name="FullTextEn"
-                    label="News Text (EN)"
+                    label={mode === 'events' ? 'Опис заходу (EN)' : 'News text (EN)'}
                     multiline
                     rows={4}
                     defaultValue={initialData?.fullTextEn || ''}
@@ -280,6 +320,8 @@ export default function NewsForm({ initialData, onSuccess }: NewsFormProps) {
                         <CircularProgress size={24} color="inherit" />
                     ) : initialData ? (
                         'Зберегти зміни'
+                    ) : mode === 'events' ? (
+                        'Створити захід'
                     ) : (
                         'Опублікувати новину'
                     )}
