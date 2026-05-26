@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import agent from '../../../api/agent';
+import agent, { type BaseDocumentParams, type DocumentListParams } from '../../../api/agent';
 import { getDocumentPageText } from '../documentTexts';
 import {
     filterAndSortDocuments,
@@ -22,6 +22,7 @@ interface UseDocumentsParams {
     selectedCategory: string;
     selectedTag: string;
     sortMode: SortMode;
+    isQualityPage?: boolean; 
 }
 
 export const useDocuments = ({
@@ -30,6 +31,7 @@ export const useDocuments = ({
     selectedCategory,
     selectedTag,
     sortMode,
+    isQualityPage = false,
 }: UseDocumentsParams) => {
     const [documents, setDocuments] = useState<UiDocument[]>([]);
     const [categories, setCategories] = useState<UiCategory[]>([]);
@@ -46,27 +48,73 @@ export const useDocuments = ({
             setError('');
 
             try {
-                const [documentsResponse, categoriesResponse] = await Promise.all([
-                    agent.Documents.list(lang),
-                    agent.Documents.categories(lang),
-                ]);
+                if (isQualityPage) {
+                    
+                    setCategories([
+                        { id: 1, name: lang === 'en' ? 'Internal Quality Evaluation' : 'Внутрішнє оцінювання якості' },
+                        { id: 2, name: lang === 'en' ? 'External Quality Evaluation' : 'Зовнішнє оцінювання якості' }
+                    ]);
 
-                if (!isMounted) return;
+                    const queryParams: BaseDocumentParams = {
+                        lang,
+                        pageNumber: 1,
+                        pageSize: 100, 
+                    };
 
-                setDocuments(
-                    documentsResponse.items.map((item: ApiDocument) =>
-                        normalizeDocument(item, lang, text.withoutCategory)
-                    )
-                );
+                    const [internalRes, externalRes] = await Promise.all([
+                        agent.QualityAssessment.getInternal(queryParams),
+                        agent.QualityAssessment.getExternal(queryParams)
+                    ]);
 
-                setCategories(
-                    (categoriesResponse as ApiCategory[]).map((item) =>
+                    if (!isMounted) return;
+
+                    const internalDocs = (internalRes.items || []).map((item: ApiDocument) => ({
+                        ...normalizeDocument(item, lang, text.withoutCategory),
+                        categoryName: 'Внутрішнє оцінювання якості'
+                    }));
+
+                    const externalDocs = (externalRes.items || []).map((item: ApiDocument) => ({
+                        ...normalizeDocument(item, lang, text.withoutCategory),
+                        categoryName: 'Зовнішнє оцінювання якості'
+                    }));
+
+                    setDocuments([...internalDocs, ...externalDocs]);
+
+                } else {
+                    
+                    const categoriesResponse = await agent.Documents.categories(lang);
+
+                    if (!isMounted) return;
+
+                    const fetchedCategories = (categoriesResponse as ApiCategory[]).map((item) =>
                         normalizeCategory(item, lang)
-                    )
-                );
+                    );
+
+                    const filteredCategories = fetchedCategories.filter(
+                        (c) => c.name !== 'Внутрішнє оцінювання якості' && c.name !== 'Зовнішнє оцінювання якості' &&
+                            c.name !== 'Internal Quality Evaluation' && c.name !== 'External Quality Evaluation'
+                    );
+                    setCategories(filteredCategories);
+
+                    const documentParams: DocumentListParams = {
+                        lang,
+                        pageNumber: 1,
+                        pageSize: 100,
+                    };
+
+                    const documentsResponse = await agent.Documents.list(documentParams);
+
+                    if (!isMounted) return;
+
+                    const apiItems = documentsResponse.items || documentsResponse;
+                    setDocuments(
+                        apiItems.map((item: ApiDocument) =>
+                            normalizeDocument(item, lang, text.withoutCategory)
+                        )
+                    );
+                }
             } catch (err) {
                 console.error('Documents load error:', err);
-
                 if (isMounted) {
                     setError(text.error);
                 }
@@ -82,7 +130,7 @@ export const useDocuments = ({
         return () => {
             isMounted = false;
         };
-    }, [lang, text.error, text.withoutCategory]);
+    }, [lang, text.error, text.withoutCategory, isQualityPage]);
 
     const allTags = useMemo(() => getUniqueTags(documents, lang), [documents, lang]);
 

@@ -8,7 +8,7 @@ import agent, { type ExternalLink } from '../../api/agent';
 
 const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '');
 
-export default function QualityAssessmentPage() {
+export default function ExternalLinkPage() {
     const { i18n } = useTranslation();
     const [links, setLinks] = useState<ExternalLink[]>([]);
     const [loading, setLoading] = useState(true);

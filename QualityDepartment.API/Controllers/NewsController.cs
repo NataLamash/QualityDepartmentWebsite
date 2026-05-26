@@ -37,8 +37,7 @@ namespace QualityDepartment.API.Controllers
             var result = await _newsService.GetNewsByIdAsync(id, lang);
 
             if (result == null)
-                return NotFound(ApiResponse<object>.FailureResponse(
-                    new List<string> { "News not found" }, "Новину не знайдено"));
+                return NotFound(ApiResponse<NewsDetailsDto>.FailureResponse(new List<string> { "NEWS_NOT_FOUND" }));
 
             return Ok(ApiResponse<NewsDetailsDto>.SuccessResponse(result));
         }

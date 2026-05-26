@@ -4,6 +4,7 @@ using QualityDepartment.Core.DTOs.Admin.Documents;
 using QualityDepartment.Core.DTOs.Admin.ExternalLinks;
 using QualityDepartment.Core.DTOs.Admin.News;
 using QualityDepartment.Core.DTOs.Admin.TagsAndCategories;
+using QualityDepartment.Core.DTOs.Common;
 using QualityDepartment.Core.DTOs.Documents;
 using QualityDepartment.Core.DTOs.ExternalLinks;
 using QualityDepartment.Core.DTOs.Home;
@@ -27,7 +28,8 @@ namespace QualityDepartment.Core.Mappings
                 opt => opt.MapFrom((src, dest, destMember, context) =>
                     GetLocalizedValue(src.TitleUa, src.TitleEn, context)))
             .ForMember(dest => dest.PublishDate, opt => opt.MapFrom(src => src.PublishDate))
-            .ForMember(dest => dest.PhotoPath, opt => opt.MapFrom(src => src.PhotoPath));
+            .ForMember(dest => dest.PhotoPath, opt => opt.MapFrom(src => src.PhotoPath))
+            .ForMember(dest => dest.Tags, opt => opt.MapFrom(src => src.Tags));
 
             CreateMap<New, NewsDetailsDto>()
                 .ForMember(
@@ -42,7 +44,13 @@ namespace QualityDepartment.Core.Mappings
                 .ForMember(dest => dest.PhotoPath, opt => opt.MapFrom(src => src.PhotoPath))
                 .ForMember(
                     dest => dest.Language,
-                    opt => opt.MapFrom((src, dest, destMember, context) => GetLanguage(context)));
+                    opt => opt.MapFrom((src, dest, destMember, context) => GetLanguage(context)))
+                .ForMember(dest => dest.Tags, opt => opt.MapFrom(src => src.Tags));
+
+            CreateMap<Tag, LookupDto>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Name, opt => opt.MapFrom((src, dest, destMember, context) =>
+                    GetLocalizedValue(src.NameUa, src.NameEn, context)));
 
             CreateMap<New, HomeNewsCardDto>()
                 .ForMember(
