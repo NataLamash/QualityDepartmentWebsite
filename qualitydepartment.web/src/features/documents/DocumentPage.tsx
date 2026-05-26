@@ -25,7 +25,7 @@ export default function DocumentPage() {
     const lang = getLang(i18n.language);
 
     const text = {
-        title: lang === 'en' ? 'Archive' : 'Архів',
+        title: lang === 'en' ? 'Documents' : 'Документи',
         filters: lang === 'en' ? 'Filters' : 'Фільтри',
         category: lang === 'en' ? 'Category' : 'Категорія',
         date: lang === 'en' ? 'Choose date' : 'Оберіть дату',

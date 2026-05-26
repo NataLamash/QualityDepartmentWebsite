@@ -49,7 +49,7 @@ const handleSearchSubmit = () => {
     const menuItems = [
         { ua: 'Головна', en: 'Home', path: '/' },
         { ua: 'Новини', en: 'News', path: '/news' },
-        { ua: 'Архів', en: 'Archive', path: '/archive' },
+        { ua: 'Документи', en: 'Documents', path: '/archive' },
         { ua: 'Оцінювання якості освіти', en: 'Assessing the quality of education', path: '/info' },
         { ua: 'Опитування', en: 'Surveys', path: '/surveys' },
     ];

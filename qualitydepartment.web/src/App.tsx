@@ -9,6 +9,8 @@ import QualityAssessmentPage from './features/info/QualityAssessmentPage';
 import NewsDetailsPage from './features/news/NewsDetailsPage';
 import SearchPage from './features/search/SearchPage';
 import DocumentSearchPreviewPage from './features/search/DocumentSearchPreviewPage';
+import SurveysPage from './features/surveys/SurveysPage';
+import SurveyDetailsPage from './features/surveys/SurveyDetailsPage';
 
 function App() {
     return (
@@ -24,6 +26,8 @@ function App() {
                     <Route path="/search" element={<SearchPage />} />
                     <Route path="/documents/:id/preview" element={<DocumentSearchPreviewPage />} />
                     <Route path="/news/:id" element={<NewsDetailsPage />} />
+                    <Route path="/surveys" element={<SurveysPage />} />
+                    <Route path="/surveys/:id" element={<SurveyDetailsPage />} />
                 </Routes>
             </Box>
 

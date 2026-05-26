@@ -4,17 +4,19 @@ import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded';
 import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded';
 import InfoRoundedIcon from '@mui/icons-material/InfoRounded';
 import CategoryRoundedIcon from '@mui/icons-material/CategoryRounded';
+import SellRoundedIcon from '@mui/icons-material/SellRounded';
+import QuizRoundedIcon from '@mui/icons-material/QuizRounded';
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/ui/PageHeader';
-import SellRoundedIcon from '@mui/icons-material/SellRounded';
 
 const modules = [
-    { title: 'News', path: '/news', icon: FeedRoundedIcon },
-    { title: 'Documents', path: '/documents', icon: DescriptionRoundedIcon },
-    { title: 'Administration', path: '/administration', icon: GroupsRoundedIcon },
-    { title: 'Useful Information', path: '/useful-information', icon: InfoRoundedIcon },
-    { title: 'Categories', path: '/categories', icon: CategoryRoundedIcon },
-    { title: 'Tags', path: '/tags', icon: SellRoundedIcon },
+    { title: 'Новини', path: '/news', icon: FeedRoundedIcon },
+    { title: 'Документи', path: '/documents', icon: DescriptionRoundedIcon },
+    { title: 'Адміністрація', path: '/administration', icon: GroupsRoundedIcon },
+    { title: 'Корисна інформація', path: '/useful-information', icon: InfoRoundedIcon },
+    { title: 'Категорії', path: '/categories', icon: CategoryRoundedIcon },
+    { title: 'Теги', path: '/tags', icon: SellRoundedIcon },
+    { title: 'Опитування', path: '/surveys', icon: QuizRoundedIcon },
 ];
 
 export default function DashboardPage() {
@@ -23,8 +25,8 @@ export default function DashboardPage() {
     return (
         <Box>
             <PageHeader
-                title="Dashboard"
-                description="Стартова точка адмінки. Звідси команда може переходити до CRUD-модулів."
+                title="Панель керування"
+                description="Стартова точка адмін-панелі. Звідси можна перейти до всіх CRUD-модулів."
                 showBackButton={false}
             />
 
@@ -76,12 +78,12 @@ export default function DashboardPage() {
                                 <Icon />
                             </Box>
 
-                            <Typography variant="h6" sx={{ mb: 1 }}>
+                            <Typography variant="h6" sx={{ mb: 1, fontWeight: 700 }}>
                                 {item.title}
                             </Typography>
 
                             <Typography sx={{ color: '#666' }}>
-                                Вхід у модуль керування {item.title.toLowerCase()}.
+                                Перейти до модуля керування: {item.title.toLowerCase()}.
                             </Typography>
                         </Box>
                     );

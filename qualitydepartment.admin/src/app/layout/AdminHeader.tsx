@@ -11,6 +11,7 @@ const titleMap: Record<string, string> = {
     '/useful-information': 'Useful Information',
     '/categories': 'Categories',
     '/tags': 'Tags',
+    '/surveys': 'Surveys',
 };
 
 export default function AdminHeader() {
