@@ -9,6 +9,8 @@ import ExternalLinkPage from './features/info/ExternalLinkPage';
 import NewsDetailsPage from './features/news/NewsDetailsPage';
 import SearchPage from './features/search/SearchPage';
 import DocumentSearchPreviewPage from './features/search/DocumentSearchPreviewPage';
+import SurveysPage from './features/surveys/SurveysPage';
+import SurveyDetailsPage from './features/surveys/SurveyDetailsPage';
 
 function App() {
     return (

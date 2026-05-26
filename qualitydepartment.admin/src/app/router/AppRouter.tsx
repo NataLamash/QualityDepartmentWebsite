@@ -9,6 +9,7 @@ import AdministrationMembersPage from '../../features/administration/Administrat
 import UsefulInformationPage from '../../features/useful-information/UsefulInformationPage';
 import CategoriesPage from '../../features/categories/CategoriesPage';
 import TagsPage from '../../features/tags/TagsPage';
+import SurveysAdminPage from '../../features/surveys/SurveysAdminPage';
 
 export default function AppRouter() {
     return (
@@ -25,6 +26,7 @@ export default function AppRouter() {
                     <Route path="/useful-information" element={<UsefulInformationPage />} />
                     <Route path="/categories" element={<CategoriesPage />} />
                     <Route path="/tags" element={<TagsPage />} />
+                    <Route path="/surveys" element={<SurveysAdminPage />} />
                 </Route>
             </Route>
 
