@@ -74,13 +74,32 @@ const agent = {
 },
 
     Documents: {
-        list: (page = 1, pageSize = 10, search = '') =>
-            requests.get<any>(`/admin/documents?page=${page}&pageSize=${pageSize}&search=${search}`),
-        details: (id: number) => requests.get<any>(`/admin/documents/${id}`),
-        create: (doc: FormData) => requests.post<void>('/admin/documents', doc),
-        update: (id: number, doc: FormData) => requests.put<void>(`/admin/documents/${id}`, doc),
-        delete: (id: number) => requests.del<void>(`/admin/documents/${id}`),
-        categories: () => requests.get<any[]>('/documents/categories'),
+    list: (page = 1, pageSize = 10, search = '') =>
+        requests.get<any>(`/admin/documents?page=${page}&pageSize=${pageSize}&search=${search}`),
+
+    details: (id: number) => requests.get<any>(`/admin/documents/${id}`),
+
+    create: (doc: FormData) => requests.post<void>('/admin/documents', doc),
+    update: (id: number, doc: FormData) => requests.put<void>(`/admin/documents/${id}`, doc),
+    delete: (id: number) => requests.del<void>(`/admin/documents/${id}`),
+
+    categories: () => requests.get<any[]>('/documents/categories'),
+
+    internalAssessment: (page = 1, pageSize = 10, search = '') =>
+        requests.get<any>(
+            `/admin/documents/internal-assessment?page=${page}&pageSize=${pageSize}&search=${encodeURIComponent(search)}`
+        ),
+
+    externalAssessment: (page = 1, pageSize = 10, search = '') =>
+        requests.get<any>(
+            `/admin/documents/external-assessment?page=${page}&pageSize=${pageSize}&search=${encodeURIComponent(search)}`
+        ),
+
+    internalCategoryId: () =>
+        requests.get<ApiResponse<number>>('/documents/categories/internal-id'),
+
+    externalCategoryId: () =>
+        requests.get<ApiResponse<number>>('/documents/categories/external-id'),
     },
 
     AdministrationMembers: {

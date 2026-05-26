@@ -11,6 +11,7 @@ import CategoriesPage from '../../features/categories/CategoriesPage';
 import TagsPage from '../../features/tags/TagsPage';
 import SurveysAdminPage from '../../features/surveys/SurveysAdminPage';
 import EventsAdminPage from '../../features/events/EventsAdminPage';
+import QualityAssessmentAdminPage from '../../features/quality-assessment/QualityAssessmentAdminPage';
 
 export default function AppRouter() {
     return (
@@ -29,6 +30,15 @@ export default function AppRouter() {
                     <Route path="/tags" element={<TagsPage />} />
                     <Route path="/surveys" element={<SurveysAdminPage />} />
                     <Route path="/events" element={<EventsAdminPage />} />
+                    <Route path="/quality-assessment" element={<Navigate to="/quality-assessment/internal" replace />} />
+                    <Route
+                        path="/quality-assessment/internal"
+                        element={<QualityAssessmentAdminPage mode="internal" />}
+                    />
+                    <Route
+                        path="/quality-assessment/external"
+                        element={<QualityAssessmentAdminPage mode="external" />}
+                    />
                 </Route>
             </Route>
 

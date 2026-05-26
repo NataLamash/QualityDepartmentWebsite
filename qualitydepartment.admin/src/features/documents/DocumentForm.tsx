@@ -6,9 +6,16 @@ import agent from '../../api/agent';
 interface DocumentFormProps {
     initialData?: any;
     onSuccess: () => void;
+    forcedCategoryId?: number | null;
+    forcedCategoryName?: string;
 }
 
-export default function DocumentForm({ initialData, onSuccess }: DocumentFormProps) {
+export default function DocumentForm({
+    initialData,
+    onSuccess,
+    forcedCategoryId,
+    forcedCategoryName,
+}: DocumentFormProps) {
     const [categories, setCategories] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [loadingCats, setLoadingCats] = useState(true);
@@ -63,6 +70,9 @@ export default function DocumentForm({ initialData, onSuccess }: DocumentFormPro
         } else if (initialData) {
             formData.delete('File');
         }
+        if (forcedCategoryId) {
+            formData.set('CategoryId', String(forcedCategoryId));
+        }
 
         try {
             if (initialData) {
@@ -95,24 +105,35 @@ export default function DocumentForm({ initialData, onSuccess }: DocumentFormPro
                     />
                 </Stack>
                 
-                <TextField
-                    select
-                    name="CategoryId"
-                    label="Категорія"
-                    defaultValue={initialData?.categoryId || ''}
-                    required
-                    fullWidth
-                >
-                    {categories.length > 0 ? (
-                        categories.map((cat) => (
-                            <MenuItem key={cat.id} value={cat.id}>
-                                {cat.nameUa || cat.name || "Категорія"}
+                {forcedCategoryId ? (
+                    <TextField
+                        label="Категорія"
+                        value={forcedCategoryName || ''}
+                        fullWidth
+                        disabled
+                    />
+                ) : (
+                    <TextField
+                        select
+                        name="CategoryId"
+                        label="Категорія"
+                        defaultValue={initialData?.categoryId || ''}
+                        required
+                        fullWidth
+                    >
+                        {categories.length > 0 ? (
+                            categories.map((cat) => (
+                                <MenuItem key={cat.id} value={cat.id}>
+                                    {cat.nameUa || cat.name || 'Категорія'}
+                                </MenuItem>
+                            ))
+                        ) : (
+                            <MenuItem disabled value="">
+                                <em>Категорії не знайдено</em>
                             </MenuItem>
-                        ))
-                    ) : (
-                        <MenuItem disabled value=""><em>Категорії не знайдено</em></MenuItem>
-                    )}
-                </TextField>
+                        )}
+                    </TextField>
+                )}
 
                 <TextField 
                     name="DescriptionUa" label="Опис (UA)" multiline rows={3} 

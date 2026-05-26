@@ -9,6 +9,7 @@ import QuizRoundedIcon from '@mui/icons-material/QuizRounded';
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/ui/PageHeader';
 import EventAvailableRoundedIcon from '@mui/icons-material/EventAvailableRounded';
+import FactCheckRoundedIcon from '@mui/icons-material/FactCheckRounded';
 
 const modules = [
     { title: 'Новини', path: '/news', icon: FeedRoundedIcon },
@@ -19,6 +20,7 @@ const modules = [
     { title: 'Категорії', path: '/categories', icon: CategoryRoundedIcon },
     { title: 'Теги', path: '/tags', icon: SellRoundedIcon },
     { title: 'Опитування', path: '/surveys', icon: QuizRoundedIcon },
+    { title: 'Оцінювання якості вищої освіти', path: '/quality-assessment/internal', icon: FactCheckRoundedIcon },
 ];
 
 export default function DashboardPage() {

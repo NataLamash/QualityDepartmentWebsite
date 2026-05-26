@@ -13,6 +13,8 @@ const titleMap: Record<string, string> = {
     '/categories': 'Категорії',
     '/tags': 'Теги',
     '/surveys': 'Опитування',
+    '/quality-assessment/internal': 'Внутрішнє оцінювання якості вищої освіти',
+    '/quality-assessment/external': 'Зовнішнє оцінювання якості вищої освіти',
 };
 
 export default function AdminHeader() {
@@ -20,7 +22,7 @@ export default function AdminHeader() {
     const navigate = useNavigate();
     const { user, logout } = useAuth();
 
-    const currentTitle = titleMap[location.pathname] ?? 'Admin Panel';
+    const currentTitle = titleMap[location.pathname] ?? 'Адмін-панель';
 
     const handleLogout = () => {
         logout();

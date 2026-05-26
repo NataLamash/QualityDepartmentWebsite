@@ -10,18 +10,21 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import SellRoundedIcon from '@mui/icons-material/SellRounded';
 import QuizRoundedIcon from '@mui/icons-material/QuizRounded';
 import EventAvailableRoundedIcon from '@mui/icons-material/EventAvailableRounded';
+import FactCheckRoundedIcon from '@mui/icons-material/FactCheckRounded';
 
 const sidebarItems = [
     { label: 'Панель керування', path: '/dashboard', icon: DashboardRoundedIcon },
     { label: 'Новини', path: '/news', icon: FeedRoundedIcon },
     { label: 'Заходи', path: '/events', icon: EventAvailableRoundedIcon },
     { label: 'Документи', path: '/documents', icon: DescriptionRoundedIcon },
+    { label: 'Оцінювання якості вищої освіти', path: '/quality-assessment/internal', icon: FactCheckRoundedIcon },
     { label: 'Адміністрація', path: '/administration', icon: GroupsRoundedIcon },
     { label: 'Корисні посилання', path: '/useful-information', icon: InfoRoundedIcon },
     { label: 'Категорії', path: '/categories', icon: CategoryRoundedIcon },
     { label: 'Теги', path: '/tags', icon: SellRoundedIcon },
     { label: 'Опитування', path: '/surveys', icon: QuizRoundedIcon },
     { label: 'Логін', path: '/login', icon: LoginRoundedIcon },
+    
 ];
 
 export default function AdminSidebar() {
@@ -73,7 +76,10 @@ export default function AdminSidebar() {
 
             <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
                 {sidebarItems.map((item) => {
-                    const isActive = location.pathname === item.path;
+                    const isActive =
+                        location.pathname === item.path ||
+                        (item.path === '/quality-assessment/internal' &&
+                            location.pathname.startsWith('/quality-assessment'));
                     const Icon = item.icon;
 
                     return (
