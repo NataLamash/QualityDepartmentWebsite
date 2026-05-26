@@ -8,14 +8,12 @@ import SellRoundedIcon from '@mui/icons-material/SellRounded';
 import QuizRoundedIcon from '@mui/icons-material/QuizRounded';
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/ui/PageHeader';
-import EventAvailableRoundedIcon from '@mui/icons-material/EventAvailableRounded';
 
 const modules = [
     { title: 'Новини', path: '/news', icon: FeedRoundedIcon },
-    { title: 'Заходи', path: '/events', icon: EventAvailableRoundedIcon },
     { title: 'Документи', path: '/documents', icon: DescriptionRoundedIcon },
     { title: 'Адміністрація', path: '/administration', icon: GroupsRoundedIcon },
-    { title: 'Корисні посилання', path: '/useful-information', icon: InfoRoundedIcon },
+    { title: 'Корисна інформація', path: '/useful-information', icon: InfoRoundedIcon },
     { title: 'Категорії', path: '/categories', icon: CategoryRoundedIcon },
     { title: 'Теги', path: '/tags', icon: SellRoundedIcon },
     { title: 'Опитування', path: '/surveys', icon: QuizRoundedIcon },

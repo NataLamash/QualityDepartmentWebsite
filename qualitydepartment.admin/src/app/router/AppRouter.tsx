@@ -10,7 +10,6 @@ import UsefulInformationPage from '../../features/useful-information/UsefulInfor
 import CategoriesPage from '../../features/categories/CategoriesPage';
 import TagsPage from '../../features/tags/TagsPage';
 import SurveysAdminPage from '../../features/surveys/SurveysAdminPage';
-import EventsAdminPage from '../../features/events/EventsAdminPage';
 
 export default function AppRouter() {
     return (
@@ -28,7 +27,6 @@ export default function AppRouter() {
                     <Route path="/categories" element={<CategoriesPage />} />
                     <Route path="/tags" element={<TagsPage />} />
                     <Route path="/surveys" element={<SurveysAdminPage />} />
-                    <Route path="/events" element={<EventsAdminPage />} />
                 </Route>
             </Route>
 
