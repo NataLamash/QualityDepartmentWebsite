@@ -3,7 +3,7 @@ using QualityDepartment.Core.DTOs.Admin.Auth;
 using QualityDepartment.Core.DTOs.Common;
 using QualityDepartment.Infrastructure.Services;
 
-namespace QualityDepartment.API.Controllers.Admin
+namespace QualityDepartment.API.Controllers
 {
     [ApiController]
     [Route("api/admin/auth")]
@@ -18,8 +18,7 @@ namespace QualityDepartment.API.Controllers.Admin
         {
             var result = await _authService.LoginAsync(dto);
             if (result == null)
-                return Unauthorized(ApiResponse<AuthResponseDto>.FailureResponse(
-                    new List<string> { "Невірний email або пароль" }, "Unauthorized"));
+                return Unauthorized(ApiResponse<AuthResponseDto>.FailureResponse(new List<string> { "INVALID_CREDENTIALS" }));
 
             return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result));
         }

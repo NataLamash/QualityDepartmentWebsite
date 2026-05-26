@@ -5,6 +5,7 @@ export default function Footer() {
     const { i18n } = useTranslation();
 
     const mapSrc = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2540.9118557088455!2d30.511100376857116!3d50.44274998725838!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40d4cef00099684b%3A0x673412571217343!2z0KfQtdGA0LLQvtC90LjQuSDQutC-0YDQv9GD0YEg0JrQndCjINC_0L7RgdC10LvQtdC90L3Rjw!5e0!3m2!1suk!2sua!4v1712835000000!5m2!1suk!2sua";
+
     return (
         <Box sx={{ mt: 'auto', width: '100%', bgcolor: '#BA0000', position: 'relative', overflow: 'hidden' }}>
 
@@ -15,7 +16,7 @@ export default function Footer() {
                     width: '100%',
                     display: 'block',
                     position: 'absolute',
-                    top: '20px', 
+                    top: '20px',
                     left: 0,
                     zIndex: 1,
                 }}
@@ -45,10 +46,9 @@ export default function Footer() {
                             display: 'flex',
                             flexDirection: { xs: 'column', md: 'row' },
                             alignItems: 'center',
-                            justifyContent: 'space-between',
                             gap: 4
                         }}>
-                            <Stack spacing={2.5} sx={{ flex: 1, width: '100%' }}>
+                            <Stack spacing={2.5} sx={{ flex: { xs: '1 1 auto', md: '0 0 60%' }, width: '100%' }}>
                                 <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
                                     <Box component="img" src="/Location.png" sx={{ width: 22, height: 22 }} />
                                     <Typography sx={{ fontWeight: 600, fontSize: '1rem', lineHeight: 1.4 }}>
@@ -67,17 +67,41 @@ export default function Footer() {
                                 </Stack>
                             </Stack>
 
-                            <Stack direction="row" spacing={1.5}>
-                                <IconButton sx={{ p: 0, '&:hover': { transform: 'scale(1.1)' }, transition: '0.2s' }}>
-                                    <Box component="img" src="/Telegram.png" sx={{ width: 48, height: 48 }} />
-                                </IconButton>
-                                <IconButton sx={{ p: 0, '&:hover': { transform: 'scale(1.1)' }, transition: '0.2s' }}>
-                                    <Box component="img" src="/Facebook.png" sx={{ width: 48, height: 48 }} />
-                                </IconButton>
-                                <IconButton sx={{ p: 0, '&:hover': { transform: 'scale(1.1)' }, transition: '0.2s' }}>
-                                    <Box component="img" src="/Gmail.png" sx={{ width: 48, height: 48 }} />
-                                </IconButton>
-                            </Stack>
+                            <Box sx={{
+                                flex: 1,
+                                display: 'flex',
+                                justifyContent: 'center',
+                                width: '100%'
+                            }}>
+                                <Stack
+                                    direction="row"
+                                    spacing={2}
+                                    sx={{
+                                        justifyContent: 'center',
+                                        alignItems: 'center'
+                                    }}
+                                >
+                                    <IconButton
+                                        component="a"
+                                        href="https://fb.com/department.quality"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        sx={{ p: 0, '&:hover': { transform: 'scale(1.1)' }, transition: '0.2s' }}
+                                    >
+                                        <Box component="img" src="/Facebook.png" sx={{ width: 48, height: 48 }} />
+                                    </IconButton>
+
+                                    <IconButton
+                                        component="a"
+                                        href="https://mail.google.com/mail/?view=cm&fs=1&to=department_quality@univ.net.ua"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        sx={{ p: 0, '&:hover': { transform: 'scale(1.1)' }, transition: '0.2s' }}
+                                    >
+                                        <Box component="img" src="/Gmail.png" sx={{ width: 48, height: 48 }} />
+                                    </IconButton>
+                                </Stack>
+                            </Box>
                         </Box>
                     </Box>
 

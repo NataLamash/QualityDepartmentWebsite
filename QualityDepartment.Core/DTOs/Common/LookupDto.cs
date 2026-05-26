@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace QualityDepartment.Core.DTOs.Documents
+namespace QualityDepartment.Core.DTOs.Common
 {
     public class LookupDto
     {

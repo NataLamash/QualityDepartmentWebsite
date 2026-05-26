@@ -2,13 +2,13 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     Box, Container, Typography, Stack, Button,
-    Divider, CircularProgress, Paper, Grid 
+    Divider, CircularProgress, Paper
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import agent, { type NewsItem } from '../../api/agent';
+import agent, { type NewsItem, type PagedResponse } from '../../api/agent'; 
 
 const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '');
 
@@ -20,6 +20,8 @@ export default function NewsDetailsPage() {
     const [news, setNews] = useState<NewsItem | null>(null);
     const [latestNews, setLatestNews] = useState<NewsItem[]>([]);
     const [loading, setLoading] = useState(true);
+
+    const isEventDetail = window.location.pathname.includes('/events');
 
     const getFullImagePath = (path: string | undefined) => {
         if (!path) return "/placeholder.png";
@@ -35,8 +37,16 @@ export default function NewsDetailsPage() {
             try {
                 const details = await agent.News.details(Number(id), lang);
                 setNews(details);
-                const latest = await agent.News.list(4, lang);
-                setLatestNews(latest.filter((n) => n.id !== Number(id)).slice(0, 3));
+
+                const latestRes = isEventDetail
+                    ? await agent.Events.listPaged(1, 4, lang, 'desc')
+                    : await agent.News.list(4, lang);
+
+                const latestItems = (latestRes as PagedResponse<NewsItem>).items
+                    ? (latestRes as PagedResponse<NewsItem>).items
+                    : (latestRes as NewsItem[]);
+
+                setLatestNews(latestItems.filter((n: NewsItem) => n.id !== Number(id)).slice(0, 3));
             } catch (err) {
                 console.error(err);
             } finally {
@@ -45,7 +55,7 @@ export default function NewsDetailsPage() {
         };
         loadData();
         window.scrollTo(0, 0);
-    }, [id, i18n.language]);
+    }, [id, i18n.language, isEventDetail]);
 
     if (loading) return (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 20 }}>
@@ -71,10 +81,13 @@ export default function NewsDetailsPage() {
                     <Container maxWidth="lg">
                         <Button
                             startIcon={<ArrowBackIcon />}
-                            onClick={() => navigate('/news')}
+                            onClick={() => navigate(isEventDetail ? '/events' : '/news')}
                             sx={{ color: 'white', mb: 4, textTransform: 'none' }}
                         >
-                            {i18n.language === 'en' ? 'Back to News' : 'Назад до новин'}
+                            {isEventDetail
+                                ? (i18n.language === 'en' ? 'Back to Events' : 'Назад до заходів')
+                                : (i18n.language === 'en' ? 'Back to News' : 'Назад до новин')
+                            }
                         </Button>
                         <Typography variant="h2" sx={{ color: 'white', fontWeight: 800, mb: 2, fontSize: { xs: '2rem', md: '3.5rem' } }}>
                             {news.title}
@@ -94,9 +107,9 @@ export default function NewsDetailsPage() {
             </Box>
 
             <Container maxWidth="lg">
-                <Grid container spacing={6}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
 
-                    <Grid item xs={12} md={8}>
+                    <Box sx={{ width: '100%' }}>
                         <Box sx={{
                             '& p': { fontSize: '1.2rem', lineHeight: 1.8, mb: 3, color: '#333' },
                             '& img': { maxWidth: '100%', borderRadius: '20px', my: 2 },
@@ -104,43 +117,70 @@ export default function NewsDetailsPage() {
                         }}>
                             <div dangerouslySetInnerHTML={{ __html: news.fullText || '' }} />
                         </Box>
-                        <Divider sx={{ my: 6 }} />
-                    </Grid>
+                        <Divider sx={{ mt: 6, mb: 4 }} />
+                    </Box>
 
-                    <Grid item xs={12} md={4}>
-                        <Paper
-                            elevation={0}
-                            sx={{ p: 4, bgcolor: '#f9f9f9', borderRadius: '30px', position: { md: 'sticky' }, top: 100, mb: 4 }}
-                        >
-                            <Typography variant="h5" sx={{ fontWeight: 800, mb: 4 }}>
-                                {i18n.language === 'en' ? 'Latest News' : 'Останні новини'}
+                    {latestNews.length > 0 && (
+                        <Box sx={{ mb: 6, width: '100%' }}>
+                            <Typography variant="h4" sx={{ fontWeight: 800, mb: 4 }}>
+                                {isEventDetail
+                                    ? (i18n.language === 'en' ? 'Latest Events' : 'Останні заходи')
+                                    : (i18n.language === 'en' ? 'Latest News' : 'Останні новини')
+                                }
                             </Typography>
-                            <Stack spacing={4}>
+
+                            <Box sx={{
+                                display: 'flex',
+                                flexDirection: { xs: 'column', sm: 'row' },
+                                flexWrap: 'wrap',
+                                gap: 4
+                            }}>
                                 {latestNews.map((item) => (
                                     <Box
                                         key={item.id}
-                                        onClick={() => navigate(`/news/${item.id}`)}
-                                        sx={{ cursor: 'pointer', '&:hover img': { transform: 'scale(1.05)' } }}
+                                        sx={{
+                                            width: { xs: '100%', sm: 'calc(50% - 16px)', md: 'calc(33.333% - 22px)' },
+                                            display: 'flex'
+                                        }}
                                     >
-                                        <Box sx={{ width: '100%', height: 150, borderRadius: '20px', overflow: 'hidden', mb: 2 }}>
-                                            <Box
-                                                component="img"
-                                                src={getFullImagePath(item.photoPath)}
-                                                sx={{ width: '100%', height: '100%', objectFit: 'cover', transition: '0.4s' }}
-                                            />
-                                        </Box>
-                                        <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.3, mb: 1 }}>
-                                            {item.title}
-                                        </Typography>
-                                        <Typography variant="caption" color="text.secondary">
-                                            {new Date(item.publishDate).toLocaleDateString()}
-                                        </Typography>
+                                        <Paper
+                                            elevation={0}
+                                            onClick={() => navigate(isEventDetail ? `/events/${item.id}` : `/news/${item.id}`)}
+                                            sx={{
+                                                cursor: 'pointer',
+                                                bgcolor: '#f9f9f9',
+                                                p: 2.5,
+                                                borderRadius: '24px',
+                                                width: '100%',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                transition: '0.3s',
+                                                '&:hover': {
+                                                    boxShadow: '0 10px 25px rgba(0,0,0,0.05)',
+                                                    '& img': { transform: 'scale(1.03)' }
+                                                }
+                                            }}
+                                        >
+                                            <Box sx={{ width: '100%', height: 180, borderRadius: '16px', overflow: 'hidden', mb: 2 }}>
+                                                <Box
+                                                    component="img"
+                                                    src={getFullImagePath(item.photoPath)}
+                                                    sx={{ width: '100%', height: '100%', objectFit: 'cover', transition: '0.4s' }}
+                                                />
+                                            </Box>
+                                            <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.3, mb: 1, fontSize: '1.1rem' }}>
+                                                {item.title}
+                                            </Typography>
+                                            <Typography variant="caption" color="text.secondary" sx={{ mt: 'auto' }}>
+                                                {new Date(item.publishDate).toLocaleDateString()}
+                                            </Typography>
+                                        </Paper>
                                     </Box>
                                 ))}
-                            </Stack>
-                        </Paper>
-                    </Grid>
-                </Grid>
+                            </Box>
+                        </Box>
+                    )}
+                </Box>
             </Container>
         </Box>
     );

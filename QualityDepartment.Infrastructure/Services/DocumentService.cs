@@ -36,8 +36,28 @@ namespace QualityDepartment.Infrastructure.Services
                 .Include(d => d.Category)
                 .AsNoTracking()
                 .AsQueryable()
-                .Where(d => d.PublishDate <= nowUtc); 
+                .Where(d => d.PublishDate <= nowUtc &&
+                            d.Category.NameUa != "Внутрішнє оцінювання якості" &&
+                            d.Category.NameUa != "Зовнішнє оцінювання якості");
 
+            return await ExecutePagedQueryAsync(query, p);
+        }
+
+        public async Task<PagedResultDto<DocumentListItemDto>> GetDocumentsByCategoryNameAsync(string categoryNameUa, BaseDocumentParams p)
+        {
+            var nowUtc = DateTime.UtcNow;
+
+            var query = _context.Documents
+                .Include(d => d.Category)
+                .AsNoTracking()
+                .AsQueryable()
+                .Where(d => d.PublishDate <= nowUtc && d.Category.NameUa == categoryNameUa);
+
+            return await ExecutePagedQueryAsync(query, p);
+        }
+
+        private async Task<PagedResultDto<DocumentListItemDto>> ExecutePagedQueryAsync(IQueryable<Document> query, BaseDocumentParams p)
+        {
             if (!string.IsNullOrWhiteSpace(p.Search))
             {
                 var s = p.Search.Trim();
@@ -51,9 +71,9 @@ namespace QualityDepartment.Infrastructure.Services
                 );
             }
 
-            if (p.CategoryIds != null && p.CategoryIds.Any())
+            if (p is DocumentParams docParams && docParams.CategoryIds != null && docParams.CategoryIds.Any())
             {
-                query = query.Where(x => p.CategoryIds.Contains(x.CategoryId));
+                query = query.Where(x => docParams.CategoryIds.Contains(x.CategoryId));
             }
 
             query = p.Sort switch
@@ -150,7 +170,7 @@ namespace QualityDepartment.Infrastructure.Services
         public async Task<(Stream stream, string contentType, string fileName)?> GetDocumentPreviewAsync(int id)
         {
             var doc = await _context.Documents.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
-            if (doc == null || doc.ExternalType) return null;
+            if (doc == null) return null;
 
             var ext = Path.GetExtension(doc.FilePath).ToLowerInvariant();
             if (!(new[] { ".pdf", ".jpg", ".jpeg", ".png" }).Contains(ext)) return null;
@@ -166,6 +186,7 @@ namespace QualityDepartment.Infrastructure.Services
         {
             return await _context.DocumentCategories
                 .AsNoTracking()
+                .Where(c => c.NameUa != "Внутрішнє оцінювання якості" && c.NameUa != "Зовнішнє оцінювання якості")
                 .Select(c => new LookupDto { Id = c.Id, Name = lang == "en" ? c.NameEn : c.NameUa })
                 .ToListAsync();
         }
@@ -182,7 +203,35 @@ namespace QualityDepartment.Infrastructure.Services
 
         public async Task<PagedResultDto<DocumentAdminDto>> GetAdminDocumentsAsync(int page, int pageSize, string? search)
         {
-            var query = _context.Documents.Include(d => d.Category).AsNoTracking();
+            var query = _context.Documents
+                .Include(d => d.Category)
+                .AsNoTracking()
+                .Where(d => d.Category.NameUa != "Внутрішнє оцінювання якості" &&
+                            d.Category.NameUa != "Зовнішнє оцінювання якості");
+
+            return await ExecuteAdminPagedQueryAsync(query, page, pageSize, search);
+        }
+
+        public async Task<PagedResultDto<DocumentAdminDto>> GetAdminDocumentsByCategoryNameAsync(string categoryNameUa, int page, int pageSize, string? search)
+        {
+            var query = _context.Documents
+                .Include(d => d.Category)
+                .AsNoTracking()
+                .Where(d => d.Category.NameUa == categoryNameUa);
+
+            return await ExecuteAdminPagedQueryAsync(query, page, pageSize, search);
+        }
+
+        public async Task<int?> GetCategoryIdByNameAsync(string nameUa)
+        {
+            var category = await _context.DocumentCategories
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.NameUa == nameUa);
+            return category?.Id;
+        }
+
+        private async Task<PagedResultDto<DocumentAdminDto>> ExecuteAdminPagedQueryAsync(IQueryable<Document> query, int page, int pageSize, string? search)
+        {
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var s = search.Trim();
@@ -226,7 +275,6 @@ namespace QualityDepartment.Infrastructure.Services
             var doc = _mapper.Map<Document>(dto);
             doc.CreatedAt = DateTime.UtcNow;
             doc.CreatorId = userId;
-            doc.ExternalType = false;
             doc.FilePath = await _fileService.SaveFileAsync(dto.File, saveFolder);
 
             _context.Documents.Add(doc);

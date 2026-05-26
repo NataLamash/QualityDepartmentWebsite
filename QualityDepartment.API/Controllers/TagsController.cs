@@ -23,5 +23,13 @@ namespace QualityDepartment.API.Controllers
             var tags = await _tagService.GetTagsAsync(lang);
             return Ok(ApiResponse<List<TagDto>>.SuccessResponse(tags));
         }
+
+        [HttpGet("events-id")]
+        public async Task<ActionResult<ApiResponse<int>>> GetEventsTagId()
+        {
+            var id = await _tagService.GetTagIdByNameAsync("Заходи");
+            if (id == null) return NotFound(ApiResponse<int>.FailureResponse(new List<string> { "TAG_NOT_FOUND" }));
+            return Ok(ApiResponse<int>.SuccessResponse(id.Value));
+        }
     }
 }

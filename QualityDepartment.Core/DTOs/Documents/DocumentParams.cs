@@ -4,7 +4,7 @@ using System.Text;
 
 namespace QualityDepartment.Core.DTOs.Documents
 {
-    public class DocumentParams
+    public class BaseDocumentParams
     {
         private const int MaxPageSize = 50;
         public int PageNumber { get; set; } = 1;
@@ -19,6 +19,10 @@ namespace QualityDepartment.Core.DTOs.Documents
         public string? Search { get; set; }
         public string Sort { get; set; } = "dateDesc";
         public string Lang { get; set; } = "ua";
+    }
+
+    public class DocumentParams : BaseDocumentParams
+    {
         public List<int>? CategoryIds { get; set; } = null;
     }
 }

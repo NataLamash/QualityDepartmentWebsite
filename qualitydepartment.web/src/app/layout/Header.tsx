@@ -7,8 +7,15 @@ import { styled } from '@mui/material/styles';
 import SearchIcon from '@mui/icons-material/Search';
 import LanguageIcon from '@mui/icons-material/Language';
 import MenuIcon from '@mui/icons-material/Menu';
-import { NavLink, useNavigate } from 'react-router-dom'; 
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+
+interface NavigationItem {
+    ua: string;
+    en: string;
+    path: string;
+    hasDropdown?: boolean;
+}
 
 const Search = styled('div')(({ theme }) => ({
     position: 'relative',
@@ -19,9 +26,14 @@ const Search = styled('div')(({ theme }) => ({
     alignItems: 'center',
     width: '100%',
     [theme.breakpoints.up('md')]: {
-        width: '280px',
+        width: '180px', 
+        '&:focus-within': { width: '240px' }, 
     },
-    transition: '0.3s',
+    [theme.breakpoints.up('lg')]: {
+        width: '220px',
+        '&:focus-within': { width: '280px' },
+    },
+    transition: 'width 0.3s ease',
     '&:hover': {
         boxShadow: '0 0 10px rgba(186, 0, 0, 0.15)',
     },
@@ -29,28 +41,39 @@ const Search = styled('div')(({ theme }) => ({
 
 export default function Header() {
     const { i18n } = useTranslation();
-    const navigate = useNavigate(); 
+    const navigate = useNavigate();
     const [langAnchor, setLangAnchor] = useState<null | HTMLElement>(null);
     const [accessAnchor, setAccessAnchor] = useState<null | HTMLElement>(null);
     const [mobileOpen, setMobileOpen] = useState(false);
-
     const [searchValue, setSearchValue] = useState('');
+    const [qualityAnchor, setQualityAnchor] = useState<null | HTMLElement>(null);
 
-const handleSearchSubmit = () => {
-    const trimmed = searchValue.trim();
+    const handleQualityOpen = (event: React.MouseEvent<HTMLElement>) => {
+        setQualityAnchor(event.currentTarget);
+    };
 
-    if (trimmed.length < 3) {
-        return;
-    }
+    const handleQualityClose = () => {
+        setQualityAnchor(null);
+    };
 
-    navigate(`/search?q=${encodeURIComponent(trimmed)}`);
-};
+    const handleSearchSubmit = () => {
+        const trimmed = searchValue.trim();
+        if (trimmed.length < 3) return;
+        navigate(`/search?q=${encodeURIComponent(trimmed)}`);
+    };
 
-    const menuItems = [
+    const menuItems: NavigationItem[] = [
         { ua: 'Головна', en: 'Home', path: '/' },
         { ua: 'Новини', en: 'News', path: '/news' },
-        { ua: 'Документи', en: 'Documents', path: '/archive' },
-        { ua: 'Оцінювання якості освіти', en: 'Assessing the quality of education', path: '/info' },
+        { ua: 'Заходи', en: 'Events', path: '/events' },
+        { ua: 'Архів', en: 'Archive', path: '/archive' },
+        {
+            ua: 'Оцінювання якості',
+            en: 'Quality Evaluation',
+            path: '/quality-evaluation',
+            hasDropdown: true
+        },
+        { ua: 'Корисні посилання', en: 'Useful Links', path: '/info' },
         { ua: 'Опитування', en: 'Surveys', path: '/surveys' },
     ];
 
@@ -73,18 +96,18 @@ const handleSearchSubmit = () => {
             <Toolbar sx={{
                 display: 'flex',
                 flexDirection: 'column',
-                padding: { xs: '10px 15px', md: '10px 40px' },
+                padding: { xs: '10px 15px', md: '10px 20px', lg: '10px 40px' },
                 gap: { xs: 2, md: 0 },
                 minHeight: 'auto'
             }}>
 
-                <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: { md: 2, lg: 4 } }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: { md: 2, lg: 3 }, flex: 1, overflow: 'hidden' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
                             <IconButton
                                 onClick={() => setMobileOpen(true)}
-                                sx={{ display: { xs: 'flex', md: 'none' }, color: '#BA0000' }}
+                                sx={{ display: { xs: 'flex', md: 'none' }, color: '#BA0000', mr: 1 }}
                             >
                                 <MenuIcon />
                             </IconButton>
@@ -92,35 +115,99 @@ const handleSearchSubmit = () => {
                             <Box
                                 component="img"
                                 src="/logo-knu.png"
-                                onClick={() => navigate('/')} 
+                                onClick={() => navigate('/')}
                                 sx={{
-                                    height: { xs: 70, md: 110 },
+                                    height: { xs: 60, md: 75, lg: 90 }, 
                                     width: 'auto',
                                     cursor: 'pointer'
                                 }}
                             />
                         </Box>
 
-                        <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: { md: 1.5, lg: 3 } }}>
-                            {menuItems.map((item) => (
-                                <Link
-                                    key={item.ua}
-                                    component={NavLink}
-                                    to={item.path}
-                                    sx={{
-                                        color: '#333', fontWeight: 700, textDecoration: 'none', fontSize: '1.05rem',
-                                        position: 'relative', '&.active': { color: '#BA0000' },
-                                        '&:hover': { color: '#BA0000' },
-                                        '&.active::after': { content: '""', position: 'absolute', bottom: -5, left: 0, width: '100%', height: '2px', bgcolor: '#BA0000' }
-                                    }}
-                                >
-                                    {i18n.language === 'en' ? item.en : item.ua}
-                                </Link>
-                            ))}
+                        <Box sx={{
+                            display: { xs: 'none', md: 'flex' },
+                            gap: { md: '0.25rem', lg: '0.75rem' }, 
+                            alignItems: 'center',
+                            flexWrap: 'wrap', 
+                            flex: 1
+                        }}>
+                            {menuItems.map((item) => {
+                                const label = i18n.language === 'en' ? item.en : item.ua;
+
+                                const linkStyles = {
+                                    color: '#333',
+                                    fontWeight: 700,
+                                    textDecoration: 'none',
+                                    fontSize: { md: '0.85rem', lg: '0.92rem', xl: '0.98rem' },
+                                    whiteSpace: 'nowrap',
+                                    position: 'relative',
+                                    py: 1,
+                                    px: { md: 0.8, lg: 1.2 },
+                                    transition: 'color 0.2s ease',
+                                    '&.active': { color: '#BA0000' },
+                                    '&:hover': { color: '#BA0000' },
+                                    '&.active::after': { content: '""', position: 'absolute', bottom: 0, left: 0, width: '100%', height: '2px', bgcolor: '#BA0000' }
+                                };
+
+                                if (item.hasDropdown) {
+                                    return (
+                                        <Box
+                                            key={item.ua}
+                                            onMouseEnter={handleQualityOpen}
+                                            onMouseLeave={handleQualityClose}
+                                            sx={{ display: 'inline-block', position: 'relative' }}
+                                        >
+                                            <Link component={NavLink} to={item.path} sx={linkStyles}>
+                                                {label}
+                                            </Link>
+
+                                            <Menu
+                                                anchorEl={qualityAnchor}
+                                                open={Boolean(qualityAnchor)}
+                                                onClose={handleQualityClose}
+                                                disableAutoFocusItem
+                                                slotProps={{
+                                                    paper: {
+                                                        onMouseEnter: () => setQualityAnchor(qualityAnchor),
+                                                        onMouseLeave: handleQualityClose,
+                                                        sx: {
+                                                            borderRadius: '12px',
+                                                            boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+                                                            mt: 0.5,
+                                                            border: '1px solid #eee'
+                                                        }
+                                                    }
+                                                }}
+                                                anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                                                transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                                            >
+                                                <MenuItem
+                                                    onClick={() => { handleQualityClose(); navigate('/quality-evaluation?category=internal'); }}
+                                                    sx={{ fontWeight: 600, fontSize: '0.95rem', px: 3, py: 1, '&:hover': { color: '#BA0000' } }}
+                                                >
+                                                    {i18n.language === 'en' ? 'Internal Quality Evaluation' : 'Внутрішнє оцінювання якості'}
+                                                </MenuItem>
+                                                <MenuItem
+                                                    onClick={() => { handleQualityClose(); navigate('/quality-evaluation?category=external'); }}
+                                                    sx={{ fontWeight: 600, fontSize: '0.95rem', px: 3, py: 1, '&:hover': { color: '#BA0000' } }}
+                                                >
+                                                    {i18n.language === 'en' ? 'External Quality Evaluation' : 'Зовнішнє оцінювання якості'}
+                                                </MenuItem>
+                                            </Menu>
+                                        </Box>
+                                    );
+                                }
+
+                                return (
+                                    <Link key={item.ua} component={NavLink} to={item.path} sx={linkStyles}>
+                                        {label}
+                                    </Link>
+                                );
+                            })}
                         </Box>
                     </Box>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, lg: 1.5 }, flexShrink: 0 }}>
                         <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
                             <Search>
                                 <InputBase
@@ -154,12 +241,12 @@ const handleSearchSubmit = () => {
                         <Button
                             onClick={(e) => setLangAnchor(e.currentTarget)}
                             sx={{
-                                minWidth: 'auto', color: '#333', fontWeight: 600, borderRadius: '25px', border: '1px solid #eee', px: { xs: 1, md: 2 }, py: 0.8,
-                                boxShadow: '0 4px 10px rgba(0,0,0,0.05)', '&:hover': { borderColor: '#BA0000' }
+                                minWidth: 'auto', color: '#333', fontWeight: 600, borderRadius: '25px', border: '1px solid #eee', px: { xs: 1, md: 1.5, lg: 2 }, py: 0.8,
+                                bgcolor: '#fff', boxShadow: '0 4px 10px rgba(0,0,0,0.05)', '&:hover': { borderColor: '#BA0000' }
                             }}
                             startIcon={<LanguageIcon sx={{ color: '#BA0000' }} />}
                         >
-                            <Typography sx={{ display: { xs: 'none', sm: 'block' } }}>
+                            <Typography sx={{ display: { xs: 'none', sm: 'block' }, fontSize: '0.9rem' }}>
                                 {i18n.language === 'en' ? 'Eng' : 'Укр'}
                             </Typography>
                         </Button>
@@ -222,8 +309,8 @@ const handleSearchSubmit = () => {
             >
                 <Typography variant="overline" sx={{ px: 2, fontWeight: 800, color: '#999' }}>Вигляд сайту</Typography>
                 <MenuItem onClick={() => changeFontSize('14px')}>Стандартний текст</MenuItem>
-                <MenuItem onClick={() => changeFontSize('18px')}>Збільшений текст</MenuItem>
-                <MenuItem onClick={() => changeFontSize('20px')}>Дуже великий текст</MenuItem>
+                <MenuItem onClick={() => changeFontSize('17px')}>Збільшений текст</MenuItem>
+                <MenuItem onClick={() => changeFontSize('19px')}>Дуже великий текст</MenuItem>
             </Menu>
 
             <Drawer anchor="left" open={mobileOpen} onClose={() => setMobileOpen(false)}>
@@ -250,7 +337,6 @@ const handleSearchSubmit = () => {
                     </List>
                 </Box>
             </Drawer>
-
         </AppBar>
     );
 }

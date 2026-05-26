@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Box, Button, CircularProgress, Container, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import { useDocuments } from './hooks/useDocuments';
 import { getLang } from './utils/documentUtils';
 import type { SortMode, UiDocument, ViewMode } from './types';
@@ -20,12 +21,19 @@ import DocumentPreviewDialog from './components/DocumentPreviewDialog';
 
 const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '');
 
-export default function DocumentPage() {
+interface DocumentPageProps {
+    isQualityPage?: boolean;
+}
+
+export default function DocumentPage({ isQualityPage = false }: DocumentPageProps) {
     const { i18n } = useTranslation();
     const lang = getLang(i18n.language);
+    const [searchParams] = useSearchParams();
 
     const text = {
-        title: lang === 'en' ? 'Documents' : 'Документи',
+        title: isQualityPage
+            ? (lang === 'en' ? 'Quality Evaluation' : 'Оцінювання якості')
+            : (lang === 'en' ? 'Archive' : 'Архів'),
         filters: lang === 'en' ? 'Filters' : 'Фільтри',
         category: lang === 'en' ? 'Category' : 'Категорія',
         date: lang === 'en' ? 'Choose date' : 'Оберіть дату',
@@ -61,12 +69,37 @@ export default function DocumentPage() {
     const [previewDocument, setPreviewDocument] = useState<UiDocument | null>(null);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
+    useEffect(() => {
+        const categoryParam = searchParams.get('category');
+        let targetCategory = 'all';
+
+        if (isQualityPage && categoryParam) {
+            if (categoryParam === 'internal') {
+                targetCategory = 'Внутрішнє оцінювання якості';
+            } else if (categoryParam === 'external') {
+                targetCategory = 'Зовнішнє оцінювання якості';
+            }
+        }
+
+        setTempCategory(targetCategory);
+        setTempSearch('');
+        setTempDate('');
+        setTempSort('date-desc');
+
+        setAppliedCategory(targetCategory);
+        setAppliedSearch('');
+        setAppliedDate('');
+        setSortMode('date-desc');
+        setVisibleCount(8);
+    }, [isQualityPage, searchParams]);
+
     const { loading, error, categories, filteredDocuments } = useDocuments({
         lang,
         search: appliedSearch,
         selectedCategory: appliedCategory,
         selectedTag: 'all',
         sortMode,
+        isQualityPage,
     });
 
     const dateFilteredDocuments = useMemo(() => {
@@ -124,36 +157,36 @@ export default function DocumentPage() {
     };
 
     const handleDownloadDocument = async (documentItem: UiDocument) => {
-    try {
-        const fileUrl = getFullFilePath(documentItem.filePath);
-        const response = await fetch(fileUrl);
+        try {
+            const fileUrl = getFullFilePath(documentItem.filePath);
+            const response = await fetch(fileUrl);
 
-        if (!response.ok) {
-            throw new Error('Не вдалося завантажити файл');
+            if (!response.ok) {
+                throw new Error('Не вдалося завантажити файл');
+            }
+
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+
+            const link = document.createElement('a');
+            const safeName = (documentItem.title || 'document')
+                .replace(/[<>:"/\\|?*]+/g, '_')
+                .trim();
+            const fileName = safeName.toLowerCase().endsWith('.pdf')
+                ? safeName
+                : `${safeName || 'document'}.pdf`;
+
+            link.href = blobUrl;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+
+            window.URL.revokeObjectURL(blobUrl);
+        } catch (error) {
+            console.error('Download error:', error);
         }
-
-        const blob = await response.blob();
-        const blobUrl = window.URL.createObjectURL(blob);
-
-        const link = document.createElement('a');
-        const safeName = (documentItem.title || 'document')
-            .replace(/[<>:"/\\|?*]+/g, '_')
-            .trim();
-        const fileName = safeName.toLowerCase().endsWith('.pdf')
-            ? safeName
-            : `${safeName || 'document'}.pdf`;
-
-        link.href = blobUrl;
-        link.download = fileName;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-
-        window.URL.revokeObjectURL(blobUrl);
-    } catch (error) {
-        console.error('Download error:', error);
-    }
-};
+    };
 
     const isPdfFile = (path: string) => path.toLowerCase().endsWith('.pdf');
 
@@ -174,6 +207,28 @@ export default function DocumentPage() {
             <Typography component="h1" variant="h2" align="center" sx={pageTitleSx}>
                 {text.title}
             </Typography>
+
+            {isQualityPage && (
+                <Typography
+                    variant="h5"
+                    align="center"
+                    sx={{
+                        mt: -2,
+                        mb: 5,
+                        color: '#666',
+                        fontWeight: 600,
+                        fontSize: { xs: '1.2rem', md: '1.5rem' }
+                    }}
+                >
+                    {appliedCategory === 'all'
+                        ? (lang === 'en' ? 'All sections' : 'Усі документи розділу')
+                        : (lang === 'en'
+                            ? (appliedCategory === 'Внутрішнє оцінювання якості' ? 'Internal Quality Evaluation' : 'External Quality Evaluation')
+                            : appliedCategory
+                        )
+                    }
+                </Typography>
+            )}
 
             <DocumentsTopBar
                 filtersLabel={text.filters}
@@ -210,7 +265,7 @@ export default function DocumentPage() {
                     getFullFilePath={getFullFilePath}
                     onPreview={handleOpenPreview}
                     onDownload={handleDownloadDocument}
-/>
+                />
             )}
 
             {!loading && !error && dateFilteredDocuments.length > 0 && viewMode === 'cards' && (
@@ -268,6 +323,7 @@ export default function DocumentPage() {
                 onDateChange={setTempDate}
                 onSearchChange={setTempSearch}
                 onSortChange={setTempSort}
+                isQualityPage={isQualityPage}
             />
 
             <DocumentPreviewDialog
