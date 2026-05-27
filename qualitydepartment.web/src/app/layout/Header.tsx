@@ -10,6 +10,13 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
+interface NavigationItem {
+    ua: string;
+    en: string;
+    path: string;
+    hasDropdown?: boolean;
+}
+
 const Search = styled('div')(({ theme }) => ({
     position: 'relative',
     borderRadius: '25px',
@@ -19,9 +26,14 @@ const Search = styled('div')(({ theme }) => ({
     alignItems: 'center',
     width: '100%',
     [theme.breakpoints.up('md')]: {
-        width: '280px',
+        width: '180px', 
+        '&:focus-within': { width: '240px' }, 
     },
-    transition: '0.3s',
+    [theme.breakpoints.up('lg')]: {
+        width: '220px',
+        '&:focus-within': { width: '280px' },
+    },
+    transition: 'width 0.3s ease',
     '&:hover': {
         boxShadow: '0 0 10px rgba(186, 0, 0, 0.15)',
     },
@@ -34,7 +46,6 @@ export default function Header() {
     const [accessAnchor, setAccessAnchor] = useState<null | HTMLElement>(null);
     const [mobileOpen, setMobileOpen] = useState(false);
     const [searchValue, setSearchValue] = useState('');
-
     const [qualityAnchor, setQualityAnchor] = useState<null | HTMLElement>(null);
 
     const handleQualityOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -47,19 +58,15 @@ export default function Header() {
 
     const handleSearchSubmit = () => {
         const trimmed = searchValue.trim();
-
-        if (trimmed.length < 3) {
-            return;
-        }
-
+        if (trimmed.length < 3) return;
         navigate(`/search?q=${encodeURIComponent(trimmed)}`);
     };
 
-    const menuItems = [
+    const menuItems: NavigationItem[] = [
         { ua: 'Головна', en: 'Home', path: '/' },
         { ua: 'Новини', en: 'News', path: '/news' },
-
-        { ua: 'Документи', en: 'Documents', path: '/archive' },
+        { ua: 'Заходи', en: 'Events', path: '/events' },
+        { ua: 'Архів', en: 'Archive', path: '/archive' },
         {
             ua: 'Оцінювання якості',
             en: 'Quality Evaluation',
@@ -89,18 +96,18 @@ export default function Header() {
             <Toolbar sx={{
                 display: 'flex',
                 flexDirection: 'column',
-                padding: { xs: '10px 15px', md: '10px 40px' },
+                padding: { xs: '10px 15px', md: '10px 20px', lg: '10px 40px' },
                 gap: { xs: 2, md: 0 },
                 minHeight: 'auto'
             }}>
 
-                <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: { md: 2, lg: 4 } }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: { md: 2, lg: 3 }, flex: 1, overflow: 'hidden' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
                             <IconButton
                                 onClick={() => setMobileOpen(true)}
-                                sx={{ display: { xs: 'flex', md: 'none' }, color: '#BA0000' }}
+                                sx={{ display: { xs: 'flex', md: 'none' }, color: '#BA0000', mr: 1 }}
                             >
                                 <MenuIcon />
                             </IconButton>
@@ -110,16 +117,37 @@ export default function Header() {
                                 src="/logo-knu.png"
                                 onClick={() => navigate('/')}
                                 sx={{
-                                    height: { xs: 70, md: 110 },
+                                    height: { xs: 60, md: 75, lg: 90 }, 
                                     width: 'auto',
                                     cursor: 'pointer'
                                 }}
                             />
                         </Box>
 
-                        <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: { md: 1.5, lg: 3 }, alignItems: 'center' }}>
+                        <Box sx={{
+                            display: { xs: 'none', md: 'flex' },
+                            gap: { md: '0.25rem', lg: '0.75rem' }, 
+                            alignItems: 'center',
+                            flexWrap: 'wrap', 
+                            flex: 1
+                        }}>
                             {menuItems.map((item) => {
                                 const label = i18n.language === 'en' ? item.en : item.ua;
+
+                                const linkStyles = {
+                                    color: '#333',
+                                    fontWeight: 700,
+                                    textDecoration: 'none',
+                                    fontSize: { md: '0.85rem', lg: '0.92rem', xl: '0.98rem' },
+                                    whiteSpace: 'nowrap',
+                                    position: 'relative',
+                                    py: 1,
+                                    px: { md: 0.8, lg: 1.2 },
+                                    transition: 'color 0.2s ease',
+                                    '&.active': { color: '#BA0000' },
+                                    '&:hover': { color: '#BA0000' },
+                                    '&.active::after': { content: '""', position: 'absolute', bottom: 0, left: 0, width: '100%', height: '2px', bgcolor: '#BA0000' }
+                                };
 
                                 if (item.hasDropdown) {
                                     return (
@@ -129,17 +157,7 @@ export default function Header() {
                                             onMouseLeave={handleQualityClose}
                                             sx={{ display: 'inline-block', position: 'relative' }}
                                         >
-                                            <Link
-                                                component={NavLink}
-                                                to={item.path}
-                                                sx={{
-                                                    color: '#333', fontWeight: 700, textDecoration: 'none', fontSize: '1.05rem',
-                                                    position: 'relative', display: 'block', py: 1,
-                                                    '&.active': { color: '#BA0000' },
-                                                    '&:hover': { color: '#BA0000' },
-                                                    '&.active::after': { content: '""', position: 'absolute', bottom: 0, left: 0, width: '100%', height: '2px', bgcolor: '#BA0000' }
-                                                }}
-                                            >
+                                            <Link component={NavLink} to={item.path} sx={linkStyles}>
                                                 {label}
                                             </Link>
 
@@ -181,17 +199,7 @@ export default function Header() {
                                 }
 
                                 return (
-                                    <Link
-                                        key={item.ua}
-                                        component={NavLink}
-                                        to={item.path}
-                                        sx={{
-                                            color: '#333', fontWeight: 700, textDecoration: 'none', fontSize: '1.05rem',
-                                            position: 'relative', '&.active': { color: '#BA0000' },
-                                            '&:hover': { color: '#BA0000' },
-                                            '&.active::after': { content: '""', position: 'absolute', bottom: -5, left: 0, width: '100%', height: '2px', bgcolor: '#BA0000' }
-                                        }}
-                                    >
+                                    <Link key={item.ua} component={NavLink} to={item.path} sx={linkStyles}>
                                         {label}
                                     </Link>
                                 );
@@ -199,7 +207,7 @@ export default function Header() {
                         </Box>
                     </Box>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, lg: 1.5 }, flexShrink: 0 }}>
                         <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
                             <Search>
                                 <InputBase
@@ -233,12 +241,12 @@ export default function Header() {
                         <Button
                             onClick={(e) => setLangAnchor(e.currentTarget)}
                             sx={{
-                                minWidth: 'auto', color: '#333', fontWeight: 600, borderRadius: '25px', border: '1px solid #eee', px: { xs: 1, md: 2 }, py: 0.8,
-                                boxShadow: '0 4px 10px rgba(0,0,0,0.05)', '&:hover': { borderColor: '#BA0000' }
+                                minWidth: 'auto', color: '#333', fontWeight: 600, borderRadius: '25px', border: '1px solid #eee', px: { xs: 1, md: 1.5, lg: 2 }, py: 0.8,
+                                bgcolor: '#fff', boxShadow: '0 4px 10px rgba(0,0,0,0.05)', '&:hover': { borderColor: '#BA0000' }
                             }}
                             startIcon={<LanguageIcon sx={{ color: '#BA0000' }} />}
                         >
-                            <Typography sx={{ display: { xs: 'none', sm: 'block' } }}>
+                            <Typography sx={{ display: { xs: 'none', sm: 'block' }, fontSize: '0.9rem' }}>
                                 {i18n.language === 'en' ? 'Eng' : 'Укр'}
                             </Typography>
                         </Button>
@@ -301,8 +309,8 @@ export default function Header() {
             >
                 <Typography variant="overline" sx={{ px: 2, fontWeight: 800, color: '#999' }}>Вигляд сайту</Typography>
                 <MenuItem onClick={() => changeFontSize('14px')}>Стандартний текст</MenuItem>
-                <MenuItem onClick={() => changeFontSize('18px')}>Збільшений текст</MenuItem>
-                <MenuItem onClick={() => changeFontSize('20px')}>Дуже великий текст</MenuItem>
+                <MenuItem onClick={() => changeFontSize('17px')}>Збільшений текст</MenuItem>
+                <MenuItem onClick={() => changeFontSize('19px')}>Дуже великий текст</MenuItem>
             </Menu>
 
             <Drawer anchor="left" open={mobileOpen} onClose={() => setMobileOpen(false)}>
@@ -329,7 +337,6 @@ export default function Header() {
                     </List>
                 </Box>
             </Drawer>
-
         </AppBar>
     );
 }

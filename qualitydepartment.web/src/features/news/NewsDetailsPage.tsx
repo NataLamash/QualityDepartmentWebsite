@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import agent, { type NewsItem } from '../../api/agent';
+import agent, { type NewsItem, type PagedResponse } from '../../api/agent'; 
 
 const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '');
 
@@ -20,6 +20,8 @@ export default function NewsDetailsPage() {
     const [news, setNews] = useState<NewsItem | null>(null);
     const [latestNews, setLatestNews] = useState<NewsItem[]>([]);
     const [loading, setLoading] = useState(true);
+
+    const isEventDetail = window.location.pathname.includes('/events');
 
     const getFullImagePath = (path: string | undefined) => {
         if (!path) return "/placeholder.png";
@@ -35,8 +37,16 @@ export default function NewsDetailsPage() {
             try {
                 const details = await agent.News.details(Number(id), lang);
                 setNews(details);
-                const latest = await agent.News.list(4, lang);
-                setLatestNews(latest.filter((n) => n.id !== Number(id)).slice(0, 3));
+
+                const latestRes = isEventDetail
+                    ? await agent.Events.listPaged(1, 4, lang, 'desc')
+                    : await agent.News.list(4, lang);
+
+                const latestItems = (latestRes as PagedResponse<NewsItem>).items
+                    ? (latestRes as PagedResponse<NewsItem>).items
+                    : (latestRes as NewsItem[]);
+
+                setLatestNews(latestItems.filter((n: NewsItem) => n.id !== Number(id)).slice(0, 3));
             } catch (err) {
                 console.error(err);
             } finally {
@@ -45,7 +55,7 @@ export default function NewsDetailsPage() {
         };
         loadData();
         window.scrollTo(0, 0);
-    }, [id, i18n.language]);
+    }, [id, i18n.language, isEventDetail]);
 
     if (loading) return (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 20 }}>
@@ -71,10 +81,13 @@ export default function NewsDetailsPage() {
                     <Container maxWidth="lg">
                         <Button
                             startIcon={<ArrowBackIcon />}
-                            onClick={() => navigate('/news')}
+                            onClick={() => navigate(isEventDetail ? '/events' : '/news')}
                             sx={{ color: 'white', mb: 4, textTransform: 'none' }}
                         >
-                            {i18n.language === 'en' ? 'Back to News' : 'Назад до новин'}
+                            {isEventDetail
+                                ? (i18n.language === 'en' ? 'Back to Events' : 'Назад до заходів')
+                                : (i18n.language === 'en' ? 'Back to News' : 'Назад до новин')
+                            }
                         </Button>
                         <Typography variant="h2" sx={{ color: 'white', fontWeight: 800, mb: 2, fontSize: { xs: '2rem', md: '3.5rem' } }}>
                             {news.title}
@@ -110,7 +123,10 @@ export default function NewsDetailsPage() {
                     {latestNews.length > 0 && (
                         <Box sx={{ mb: 6, width: '100%' }}>
                             <Typography variant="h4" sx={{ fontWeight: 800, mb: 4 }}>
-                                {i18n.language === 'en' ? 'Latest News' : 'Останні новини'}
+                                {isEventDetail
+                                    ? (i18n.language === 'en' ? 'Latest Events' : 'Останні заходи')
+                                    : (i18n.language === 'en' ? 'Latest News' : 'Останні новини')
+                                }
                             </Typography>
 
                             <Box sx={{
@@ -129,7 +145,7 @@ export default function NewsDetailsPage() {
                                     >
                                         <Paper
                                             elevation={0}
-                                            onClick={() => navigate(`/news/${item.id}`)}
+                                            onClick={() => navigate(isEventDetail ? `/events/${item.id}` : `/news/${item.id}`)}
                                             sx={{
                                                 cursor: 'pointer',
                                                 bgcolor: '#f9f9f9',
