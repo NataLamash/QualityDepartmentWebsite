@@ -19,7 +19,7 @@ export default function AdminHeader() {
     const navigate = useNavigate();
     const { user, logout } = useAuth();
 
-    const currentTitle = titleMap[location.pathname] ?? 'Admin Panel';
+    const currentTitle = titleMap[location.pathname] ?? 'Адмін-панель';
 
     const handleLogout = () => {
         logout();

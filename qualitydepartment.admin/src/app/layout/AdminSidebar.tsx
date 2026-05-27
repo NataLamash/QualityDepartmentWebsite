@@ -71,7 +71,10 @@ export default function AdminSidebar() {
 
             <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
                 {sidebarItems.map((item) => {
-                    const isActive = location.pathname === item.path;
+                    const isActive =
+                        location.pathname === item.path ||
+                        (item.path === '/quality-assessment/internal' &&
+                            location.pathname.startsWith('/quality-assessment'));
                     const Icon = item.icon;
 
                     return (

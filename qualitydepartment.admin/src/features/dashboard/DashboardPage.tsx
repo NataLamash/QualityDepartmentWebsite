@@ -17,6 +17,7 @@ const modules = [
     { title: 'Категорії', path: '/categories', icon: CategoryRoundedIcon },
     { title: 'Теги', path: '/tags', icon: SellRoundedIcon },
     { title: 'Опитування', path: '/surveys', icon: QuizRoundedIcon },
+    { title: 'Оцінювання якості вищої освіти', path: '/quality-assessment/internal', icon: FactCheckRoundedIcon },
 ];
 
 export default function DashboardPage() {
