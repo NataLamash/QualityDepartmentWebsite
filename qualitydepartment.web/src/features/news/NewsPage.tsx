@@ -5,15 +5,19 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import agent from '../../api/agent';
+import agent, { type NewsItem } from '../../api/agent'; 
 
 const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '');
 
-export default function NewsPage() {
+interface NewsPageProps {
+    isEventsPage?: boolean; 
+}
+
+export default function NewsPage({ isEventsPage = false }: NewsPageProps) {
     const { i18n } = useTranslation();
     const navigate = useNavigate();
 
-    const [news, setNews] = useState<any[]>([]);
+    const [news, setNews] = useState<NewsItem[]>([]); 
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [totalCount, setTotalCount] = useState(0);
@@ -36,7 +40,12 @@ export default function NewsPage() {
         setLoading(true);
         const lang = i18n.language.startsWith('en') ? 'en' : 'ua';
         try {
-            const res = await agent.News.listPaged(pageNum, 9, lang, sortOrder, appliedSearch, appliedDate);
+            const fetchMethod = isEventsPage
+                ? agent.Events.listPaged
+                : agent.News.listPaged;
+
+            const res = await fetchMethod(pageNum, 9, lang, sortOrder, appliedSearch, appliedDate);
+
             if (isLoadMore) {
                 setNews(prev => [...prev, ...res.items]);
             } else {
@@ -53,7 +62,7 @@ export default function NewsPage() {
     useEffect(() => {
         setPage(1);
         fetchNews(1, false);
-    }, [i18n.language, sortOrder, appliedSearch, appliedDate]);
+    }, [i18n.language, sortOrder, appliedSearch, appliedDate, isEventsPage]);
 
     const handleLoadMore = () => {
         const nextPage = page + 1;
@@ -71,7 +80,10 @@ export default function NewsPage() {
     return (
         <Container maxWidth="xl" sx={{ py: { xs: 4, md: 8 } }}>
             <Typography variant="h2" align="center" sx={{ fontWeight: 800, mb: { xs: 4, md: 8 }, fontSize: { xs: '2.5rem', md: '3.75rem' } }}>
-                {i18n.language === 'en' ? 'News' : 'Новини'}
+                {isEventsPage
+                    ? (i18n.language === 'en' ? 'Events' : 'Заходи')
+                    : (i18n.language === 'en' ? 'News' : 'Новини')
+                }
             </Typography>
 
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, mb: 6, gap: 2, borderBottom: '1px solid #eee', pb: 2 }}>
@@ -103,7 +115,7 @@ export default function NewsPage() {
                 mx: 'auto'
             }}>
                 {news.map((item) => (
-                    <Box key={item.id} onClick={() => navigate(`/news/${item.id}`)}
+                    <Box key={item.id} onClick={() => navigate(isEventsPage ? `/events/${item.id}` : `/news/${item.id}`)}
                         sx={{
                             cursor: 'pointer', borderRadius: '32px', overflow: 'hidden',
                             position: 'relative', width: '100%',
