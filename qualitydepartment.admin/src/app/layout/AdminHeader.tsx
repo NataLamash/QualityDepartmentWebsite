@@ -4,14 +4,17 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../features/auth/AuthProvider';
 
 const titleMap: Record<string, string> = {
-    '/dashboard': 'Dashboard',
-    '/news': 'News',
-    '/documents': 'Documents',
-    '/administration': 'Administration Members',
-    '/useful-information': 'Useful Information',
-    '/categories': 'Categories',
-    '/tags': 'Tags',
-    '/surveys': 'Surveys',
+    '/dashboard': 'Панель керування',
+    '/news': 'Новини',
+    '/events': 'Заходи',
+    '/documents': 'Документи',
+    '/administration': 'Адміністрація',
+    '/useful-information': 'Корисні посилання',
+    '/categories': 'Категорії',
+    '/tags': 'Теги',
+    '/surveys': 'Опитування',
+    '/quality-assessment/internal': 'Внутрішнє оцінювання якості освіти',
+    '/quality-assessment/external': 'Зовнішнє оцінювання якості освіти',
 };
 
 export default function AdminHeader() {

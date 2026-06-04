@@ -166,8 +166,9 @@ export default function TagsPage() {
     return (
         <Box>
             <PageHeader
-                title="Tags"
+                title="Теги новин"
                 description="Керування тегами для новин."
+                showBackButton={true}
             />
 
             {error && (

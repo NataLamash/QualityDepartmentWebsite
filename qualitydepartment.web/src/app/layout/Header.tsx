@@ -65,8 +65,8 @@ export default function Header() {
     const menuItems: NavigationItem[] = [
         { ua: 'Головна', en: 'Home', path: '/' },
         { ua: 'Новини', en: 'News', path: '/news' },
+        { ua: 'Документи', en: 'Documents', path: '/archive' },
         { ua: 'Заходи', en: 'Events', path: '/events' },
-        { ua: 'Архів', en: 'Archive', path: '/archive' },
         {
             ua: 'Оцінювання якості',
             en: 'Quality Evaluation',

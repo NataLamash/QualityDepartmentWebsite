@@ -46,7 +46,24 @@ export default function DocumentsGridView({
                     <Typography component="h3" sx={gridCardTitleSx}>
                         {doc.title || namePlaceholder}
                     </Typography>
-
+                    
+                    <Typography component="p"
+                        sx={{
+                            color: '#666',
+                            fontSize: '0.98rem',
+                            lineHeight: 1.6,
+                            minHeight: 48,
+                            mb: 1,
+                            display: '-webkit-box',
+                            WebkitLineClamp: 3,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                        }}
+                    >
+                        {doc.description || '—'}
+                    </Typography>
+    
                     <Typography component="p" sx={gridCardMetaSx}>
                         {doc.categoryName}
                     </Typography>

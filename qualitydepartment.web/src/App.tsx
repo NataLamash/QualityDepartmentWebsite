@@ -27,6 +27,8 @@ function App() {
                     <Route path="/search" element={<SearchPage />} />
                     <Route path="/documents/:id/preview" element={<DocumentSearchPreviewPage />} />
                     <Route path="/news/:id" element={<NewsDetailsPage />} />
+                    <Route path="/surveys" element={<SurveysPage />} />
+                    <Route path="/surveys/:id" element={<SurveyDetailsPage />} />
                     <Route path="/events" element={<NewsPage isEventsPage={true} />} />
                     <Route path="/events/:id" element={<NewsDetailsPage />} />
                 </Routes>

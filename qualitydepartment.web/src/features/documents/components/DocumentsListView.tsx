@@ -45,7 +45,7 @@ export default function DocumentsListView({
                         <Typography component="p" sx={listTitleSx}>
                             {doc.title || namePlaceholder}
                         </Typography>
-
+                        
                         <Typography component="p" sx={listDateSx}>
                             {formatDate(doc.publishDate, lang)}
                         </Typography>

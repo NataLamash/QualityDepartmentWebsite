@@ -23,6 +23,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import agent from '../../api/agent';
 import NewsForm from '../news/NewsForm';
+import PageHeader from '../../components/ui/PageHeader';
 
 export default function EventsAdminPage() {
     const [events, setEvents] = useState<any[]>([]);
@@ -78,20 +79,38 @@ export default function EventsAdminPage() {
 
     return (
         <Box sx={{ p: 4 }}>
-            <Stack direction="row" sx={{ justifyContent: 'space-between', mb: 4 }}>
-                <Typography variant="h4" sx={{ fontWeight: 800 }}>
-                    Керування заходами
-                </Typography>
-
-                <Button
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={() => handleOpen()}
-                    sx={{ bgcolor: '#BA0000', borderRadius: '10px' }}
-                >
-                    Створити захід
-                </Button>
-            </Stack>
+                        <PageHeader title="Заходи"
+                                    description="Керування заходами відділу якості."
+                                    showBackButton={true}
+                        />
+                    
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        justifyContent: 'flex-end',
+                                        mb: 3,
+                                    }}
+                                >
+                                    <Button
+                                        variant="contained"
+                                        startIcon={<AddIcon />}
+                                        onClick={() => handleOpen()}
+                                        sx={{
+                                            bgcolor: '#BA0000',
+                                            borderRadius: '14px',
+                                            textTransform: 'none',
+                                            fontWeight: 700,
+                                            px: 2.5,
+                                            py: 1.2,
+                                            boxShadow: '0 8px 20px rgba(186,0,0,0.18)',
+                                            '&:hover': {
+                                                bgcolor: '#980000',
+                                            },
+                                        }}
+                                    >
+                                        Додати
+                                    </Button>
+                                </Box>
 
             <TableContainer
                 component={Paper}

@@ -84,6 +84,20 @@ export default function UsefulInformationForm({ initialData, onSuccess }: Useful
                 </Stack>
 
                 <TextField 
+                    label="Дата публікації" 
+                    name="PublishDate" 
+                    type="datetime-local"
+                    fullWidth
+                    defaultValue={
+                        initialData?.publishDate
+                            ? formatToLocal(initialData.publishDate)
+                            : formatToLocal(new Date().toISOString())
+                    }
+                    slotProps={{ inputLabel: { shrink: true } }}
+                    required
+                />
+                
+                <TextField 
                     name="Url" label="Посилання (URL)" fullWidth 
                     defaultValue={initialData?.url || ''} required 
                 />
@@ -97,15 +111,7 @@ export default function UsefulInformationForm({ initialData, onSuccess }: Useful
                     defaultValue={initialData?.shortDescriptionEn || ''} 
                 />
 
-                <TextField 
-                    label="Дата публікації" 
-                    name="PublishDate" 
-                    type="datetime-local" 
-                    fullWidth
-                    defaultValue={formatToLocal(initialData?.publishDate) || formatToLocal(new Date().toISOString())}
-                    slotProps={{ inputLabel: { shrink: true } }}
-                    required
-                />
+                
 
                 <Box sx={{ p: 2, border: '1px dashed #ccc', borderRadius: '8px', bgcolor: '#f9f9f9' }}>
                     <Typography variant="caption" sx={{ display: 'block', mb: 1, fontWeight: 600, color: '#666' }}>
