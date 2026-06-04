@@ -11,6 +11,7 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import agent from '../../api/agent';
 import UsefulInformationForm from './UsefulInformationForm';
+import PageHeader from '../../components/ui/PageHeader';
 
 export default function UsefulInformationPage() {
     const [links, setLinks] = useState<any[]>([]);
@@ -80,17 +81,39 @@ export default function UsefulInformationPage() {
 
     return (
         <Box sx={{ p: 4 }}>
-            <Stack direction="row" sx={{ justifyContent: 'space-between', mb: 4, alignItems: 'center' }}>
-                <Typography variant="h4" sx={{ fontWeight: 800 }}>Корисні посилання</Typography>
-                <Button 
-                    variant="contained" 
-                    startIcon={<AddIcon />} 
-                    onClick={() => handleOpen()} 
-                    sx={{ bgcolor: '#BA0000', borderRadius: '10px', textTransform: 'none', fontWeight: 700 }}
+            <PageHeader title="Корисні посилання"
+                description="Керування корисними посиланнями."
+                showBackButton={true}
+            />
+
+            <Box
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    mb: 3,
+                }}
+            >
+                <Button
+                    variant="contained"
+                    startIcon={<AddIcon />}
+                    onClick={() => handleOpen()}
+                    sx={{
+                        bgcolor: '#BA0000',
+                        borderRadius: '14px',
+                        textTransform: 'none',
+                        fontWeight: 700,
+                        px: 2.5,
+                        py: 1.2,
+                        boxShadow: '0 8px 20px rgba(186,0,0,0.18)',
+                        '&:hover': {
+                            bgcolor: '#980000',
+                        },
+                    }}
                 >
                     Додати
                 </Button>
-            </Stack>
+            </Box>
+                
 
             <TableContainer component={Paper} elevation={0} sx={{ borderRadius: '20px', border: '1px solid #eee' }}>
                 <Table size="small"> 

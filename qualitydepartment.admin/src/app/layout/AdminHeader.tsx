@@ -13,8 +13,8 @@ const titleMap: Record<string, string> = {
     '/categories': 'Категорії',
     '/tags': 'Теги',
     '/surveys': 'Опитування',
-    '/quality-assessment/internal': 'Внутрішнє оцінювання якості вищої освіти',
-    '/quality-assessment/external': 'Зовнішнє оцінювання якості вищої освіти',
+    '/quality-assessment/internal': 'Внутрішнє оцінювання якості освіти',
+    '/quality-assessment/external': 'Зовнішнє оцінювання якості освіти',
 };
 
 export default function AdminHeader() {

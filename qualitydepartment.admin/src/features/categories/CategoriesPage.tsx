@@ -166,7 +166,7 @@ export default function CategoriesPage() {
     return (
         <Box>
             <PageHeader
-                title="Categories"
+                title="Категорії документів"
                 description="Керування категоріями документів для використання у формах документів."
             />
 
