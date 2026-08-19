@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { 
-    Box, Container, Typography, CardMedia, 
-    CircularProgress, Stack, Link 
+import {
+    Box, Container, Typography, CardMedia,
+    CircularProgress, Stack, Link
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import agent, { type ExternalLink } from '../../api/agent';
@@ -9,7 +9,7 @@ import agent, { type ExternalLink } from '../../api/agent';
 const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '');
 
 export default function ExternalLinkPage() {
-    const { i18n } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [links, setLinks] = useState<ExternalLink[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -44,9 +44,23 @@ export default function ExternalLinkPage() {
     return (
         <Box sx={{ bgcolor: '#fff' }}>
             <Container maxWidth="lg" sx={{ py: 10 }}>
-                <Stack spacing={12}> 
+                <Typography
+                    component="h1"
+                    variant="h2"
+                    align="center"
+                    sx={{
+                        fontWeight: 800,
+                        mb: { xs: 6, md: 10 },
+                        fontSize: { xs: '2.5rem', md: '3.5rem' },
+                        color: '#1a1a1a'
+                    }}
+                >
+                    {t('info.title')}
+                </Typography>
+
+                <Stack spacing={12}>
                     {links.map((link) => (
-                        <Box 
+                        <Box
                             key={link.id}
                             sx={{
                                 display: 'flex',
@@ -57,50 +71,68 @@ export default function ExternalLinkPage() {
                             }}
                         >
                             <Box sx={{ flex: 1.2 }}>
-                                <Typography 
-                                    variant="h2" 
-                                    sx={{ 
-                                        fontWeight: 800, 
-                                        mb: 3, 
-                                        fontSize: { xs: '2rem', md: '3.5rem' }, 
+                                <Typography
+                                    variant="h2"
+                                    sx={{
+                                        fontWeight: 800,
+                                        mb: 3,
+                                        fontSize: { xs: '2rem', md: '3.5rem' },
                                         color: '#1a1a1a',
-                                        lineHeight: 1.1 
+                                        lineHeight: 1.1
                                     }}
                                 >
                                     {link.name}
                                 </Typography>
-                                <Typography 
-                                    variant="body1" 
-                                    sx={{ 
-                                        color: '#555', 
-                                        fontSize: '1.2rem', 
+                                <Typography
+                                    variant="body1"
+                                    sx={{
+                                        color: '#555',
+                                        fontSize: '1.2rem',
                                         lineHeight: 1.8,
-                                        mb: 4 
+                                        mb: 4
                                     }}
                                 >
-                                    {link.shortDescription || 'Впровадження стандартів та системний моніторинг якості освіти для забезпечення високого рівня підготовки фахівців.'}
+                                    {link.shortDescription || t('info.defaultDescription')}
                                 </Typography>
-                                
-                                <Link 
-                                    href={link.url} 
-                                    target="_blank" 
-                                    sx={{ 
+
+                                <Link
+                                    href={link.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    sx={{
                                         display: 'inline-block',
-                                        color: '#BA0000', 
-                                        fontWeight: 800, 
-                                        fontSize: '1rem', 
+                                        color: '#BA0000',
+                                        fontWeight: 800,
+                                        fontSize: '1rem',
                                         textTransform: 'uppercase',
                                         textDecoration: 'none',
                                         letterSpacing: '1px',
-                                        '&:hover': { textDecoration: 'underline' }
+                                        '&:hover': { textDecoration: 'underline' },
+                                        '&:focus-visible': {
+                                            outline: '2px solid #BA0000',
+                                            outlineOffset: '4px',
+                                            borderRadius: '2px'
+                                        }
                                     }}
                                 >
-                                    {i18n.language === 'en' ? 'Learn more →' : 'Дізнатися більше →'}
+                                    {t('info.learnMore')}
                                 </Link>
                             </Box>
 
                             <Box sx={{ flex: 1, width: '100%' }}>
-                                <Link href={link.url} target="_blank" sx={{ display: 'block' }}>
+                                <Link
+                                    href={link.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    sx={{
+                                        display: 'block',
+                                        borderRadius: '40px',
+                                        '&:focus-visible': {
+                                            outline: '3px solid #BA0000',
+                                            outlineOffset: '4px'
+                                        }
+                                    }}
+                                >
                                     <Box sx={{
                                         position: 'relative',
                                         width: '100%',
@@ -115,10 +147,12 @@ export default function ExternalLinkPage() {
                                         <CardMedia
                                             component="img"
                                             image={getFullImagePath(link.photoPath)}
-                                            sx={{ 
-                                                height: { xs: '300px', md: '450px' }, 
-                                                width: '100%', 
-                                                objectFit: 'cover' 
+                                            alt={link.name}
+                                            loading="lazy"
+                                            sx={{
+                                                height: { xs: '300px', md: '450px' },
+                                                width: '100%',
+                                                objectFit: 'cover'
                                             }}
                                         />
                                     </Box>
@@ -129,8 +163,8 @@ export default function ExternalLinkPage() {
                 </Stack>
 
                 {links.length === 0 && (
-                    <Typography align="center" color="text.secondary">
-                        {i18n.language === 'en' ? 'No information available.' : 'Інформація відсутня.'}
+                    <Typography align="center" color="text.secondary" sx={{ py: 6 }}>
+                        {t('info.noInfo')}
                     </Typography>
                 )}
             </Container>

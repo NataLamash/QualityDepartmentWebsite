@@ -8,7 +8,7 @@ import SellRoundedIcon from '@mui/icons-material/SellRounded';
 import QuizRoundedIcon from '@mui/icons-material/QuizRounded';
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/ui/PageHeader';
-
+import FactCheckRoundedIcon from '@mui/icons-material/FactCheckRounded';
 const modules = [
     { title: 'Новини', path: '/news', icon: FeedRoundedIcon },
     { title: 'Документи', path: '/documents', icon: DescriptionRoundedIcon },

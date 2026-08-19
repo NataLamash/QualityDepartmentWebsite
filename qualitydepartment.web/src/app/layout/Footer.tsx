@@ -2,16 +2,21 @@ import { Box, Container, Typography, Stack, IconButton } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
 export default function Footer() {
-    const { i18n } = useTranslation();
+    const { t } = useTranslation();
 
     const mapSrc = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2540.9118557088455!2d30.511100376857116!3d50.44274998725838!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40d4cef00099684b%3A0x673412571217343!2z0KfQtdGA0LLQvtC90LjQuSDQutC-0YDQv9GD0YEg0JrQndCjINC_0L7RgdC10LvQtdC90L3Rjw!5e0!3m2!1suk!2sua!4v1712835000000!5m2!1suk!2sua";
 
     return (
-        <Box sx={{ mt: 'auto', width: '100%', bgcolor: '#BA0000', position: 'relative', overflow: 'hidden' }}>
-
+        <Box
+            component="footer"
+            role="contentinfo"
+            sx={{ mt: 'auto', width: '100%', bgcolor: '#BA0000', position: 'relative', overflow: 'hidden' }}
+        >
             <Box
                 component="img"
                 src="/LineBilding2.png"
+                alt=""
+                aria-hidden="true"
                 sx={{
                     width: '100%',
                     display: 'block',
@@ -30,7 +35,6 @@ export default function Footer() {
                     alignItems: 'stretch',
                     gap: 4
                 }}>
-
                     <Box sx={{
                         flex: { xs: '1 1 auto', lg: '0 0 58%' },
                         bgcolor: 'white',
@@ -50,19 +54,21 @@ export default function Footer() {
                         }}>
                             <Stack spacing={2.5} sx={{ flex: { xs: '1 1 auto', md: '0 0 60%' }, width: '100%' }}>
                                 <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
-                                    <Box component="img" src="/Location.png" sx={{ width: 22, height: 22 }} />
+                                    <Box component="img" src="/Location.png" alt="" aria-hidden="true" sx={{ width: 22, height: 22 }} />
                                     <Typography sx={{ fontWeight: 600, fontSize: '1rem', lineHeight: 1.4 }}>
-                                        {i18n.language === 'en' ? '60 Volodymyrska str., Kyiv' : 'вулиця Володимирська, 60, Київ'}
+                                        {t('footer.address')}
                                     </Typography>
                                 </Stack>
                                 <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
-                                    <Box component="img" src="/phone.png" sx={{ width: 22, height: 22 }} />
-                                    <Typography sx={{ fontWeight: 600, fontSize: '1rem' }}>+38(044)239-34-21</Typography>
+                                    <Box component="img" src="/phone.png" alt="" aria-hidden="true" sx={{ width: 22, height: 22 }} />
+                                    <Typography sx={{ fontWeight: 600, fontSize: '1rem' }}>
+                                        {t('footer.phone')}
+                                    </Typography>
                                 </Stack>
                                 <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
-                                    <Box component="img" src="/location-pin.png" sx={{ width: 22, height: 22 }} />
+                                    <Box component="img" src="/location-pin.png" alt="" aria-hidden="true" sx={{ width: 22, height: 22 }} />
                                     <Typography sx={{ fontWeight: 600, fontSize: '1rem' }}>
-                                        {i18n.language === 'en' ? 'Red Building, room 223' : 'Червоний корпус, 223 каб.'}
+                                        {t('footer.room')}
                                     </Typography>
                                 </Stack>
                             </Stack>
@@ -73,22 +79,21 @@ export default function Footer() {
                                 justifyContent: 'center',
                                 width: '100%'
                             }}>
-                                <Stack
-                                    direction="row"
-                                    spacing={2}
-                                    sx={{
-                                        justifyContent: 'center',
-                                        alignItems: 'center'
-                                    }}
-                                >
+                                <Stack direction="row" spacing={2} sx={{ justifyContent: 'center', alignItems: 'center' }}>
                                     <IconButton
                                         component="a"
                                         href="https://fb.com/department.quality"
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        sx={{ p: 0, '&:hover': { transform: 'scale(1.1)' }, transition: '0.2s' }}
+                                        aria-label={t('accessibility.facebook')}
+                                        sx={{
+                                            p: 0,
+                                            '&:hover': { transform: 'scale(1.1)' },
+                                            '&:focus-visible': { outline: '2px solid #BA0000', outlineOffset: '2px' },
+                                            transition: '0.2s'
+                                        }}
                                     >
-                                        <Box component="img" src="/Facebook.png" sx={{ width: 48, height: 48 }} />
+                                        <Box component="img" src="/Facebook.png" alt="Facebook" sx={{ width: 48, height: 48 }} />
                                     </IconButton>
 
                                     <IconButton
@@ -96,9 +101,15 @@ export default function Footer() {
                                         href="https://mail.google.com/mail/?view=cm&fs=1&to=department_quality@univ.net.ua"
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        sx={{ p: 0, '&:hover': { transform: 'scale(1.1)' }, transition: '0.2s' }}
+                                        aria-label={t('accessibility.email')}
+                                        sx={{
+                                            p: 0,
+                                            '&:hover': { transform: 'scale(1.1)' },
+                                            '&:focus-visible': { outline: '2px solid #BA0000', outlineOffset: '2px' },
+                                            transition: '0.2s'
+                                        }}
                                     >
-                                        <Box component="img" src="/Gmail.png" sx={{ width: 48, height: 48 }} />
+                                        <Box component="img" src="/Gmail.png" alt="Gmail" sx={{ width: 48, height: 48 }} />
                                     </IconButton>
                                 </Stack>
                             </Box>
@@ -117,7 +128,7 @@ export default function Footer() {
                         position: 'relative'
                     }}>
                         <iframe
-                            title="map"
+                            title={t('footer.mapTitle')}
                             src={mapSrc}
                             style={{
                                 position: 'absolute',
@@ -132,7 +143,6 @@ export default function Footer() {
                             referrerPolicy="no-referrer-when-downgrade"
                         />
                     </Box>
-
                 </Box>
             </Container>
         </Box>

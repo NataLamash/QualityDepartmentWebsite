@@ -21,15 +21,100 @@
     "ukrainian": "Ukrainian",
     "english": "English"
   },
+  "home": {
+    "title": "Quality Management",
+    "description": "Implementation of standards and quality monitoring in education.",
+    "ourTeam": "Our Team",
+    "loadingError": "Loading error"
+  },
+  "pages": {
+    "news": "News",
+    "events": "Events",
+    "documents": "Documents",
+    "qualityEvaluation": "Quality Evaluation",
+    "surveys": "Surveys",
+    "noSurveys": "No surveys are currently available.",
+    "openSurvey": "Open survey"
+  },
+  "filters": {
+    "filters": "Filters",
+    "dateRange": "Date range",
+    "searchPlaceholder": "Search...",
+    "apply": "APPLY",
+    "loadMore": "Load more",
+    "category": "Category",
+    "chooseDate": "Choose date",
+    "search": "Search",
+    "sorting": "Sorting",
+    "newest": "Newest first",
+    "oldest": "Oldest first",
+    "az": "Alphabetically A–Z",
+    "za": "Alphabetically Z–A",
+    "allCategories": "All categories",
+    "allSections": "All sections",
+    "noDocuments": "No documents found",
+    "errorLoading": "Failed to load documents",
+    "titlePlaceholder": "Title"
+  },
+  "content": {
+    "readMore": "Read more →",
+    "download": "Download",
+    "publishedOn": "Published on",
+    "noTranslationAlert": "This content is available only in the original language (Ukrainian)",
+    "emptyList": "No items found",
+    "backToNews": "Back to News",
+    "backToEvents": "Back to Events",
+    "backToArchive": "Back to archive",
+    "backToSurveys": "Back to surveys",
+    "latestNews": "Latest News",
+    "latestEvents": "Latest Events",
+    "minRead": "min read",
+    "docLoadError": "Failed to load document preview."
+  },
+  "about": {
+    "title": "About Us",
+    "description": "The Quality Assurance Department is a structural unit of the university responsible for implementing the internal quality assurance system, monitoring educational programs, and supporting academic integrity to achieve the highest standards of education."
+  },
   "accessibility": {
     "mainNavigation": "Main Navigation",
     "searchForm": "Search Form",
     "languageSelector": "Language Selector",
-    "accessibilityMenu": "Accessibility Menu"
+    "accessibilityMenu": "Accessibility Menu",
+    "facebook": "Facebook page",
+    "email": "Send email",
+    "prevSlide": "Previous slide",
+    "nextSlide": "Next slide"
   },
   "notfound": {
     "title": "Page Not Found",
     "description": "Sorry, the page you are looking for does not exist or has been removed.",
     "goHome": "Go to Home"
+  },
+  "search": {
+    "title": "Search results",
+    "searchingFor": "Search query",
+    "empty": "No results found for your query.",
+    "tooShort": "Enter at least 3 characters.",
+    "error": "Failed to load search results.",
+    "open": "Open",
+    "typeNews": "News",
+    "typeDocument": "Document",
+    "typeExternalLink": "Useful information"
+  },
+  "info": {
+    "title": "Useful Information",
+    "learnMore": "Learn more →",
+    "noInfo": "No information available.",
+    "defaultDescription": "Implementation of standards and systematic monitoring of education quality to ensure a high level of professional training."
+  },
+  "footer": {
+    "title": "Education Quality Assurance Department",
+    "university": "Taras Shevchenko National University of Kyiv",
+    "address": "60 Volodymyrska St, Kyiv",
+    "room": "Red Building, room 223",
+    "phone": "+38(044)239-34-21",
+    "contacts": "Contacts",
+    "allRightsReserved": "All rights reserved",
+    "mapTitle": "Location of KNU Red Building on the map"
   }
 }
