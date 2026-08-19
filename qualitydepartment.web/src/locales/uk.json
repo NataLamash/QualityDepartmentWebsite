@@ -1,0 +1,35 @@
+{
+  "header": {
+    "menu": "Меню",
+    "home": "Головна",
+    "news": "Новини",
+    "documents": "Документи",
+    "events": "Заходи",
+    "qualityEvaluation": "Оцінювання якості",
+    "internalQuality": "Внутрішнє оцінювання якості",
+    "externalQuality": "Зовнішнє оцінювання якості",
+    "usefulLinks": "Корисні посилання",
+    "surveys": "Опитування",
+    "search": "Пошук",
+    "language": "Укр",
+    "back": "Повернутися",
+    "viewSite": "Дизайн сайту",
+    "searchPlaceholder": "Пошук",
+    "standardText": "Стандартний текст",
+    "enlargedText": "Збільшений текст",
+    "largeText": "Дуже великий текст",
+    "ukrainian": "Українська",
+    "english": "English"
+  },
+  "accessibility": {
+    "mainNavigation": "Головна навігація",
+    "searchForm": "Форма пошуку",
+    "languageSelector": "Вибір мови",
+    "accessibilityMenu": "Меню доступності"
+  },
+  "notfound": {
+    "title": "Сторінка не знайдена",
+    "description": "На жаль, сторінка, яку ви шукаєте, не існує або була видалена.",
+    "goHome": "Повернутися на головну"
+  }
+}

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
     AppBar, Toolbar, Box, InputBase, Button, Menu, MenuItem,
     Link, IconButton, Typography, Drawer, List, ListItem, ListItemText, ListItemButton
@@ -11,10 +11,10 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 interface NavigationItem {
-    ua: string;
-    en: string;
+    pathKey: string;
     path: string;
     hasDropdown?: boolean;
+    submenu?: Array<{ key: string; path: string }>;
 }
 
 const Search = styled('div')(({ theme }) => ({
@@ -40,7 +40,7 @@ const Search = styled('div')(({ theme }) => ({
 }));
 
 export default function Header() {
-    const { i18n } = useTranslation();
+    const { i18n, t } = useTranslation();
     const navigate = useNavigate();
     const [langAnchor, setLangAnchor] = useState<null | HTMLElement>(null);
     const [accessAnchor, setAccessAnchor] = useState<null | HTMLElement>(null);
@@ -63,23 +63,22 @@ export default function Header() {
     };
 
     const menuItems: NavigationItem[] = [
-        { ua: 'Головна', en: 'Home', path: '/' },
-        { ua: 'Новини', en: 'News', path: '/news' },
-        { ua: 'Документи', en: 'Documents', path: '/archive' },
-        { ua: 'Заходи', en: 'Events', path: '/events' },
+        { pathKey: 'header.home', path: '/' },
+        { pathKey: 'header.news', path: '/news' },
+        { pathKey: 'header.documents', path: '/archive' },
+        { pathKey: 'header.events', path: '/events' },
         {
-            ua: 'Оцінювання якості',
-            en: 'Quality Evaluation',
+            pathKey: 'header.qualityEvaluation',
             path: '/quality-evaluation',
-            hasDropdown: true
+            hasDropdown: true,
+            submenu: [
+                { key: 'header.internalQuality', path: '/quality-evaluation?category=internal' },
+                { key: 'header.externalQuality', path: '/quality-evaluation?category=external' }
+            ]
         },
-        { ua: 'Корисні посилання', en: 'Useful Links', path: '/info' },
-        { ua: 'Опитування', en: 'Surveys', path: '/surveys' },
+        { pathKey: 'header.usefulLinks', path: '/info' },
+        { pathKey: 'header.surveys', path: '/surveys' },
     ];
-
-    useEffect(() => {
-        document.documentElement.style.fontSize = '14px';
-    }, []);
 
     const handleLanguageChange = (lang: string) => {
         i18n.changeLanguage(lang);
@@ -87,12 +86,19 @@ export default function Header() {
     };
 
     const changeFontSize = (size: string) => {
-        document.documentElement.style.fontSize = size;
+        const root = document.documentElement;
+        root.style.fontSize = size;
         setAccessAnchor(null);
     };
 
     return (
-        <AppBar position="static" color="inherit" elevation={0} sx={{ borderBottom: '1px solid #eee', bgcolor: '#fff' }}>
+        <AppBar 
+            position="static" 
+            color="inherit" 
+            elevation={0} 
+            sx={{ borderBottom: '1px solid #eee', bgcolor: '#fff' }}
+            role="banner"
+        >
             <Toolbar sx={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -108,6 +114,7 @@ export default function Header() {
                             <IconButton
                                 onClick={() => setMobileOpen(true)}
                                 sx={{ display: { xs: 'flex', md: 'none' }, color: '#BA0000', mr: 1 }}
+                                aria-label={t('header.menu')}
                             >
                                 <MenuIcon />
                             </IconButton>
@@ -116,23 +123,29 @@ export default function Header() {
                                 component="img"
                                 src="/logo-knu.png"
                                 onClick={() => navigate('/')}
+                                alt="КНУ Logo"
                                 sx={{
                                     height: { xs: 60, md: 75, lg: 90 }, 
                                     width: 'auto',
                                     cursor: 'pointer'
                                 }}
+                                role="link"
                             />
                         </Box>
 
-                        <Box sx={{
-                            display: { xs: 'none', md: 'flex' },
-                            gap: { md: '0.25rem', lg: '0.75rem' }, 
-                            alignItems: 'center',
-                            flexWrap: 'wrap', 
-                            flex: 1
-                        }}>
+                        <Box 
+                            sx={{
+                                display: { xs: 'none', md: 'flex' },
+                                gap: { md: '0.25rem', lg: '0.75rem' }, 
+                                alignItems: 'center',
+                                flexWrap: 'wrap', 
+                                flex: 1
+                            }}
+                            role="navigation"
+                            aria-label={t('accessibility.mainNavigation')}
+                        >
                             {menuItems.map((item) => {
-                                const label = i18n.language === 'en' ? item.en : item.ua;
+                                const label = t(item.pathKey);
 
                                 const linkStyles = {
                                     color: '#333',
@@ -146,18 +159,29 @@ export default function Header() {
                                     transition: 'color 0.2s ease',
                                     '&.active': { color: '#BA0000' },
                                     '&:hover': { color: '#BA0000' },
-                                    '&.active::after': { content: '""', position: 'absolute', bottom: 0, left: 0, width: '100%', height: '2px', bgcolor: '#BA0000' }
+                                    '&.active::after': { content: '""', position: 'absolute', bottom: 0, left: 0, width: '100%', height: '2px', bgcolor: '#BA0000' },
+                                    '&:focus-visible': {
+                                        outline: '2px solid #BA0000',
+                                        outlineOffset: '2px',
+                                        borderRadius: '4px'
+                                    }
                                 };
 
                                 if (item.hasDropdown) {
                                     return (
                                         <Box
-                                            key={item.ua}
+                                            key={item.path}
                                             onMouseEnter={handleQualityOpen}
                                             onMouseLeave={handleQualityClose}
                                             sx={{ display: 'inline-block', position: 'relative' }}
                                         >
-                                            <Link component={NavLink} to={item.path} sx={linkStyles}>
+                                            <Link 
+                                                component={NavLink} 
+                                                to={item.path} 
+                                                sx={linkStyles}
+                                                aria-haspopup="menu"
+                                                aria-expanded={Boolean(qualityAnchor)}
+                                            >
                                                 {label}
                                             </Link>
 
@@ -181,25 +205,27 @@ export default function Header() {
                                                 anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                                                 transformOrigin={{ vertical: 'top', horizontal: 'left' }}
                                             >
-                                                <MenuItem
-                                                    onClick={() => { handleQualityClose(); navigate('/quality-evaluation?category=internal'); }}
-                                                    sx={{ fontWeight: 600, fontSize: '0.95rem', px: 3, py: 1, '&:hover': { color: '#BA0000' } }}
-                                                >
-                                                    {i18n.language === 'en' ? 'Internal Quality Evaluation' : 'Внутрішнє оцінювання якості'}
-                                                </MenuItem>
-                                                <MenuItem
-                                                    onClick={() => { handleQualityClose(); navigate('/quality-evaluation?category=external'); }}
-                                                    sx={{ fontWeight: 600, fontSize: '0.95rem', px: 3, py: 1, '&:hover': { color: '#BA0000' } }}
-                                                >
-                                                    {i18n.language === 'en' ? 'External Quality Evaluation' : 'Зовнішнє оцінювання якості'}
-                                                </MenuItem>
+                                                {item.submenu?.map((sub) => (
+                                                    <MenuItem
+                                                        key={sub.path}
+                                                        onClick={() => { handleQualityClose(); navigate(sub.path); }}
+                                                        sx={{ fontWeight: 600, fontSize: '0.95rem', px: 3, py: 1, '&:hover': { color: '#BA0000' }, '&:focus-visible': { outline: '2px solid #BA0000' } }}
+                                                    >
+                                                        {t(sub.key)}
+                                                    </MenuItem>
+                                                ))}
                                             </Menu>
                                         </Box>
                                     );
                                 }
 
                                 return (
-                                    <Link key={item.ua} component={NavLink} to={item.path} sx={linkStyles}>
+                                    <Link 
+                                        key={item.path} 
+                                        component={NavLink} 
+                                        to={item.path} 
+                                        sx={linkStyles}
+                                    >
                                         {label}
                                     </Link>
                                 );
@@ -209,9 +235,9 @@ export default function Header() {
 
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, lg: 1.5 }, flexShrink: 0 }}>
                         <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
-                            <Search>
+                            <Search role="search" aria-label={t('accessibility.searchForm')}>
                                 <InputBase
-                                    placeholder={i18n.language === 'en' ? 'Search' : 'Пошук'}
+                                    placeholder={t('header.searchPlaceholder')}
                                     value={searchValue}
                                     onChange={(e) => setSearchValue(e.target.value)}
                                     onKeyDown={(e) => {
@@ -221,6 +247,9 @@ export default function Header() {
                                         }
                                     }}
                                     sx={{ color: '#333', p: '6px 15px', fontSize: '0.9rem', flex: 1 }}
+                                    inputProps={{
+                                        'aria-label': t('header.searchPlaceholder')
+                                    }}
                                 />
                                 <Box
                                     onClick={handleSearchSubmit}
@@ -231,7 +260,18 @@ export default function Header() {
                                         height: '20px',
                                         px: 1,
                                         cursor: 'pointer',
+                                        '&:focus-visible': {
+                                            outline: '2px solid #BA0000'
+                                        }
                                     }}
+                                    role="button"
+                                    tabIndex={0}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' || e.key === ' ') {
+                                            handleSearchSubmit();
+                                        }
+                                    }}
+                                    aria-label={t('header.search')}
                                 >
                                     <SearchIcon sx={{ color: '#BA0000', fontSize: '1.1rem' }} />
                                 </Box>
@@ -242,12 +282,20 @@ export default function Header() {
                             onClick={(e) => setLangAnchor(e.currentTarget)}
                             sx={{
                                 minWidth: 'auto', color: '#333', fontWeight: 600, borderRadius: '25px', border: '1px solid #eee', px: { xs: 1, md: 1.5, lg: 2 }, py: 0.8,
-                                bgcolor: '#fff', boxShadow: '0 4px 10px rgba(0,0,0,0.05)', '&:hover': { borderColor: '#BA0000' }
+                                bgcolor: '#fff', boxShadow: '0 4px 10px rgba(0,0,0,0.05)', 
+                                '&:hover': { borderColor: '#BA0000' },
+                                '&:focus-visible': {
+                                    outline: '2px solid #BA0000',
+                                    outlineOffset: '2px'
+                                }
                             }}
                             startIcon={<LanguageIcon sx={{ color: '#BA0000' }} />}
+                            aria-label={t('accessibility.languageSelector')}
+                            aria-haspopup="menu"
+                            aria-expanded={Boolean(langAnchor)}
                         >
                             <Typography sx={{ display: { xs: 'none', sm: 'block' }, fontSize: '0.9rem' }}>
-                                {i18n.language === 'en' ? 'Eng' : 'Укр'}
+                                {t('header.language')}
                             </Typography>
                         </Button>
 
@@ -256,18 +304,25 @@ export default function Header() {
                             sx={{
                                 width: 40, height: 40, borderRadius: '12px', border: '1px solid #eee',
                                 bgcolor: '#fff', boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
-                                '&:hover': { borderColor: '#BA0000' }
+                                '&:hover': { borderColor: '#BA0000' },
+                                '&:focus-visible': {
+                                    outline: '2px solid #BA0000',
+                                    outlineOffset: '2px'
+                                }
                             }}
+                            aria-label={t('accessibility.accessibilityMenu')}
+                            aria-haspopup="menu"
+                            aria-expanded={Boolean(accessAnchor)}
                         >
-                            <Box component="img" src="/Helper.png" sx={{ width: 20, height: 20 }} />
+                            <Box component="img" src="/Helper.png" sx={{ width: 20, height: 20 }} alt="Accessibility" />
                         </IconButton>
                     </Box>
                 </Box>
 
                 <Box sx={{ display: { xs: 'block', sm: 'none' }, width: '100%', pb: 1 }}>
-                    <Search>
+                    <Search role="search">
                         <InputBase
-                            placeholder={i18n.language === 'en' ? 'Search' : 'Пошук'}
+                            placeholder={t('header.searchPlaceholder')}
                             value={searchValue}
                             onChange={(e) => setSearchValue(e.target.value)}
                             onKeyDown={(e) => {
@@ -277,8 +332,15 @@ export default function Header() {
                                 }
                             }}
                             sx={{ color: '#333', p: '8px 20px', fontSize: '1rem', flex: 1 }}
+                            inputProps={{
+                                'aria-label': t('header.searchPlaceholder')
+                            }}
                         />
-                        <IconButton sx={{ p: '10px' }} onClick={handleSearchSubmit}>
+                        <IconButton 
+                            sx={{ p: '10px' }} 
+                            onClick={handleSearchSubmit}
+                            aria-label={t('header.search')}
+                        >
                             <SearchIcon sx={{ color: '#BA0000' }} />
                         </IconButton>
                     </Search>
@@ -289,6 +351,8 @@ export default function Header() {
                 component="img"
                 src="/LineBilding.png"
                 sx={{ width: '100%', display: 'block', height: 'auto', marginTop: '-10px', position: 'relative', zIndex: 10 }}
+                alt=""
+                aria-hidden="true"
             />
 
             <Menu
@@ -297,8 +361,18 @@ export default function Header() {
                 onClose={() => setLangAnchor(null)}
                 slotProps={{ paper: { sx: { borderRadius: '15px' } } }}
             >
-                <MenuItem onClick={() => handleLanguageChange('ua')}>Українська</MenuItem>
-                <MenuItem onClick={() => handleLanguageChange('en')}>English</MenuItem>
+                <MenuItem 
+                    onClick={() => handleLanguageChange('uk')}
+                    sx={{ '&:focus-visible': { outline: '2px solid #BA0000' } }}
+                >
+                    {t('header.ukrainian')}
+                </MenuItem>
+                <MenuItem 
+                    onClick={() => handleLanguageChange('en')}
+                    sx={{ '&:focus-visible': { outline: '2px solid #BA0000' } }}
+                >
+                    {t('header.english')}
+                </MenuItem>
             </Menu>
 
             <Menu
@@ -307,28 +381,48 @@ export default function Header() {
                 onClose={() => setAccessAnchor(null)}
                 slotProps={{ paper: { sx: { borderRadius: '15px', p: 1, minWidth: 200 } } }}
             >
-                <Typography variant="overline" sx={{ px: 2, fontWeight: 800, color: '#999' }}>Вигляд сайту</Typography>
-                <MenuItem onClick={() => changeFontSize('14px')}>Стандартний текст</MenuItem>
-                <MenuItem onClick={() => changeFontSize('17px')}>Збільшений текст</MenuItem>
-                <MenuItem onClick={() => changeFontSize('19px')}>Дуже великий текст</MenuItem>
+                <Typography variant="overline" sx={{ px: 2, fontWeight: 800, color: '#999' }}>
+                    {t('header.viewSite')}
+                </Typography>
+                <MenuItem 
+                    onClick={() => changeFontSize('14px')}
+                    sx={{ '&:focus-visible': { outline: '2px solid #BA0000' } }}
+                >
+                    {t('header.standardText')}
+                </MenuItem>
+                <MenuItem 
+                    onClick={() => changeFontSize('17px')}
+                    sx={{ '&:focus-visible': { outline: '2px solid #BA0000' } }}
+                >
+                    {t('header.enlargedText')}
+                </MenuItem>
+                <MenuItem 
+                    onClick={() => changeFontSize('19px')}
+                    sx={{ '&:focus-visible': { outline: '2px solid #BA0000' } }}
+                >
+                    {t('header.largeText')}
+                </MenuItem>
             </Menu>
 
             <Drawer anchor="left" open={mobileOpen} onClose={() => setMobileOpen(false)}>
-                <Box sx={{ width: 250, p: 2 }}>
-                    <Typography variant="h6" sx={{ color: '#BA0000', fontWeight: 900, mb: 2 }}>МЕНЮ</Typography>
+                <Box sx={{ width: 250, p: 2 }} role="navigation">
+                    <Typography variant="h6" sx={{ color: '#BA0000', fontWeight: 900, mb: 2 }}>
+                        {t('header.menu')}
+                    </Typography>
                     <List>
                         {menuItems.map((item) => (
-                            <ListItem key={item.ua} disablePadding>
+                            <ListItem key={item.path} disablePadding>
                                 <ListItemButton
                                     component={NavLink}
                                     to={item.path}
                                     onClick={() => setMobileOpen(false)}
                                     sx={{
-                                        '&.active': { color: '#BA0000', bgcolor: 'rgba(186, 0, 0, 0.08)' }
+                                        '&.active': { color: '#BA0000', bgcolor: 'rgba(186, 0, 0, 0.08)' },
+                                        '&:focus-visible': { outline: '2px solid #BA0000' }
                                     }}
                                 >
                                     <ListItemText
-                                        primary={i18n.language === 'en' ? item.en : item.ua}
+                                        primary={t(item.pathKey)}
                                         slotProps={{ primary: { sx: { fontWeight: 700 } } }}
                                     />
                                 </ListItemButton>
