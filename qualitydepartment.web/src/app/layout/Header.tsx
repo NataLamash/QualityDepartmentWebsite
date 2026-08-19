@@ -130,6 +130,12 @@ export default function Header() {
                                     cursor: 'pointer'
                                 }}
                                 role="link"
+                                tabIndex={0}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                        navigate('/');
+                                    }
+                                }}
                             />
                         </Box>
 
@@ -405,7 +411,7 @@ export default function Header() {
             </Menu>
 
             <Drawer anchor="left" open={mobileOpen} onClose={() => setMobileOpen(false)}>
-                <Box sx={{ width: 250, p: 2 }} role="navigation">
+                <Box sx={{ width: 250, p: 2 }} role="navigation" aria-label={t('header.menu')}>
                     <Typography variant="h6" sx={{ color: '#BA0000', fontWeight: 900, mb: 2 }}>
                         {t('header.menu')}
                     </Typography>
