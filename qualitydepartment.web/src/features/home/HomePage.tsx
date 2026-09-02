@@ -75,6 +75,12 @@ export default function HomePage() {
         return `${API_BASE}/${cleanPath}`;
     };
 
+    const getAdminImagePath = (path: string | undefined) => {
+        if (!path) return "/user-placeholder.png";
+        const cleanPath = path.replace(/\\/g, '/').replace(/^\//, '');
+        return `${API_BASE}/${cleanPath}`;
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
@@ -167,6 +173,9 @@ export default function HomePage() {
                                                 image={getFullImagePath(item.photoPath)}
                                                 alt={item.title}
                                                 loading="lazy"
+                                                onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                                                    e.currentTarget.src = '/placeholder.png';
+                                                }}
                                                 sx={{
                                                     height: '100%',
                                                     width: '100%',
@@ -241,9 +250,12 @@ export default function HomePage() {
                                     }}>
                                         <CardMedia
                                             component="img"
-                                            image={getFullImagePath(person.photoPath)}
+                                            image={getAdminImagePath(person.photoPath)}
                                             alt={person.fullName}
                                             loading="lazy"
+                                            onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                                                e.currentTarget.src = '/user-placeholder.png';
+                                            }}
                                             sx={{
                                                 height: '100%',
                                                 width: '100%',

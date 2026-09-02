@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     AppBar, Toolbar, Box, InputBase, Button, Menu, MenuItem,
     Link, IconButton, Typography, Drawer, List, ListItem, ListItemText, ListItemButton
@@ -20,20 +20,24 @@ interface NavigationItem {
 const Search = styled('div')(({ theme }) => ({
     position: 'relative',
     borderRadius: '25px',
-    border: '1px solid #BA0000',
+    border: '1.5px solid #BA0000',
     backgroundColor: '#fff',
     display: 'flex',
     alignItems: 'center',
     width: '100%',
     [theme.breakpoints.up('md')]: {
-        width: '180px', 
-        '&:focus-within': { width: '240px' }, 
+        width: '150px',
+        '&:focus-within': { width: '190px' },
     },
     [theme.breakpoints.up('lg')]: {
-        width: '220px',
-        '&:focus-within': { width: '280px' },
+        width: '180px',
+        '&:focus-within': { width: '230px' },
     },
-    transition: 'width 0.3s ease',
+    [theme.breakpoints.up('xl')]: {
+        width: '220px',
+        '&:focus-within': { width: '270px' },
+    },
+    transition: 'width 0.25s ease',
     '&:hover': {
         boxShadow: '0 0 10px rgba(186, 0, 0, 0.15)',
     },
@@ -47,6 +51,11 @@ export default function Header() {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [searchValue, setSearchValue] = useState('');
     const [qualityAnchor, setQualityAnchor] = useState<null | HTMLElement>(null);
+
+    useEffect(() => {
+        const savedFontSize = localStorage.getItem('app_font_size') || '14px';
+        document.documentElement.style.fontSize = savedFontSize;
+    }, []);
 
     const handleQualityOpen = (event: React.MouseEvent<HTMLElement>) => {
         setQualityAnchor(event.currentTarget);
@@ -86,30 +95,30 @@ export default function Header() {
     };
 
     const changeFontSize = (size: string) => {
-        const root = document.documentElement;
-        root.style.fontSize = size;
+        document.documentElement.style.fontSize = size;
+        localStorage.setItem('app_font_size', size);
         setAccessAnchor(null);
     };
 
     return (
-        <AppBar 
-            position="static" 
-            color="inherit" 
-            elevation={0} 
+        <AppBar
+            position="static"
+            color="inherit"
+            elevation={0}
             sx={{ borderBottom: '1px solid #eee', bgcolor: '#fff' }}
             role="banner"
         >
             <Toolbar sx={{
                 display: 'flex',
                 flexDirection: 'column',
-                padding: { xs: '10px 15px', md: '10px 20px', lg: '10px 40px' },
+                padding: { xs: '10px 15px', md: '10px 16px', lg: '10px 32px' },
                 gap: { xs: 2, md: 0 },
                 minHeight: 'auto'
             }}>
 
-                <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
+                <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: { md: 1.5, lg: 2 } }}>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: { md: 2, lg: 3 }, flex: 1, overflow: 'hidden' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: { md: 1, lg: 2 }, flex: 1, minWidth: 0 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
                             <IconButton
                                 onClick={() => setMobileOpen(true)}
@@ -125,7 +134,7 @@ export default function Header() {
                                 onClick={() => navigate('/')}
                                 alt="КНУ Logo"
                                 sx={{
-                                    height: { xs: 60, md: 75, lg: 90 }, 
+                                    height: { xs: 55, md: 62, lg: 75, xl: 85 },
                                     width: 'auto',
                                     cursor: 'pointer'
                                 }}
@@ -139,13 +148,15 @@ export default function Header() {
                             />
                         </Box>
 
-                        <Box 
+                        <Box
                             sx={{
                                 display: { xs: 'none', md: 'flex' },
-                                gap: { md: '0.25rem', lg: '0.75rem' }, 
+                                gap: { md: '0.2rem 0.5rem', lg: '0.4rem 0.8rem', xl: '0.5rem 1.2rem' },
                                 alignItems: 'center',
-                                flexWrap: 'wrap', 
-                                flex: 1
+                                flexWrap: 'wrap',
+                                flex: 1,
+                                minWidth: 0,
+                                py: 0.5
                             }}
                             role="navigation"
                             aria-label={t('accessibility.mainNavigation')}
@@ -157,11 +168,12 @@ export default function Header() {
                                     color: '#333',
                                     fontWeight: 700,
                                     textDecoration: 'none',
-                                    fontSize: { md: '0.85rem', lg: '0.92rem', xl: '0.98rem' },
+                                    fontSize: { md: '0.8rem', lg: '0.88rem', xl: '0.96rem' },
                                     whiteSpace: 'nowrap',
+                                    flexShrink: 0,
                                     position: 'relative',
-                                    py: 1,
-                                    px: { md: 0.8, lg: 1.2 },
+                                    py: 0.5,
+                                    px: { md: 0.6, lg: 0.9, xl: 1.2 },
                                     transition: 'color 0.2s ease',
                                     '&.active': { color: '#BA0000' },
                                     '&:hover': { color: '#BA0000' },
@@ -179,11 +191,11 @@ export default function Header() {
                                             key={item.path}
                                             onMouseEnter={handleQualityOpen}
                                             onMouseLeave={handleQualityClose}
-                                            sx={{ display: 'inline-block', position: 'relative' }}
+                                            sx={{ display: 'inline-block', position: 'relative', flexShrink: 0 }}
                                         >
-                                            <Link 
-                                                component={NavLink} 
-                                                to={item.path} 
+                                            <Link
+                                                component={NavLink}
+                                                to={item.path}
                                                 sx={linkStyles}
                                                 aria-haspopup="menu"
                                                 aria-expanded={Boolean(qualityAnchor)}
@@ -226,10 +238,10 @@ export default function Header() {
                                 }
 
                                 return (
-                                    <Link 
-                                        key={item.path} 
-                                        component={NavLink} 
-                                        to={item.path} 
+                                    <Link
+                                        key={item.path}
+                                        component={NavLink}
+                                        to={item.path}
                                         sx={linkStyles}
                                     >
                                         {label}
@@ -239,7 +251,7 @@ export default function Header() {
                         </Box>
                     </Box>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, lg: 1.5 }, flexShrink: 0 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.8, md: 1, lg: 1.3 }, flexShrink: 0, alignSelf: 'center' }}>
                         <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
                             <Search role="search" aria-label={t('accessibility.searchForm')}>
                                 <InputBase
@@ -252,7 +264,7 @@ export default function Header() {
                                             handleSearchSubmit();
                                         }
                                     }}
-                                    sx={{ color: '#333', p: '6px 15px', fontSize: '0.9rem', flex: 1 }}
+                                    sx={{ color: '#333', p: { xs: '4px 8px', lg: '6px 12px' }, fontSize: '0.85rem', flex: 1 }}
                                     inputProps={{
                                         'aria-label': t('header.searchPlaceholder')
                                     }}
@@ -263,8 +275,8 @@ export default function Header() {
                                         display: 'flex',
                                         alignItems: 'center',
                                         borderLeft: '1.5px solid #BA0000',
-                                        height: '20px',
-                                        px: 1,
+                                        height: '18px',
+                                        px: { xs: 0.8, lg: 1 },
                                         cursor: 'pointer',
                                         '&:focus-visible': {
                                             outline: '2px solid #BA0000'
@@ -279,7 +291,7 @@ export default function Header() {
                                     }}
                                     aria-label={t('header.search')}
                                 >
-                                    <SearchIcon sx={{ color: '#BA0000', fontSize: '1.1rem' }} />
+                                    <SearchIcon sx={{ color: '#BA0000', fontSize: '1rem' }} />
                                 </Box>
                             </Search>
                         </Box>
@@ -287,20 +299,21 @@ export default function Header() {
                         <Button
                             onClick={(e) => setLangAnchor(e.currentTarget)}
                             sx={{
-                                minWidth: 'auto', color: '#333', fontWeight: 600, borderRadius: '25px', border: '1px solid #eee', px: { xs: 1, md: 1.5, lg: 2 }, py: 0.8,
-                                bgcolor: '#fff', boxShadow: '0 4px 10px rgba(0,0,0,0.05)', 
+                                minWidth: 'auto', color: '#333', fontWeight: 700, borderRadius: '25px', border: '1px solid #eee', px: { xs: 0.8, md: 1.2, lg: 1.5 }, py: 0.6,
+                                bgcolor: '#fff', boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
+                                whiteSpace: 'nowrap',
                                 '&:hover': { borderColor: '#BA0000' },
                                 '&:focus-visible': {
                                     outline: '2px solid #BA0000',
                                     outlineOffset: '2px'
                                 }
                             }}
-                            startIcon={<LanguageIcon sx={{ color: '#BA0000' }} />}
+                            startIcon={<LanguageIcon sx={{ color: '#BA0000', fontSize: '1.1rem' }} />}
                             aria-label={t('accessibility.languageSelector')}
                             aria-haspopup="menu"
                             aria-expanded={Boolean(langAnchor)}
                         >
-                            <Typography sx={{ display: { xs: 'none', sm: 'block' }, fontSize: '0.9rem' }}>
+                            <Typography sx={{ display: { xs: 'none', sm: 'block' }, fontSize: '0.82rem', fontWeight: 700 }}>
                                 {t('header.language')}
                             </Typography>
                         </Button>
@@ -308,7 +321,7 @@ export default function Header() {
                         <IconButton
                             onClick={(e) => setAccessAnchor(e.currentTarget)}
                             sx={{
-                                width: 40, height: 40, borderRadius: '12px', border: '1px solid #eee',
+                                width: { xs: 36, md: 38 }, height: { xs: 36, md: 38 }, borderRadius: '12px', border: '1px solid #eee',
                                 bgcolor: '#fff', boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
                                 '&:hover': { borderColor: '#BA0000' },
                                 '&:focus-visible': {
@@ -320,7 +333,7 @@ export default function Header() {
                             aria-haspopup="menu"
                             aria-expanded={Boolean(accessAnchor)}
                         >
-                            <Box component="img" src="/Helper.png" sx={{ width: 20, height: 20 }} alt="Accessibility" />
+                            <Box component="img" src="/Helper.png" sx={{ width: 18, height: 18 }} alt="Accessibility" />
                         </IconButton>
                     </Box>
                 </Box>
@@ -342,8 +355,8 @@ export default function Header() {
                                 'aria-label': t('header.searchPlaceholder')
                             }}
                         />
-                        <IconButton 
-                            sx={{ p: '10px' }} 
+                        <IconButton
+                            sx={{ p: '10px' }}
                             onClick={handleSearchSubmit}
                             aria-label={t('header.search')}
                         >
@@ -367,13 +380,13 @@ export default function Header() {
                 onClose={() => setLangAnchor(null)}
                 slotProps={{ paper: { sx: { borderRadius: '15px' } } }}
             >
-                <MenuItem 
+                <MenuItem
                     onClick={() => handleLanguageChange('uk')}
                     sx={{ '&:focus-visible': { outline: '2px solid #BA0000' } }}
                 >
                     {t('header.ukrainian')}
                 </MenuItem>
-                <MenuItem 
+                <MenuItem
                     onClick={() => handleLanguageChange('en')}
                     sx={{ '&:focus-visible': { outline: '2px solid #BA0000' } }}
                 >
@@ -390,19 +403,19 @@ export default function Header() {
                 <Typography variant="overline" sx={{ px: 2, fontWeight: 800, color: '#999' }}>
                     {t('header.viewSite')}
                 </Typography>
-                <MenuItem 
+                <MenuItem
                     onClick={() => changeFontSize('14px')}
                     sx={{ '&:focus-visible': { outline: '2px solid #BA0000' } }}
                 >
                     {t('header.standardText')}
                 </MenuItem>
-                <MenuItem 
+                <MenuItem
                     onClick={() => changeFontSize('17px')}
                     sx={{ '&:focus-visible': { outline: '2px solid #BA0000' } }}
                 >
                     {t('header.enlargedText')}
                 </MenuItem>
-                <MenuItem 
+                <MenuItem
                     onClick={() => changeFontSize('19px')}
                     sx={{ '&:focus-visible': { outline: '2px solid #BA0000' } }}
                 >
