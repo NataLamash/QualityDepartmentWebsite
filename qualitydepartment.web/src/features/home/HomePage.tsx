@@ -19,7 +19,7 @@ const commonGlassStyle = {
     position: 'absolute',
     bottom: 20,
     left: '50%',
-    transform: 'translateX(-50%)', 
+    transform: 'translateX(-50%)',
     width: '90%',
     backdropFilter: 'blur(15px)',
     bgcolor: 'rgba(255, 255, 255, 0.8)',
@@ -51,11 +51,15 @@ const navBtnStyle = {
         color: '#fff',
         transform: 'translateY(-50%) scale(1.1)'
     },
+    '&:focus-visible': {
+        outline: '2px solid #BA0000',
+        outlineOffset: '2px'
+    },
     display: { xs: 'none', md: 'flex' }
 };
 
 export default function HomePage() {
-    const { i18n } = useTranslation();
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
 
     const [news, setNews] = useState<NewsItem[]>([]);
@@ -67,6 +71,12 @@ export default function HomePage() {
 
     const getFullImagePath = (path: string | undefined) => {
         if (!path) return "/placeholder.png";
+        const cleanPath = path.replace(/\\/g, '/').replace(/^\//, '');
+        return `${API_BASE}/${cleanPath}`;
+    };
+
+    const getAdminImagePath = (path: string | undefined) => {
+        if (!path) return "/user-placeholder.png";
         const cleanPath = path.replace(/\\/g, '/').replace(/^\//, '');
         return `${API_BASE}/${cleanPath}`;
     };
@@ -98,7 +108,6 @@ export default function HomePage() {
 
     return (
         <Box sx={{ bgcolor: 'background.default', overflowX: 'hidden' }}>
-
             <Container sx={{ py: 10 }}>
                 <Box sx={{
                     display: 'flex',
@@ -108,13 +117,11 @@ export default function HomePage() {
                     gap: { xs: 4, md: 8 }
                 }}>
                     <Box sx={{ flex: 1.5 }}>
-                        <Typography variant="h2" sx={{ fontWeight: 800, mb: 3, fontSize: { xs: '2.5rem', md: '3.5rem' }, color: '#1a1a1a' }}>
-                            {i18n.language === 'en' ? 'Quality Management' : 'Відділ забезпечення якості'}
+                        <Typography component="h1" variant="h2" sx={{ fontWeight: 800, mb: 3, fontSize: { xs: '2.5rem', md: '3.5rem' }, color: '#1a1a1a' }}>
+                            {t('home.title')}
                         </Typography>
                         <Typography variant="body1" sx={{ color: '#555', fontSize: '1.2rem', lineHeight: 1.8 }}>
-                            {i18n.language === 'en'
-                                ? 'Implementation of standards and quality monitoring in education.'
-                                : 'Впровадження стандартів освітньої діяльності та системний моніторинг якості освіти.'}
+                            {t('home.description')}
                         </Typography>
                     </Box>
 
@@ -128,6 +135,7 @@ export default function HomePage() {
                         }}>
                             <IconButton
                                 onClick={() => newsSwiperRef.current?.slidePrev()}
+                                aria-label={t('accessibility.prevSlide')}
                                 sx={{ ...navBtnStyle, left: 0 }}
                             >
                                 <ChevronLeft />
@@ -141,15 +149,33 @@ export default function HomePage() {
                                 style={{ borderRadius: '40px', height: '580px', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}
                             >
                                 {news.map((item) => (
-                                    <SwiperSlide key={item.id} onClick={() => navigate(`/news/${item.id}`)} style={{ cursor: 'pointer' }}>
+                                    <SwiperSlide
+                                        key={item.id}
+                                        onClick={() => navigate(`/news/${item.id}`)}
+                                        tabIndex={0}
+                                        role="button"
+                                        aria-label={item.title}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' || e.key === ' ') {
+                                                navigate(`/news/${item.id}`);
+                                            }
+                                        }}
+                                        style={{ cursor: 'pointer' }}
+                                    >
                                         <Box sx={{
                                             position: 'relative',
                                             height: '100%',
-                                            '&:hover .glass': { bottom: 30, bgcolor: 'rgba(255, 255, 255, 0.9)' }
+                                            '&:hover .glass': { bottom: 30, bgcolor: 'rgba(255, 255, 255, 0.9)' },
+                                            '&:focus-visible': { outline: '2px solid #BA0000', borderRadius: '40px' }
                                         }}>
                                             <CardMedia
                                                 component="img"
                                                 image={getFullImagePath(item.photoPath)}
+                                                alt={item.title}
+                                                loading="lazy"
+                                                onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                                                    e.currentTarget.src = '/placeholder.png';
+                                                }}
                                                 sx={{
                                                     height: '100%',
                                                     width: '100%',
@@ -168,6 +194,7 @@ export default function HomePage() {
 
                             <IconButton
                                 onClick={() => newsSwiperRef.current?.slideNext()}
+                                aria-label={t('accessibility.nextSlide')}
                                 sx={{ ...navBtnStyle, right: 0 }}
                             >
                                 <ChevronRight />
@@ -180,8 +207,8 @@ export default function HomePage() {
             <AboutBlock />
 
             <Container sx={{ py: 12 }}>
-                <Typography variant="h3" sx={{ mb: 6, fontWeight: 800, color: '#1a1a1a', textAlign: { xs: 'center', md: 'left' } }}>
-                    {i18n.language === 'en' ? 'Our Team' : 'Наша Команада'}
+                <Typography variant="h2" sx={{ mb: 6, fontWeight: 800, color: '#1a1a1a', textAlign: { xs: 'center', md: 'left' }, fontSize: { xs: '2rem', md: '2.8rem' } }}>
+                    {t('home.ourTeam')}
                 </Typography>
 
                 <Box sx={{ position: 'relative' }}>
@@ -193,6 +220,7 @@ export default function HomePage() {
                     }}>
                         <IconButton
                             onClick={() => adminSwiperRef.current?.slidePrev()}
+                            aria-label={t('accessibility.prevSlide')}
                             sx={{ ...navBtnStyle, left: 0 }}
                         >
                             <ChevronLeft />
@@ -213,7 +241,7 @@ export default function HomePage() {
                                 <SwiperSlide key={person.id}>
                                     <Box sx={{
                                         borderRadius: '80px 80px 30px 30px',
-                                        height: 520, 
+                                        height: 520,
                                         position: 'relative',
                                         overflow: 'hidden',
                                         boxShadow: '0 10px 30px rgba(0,0,0,0.06)',
@@ -222,12 +250,17 @@ export default function HomePage() {
                                     }}>
                                         <CardMedia
                                             component="img"
-                                            image={getFullImagePath(person.photoPath)}
+                                            image={getAdminImagePath(person.photoPath)}
+                                            alt={person.fullName}
+                                            loading="lazy"
+                                            onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                                                e.currentTarget.src = '/user-placeholder.png';
+                                            }}
                                             sx={{
                                                 height: '100%',
                                                 width: '100%',
                                                 objectPosition: 'top',
-                                                objectFit: 'cover', 
+                                                objectFit: 'cover',
                                                 transition: '0.6s'
                                             }}
                                         />
@@ -257,6 +290,7 @@ export default function HomePage() {
 
                         <IconButton
                             onClick={() => adminSwiperRef.current?.slideNext()}
+                            aria-label={t('accessibility.nextSlide')}
                             sx={{ ...navBtnStyle, right: 0 }}
                         >
                             <ChevronRight />

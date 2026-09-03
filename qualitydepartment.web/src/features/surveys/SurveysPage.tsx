@@ -24,7 +24,7 @@ const getFullImagePath = (path: string | undefined) => {
 };
 
 export default function SurveysPage() {
-    const { i18n } = useTranslation();
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
 
     const [surveys, setSurveys] = useState<ExternalLink[]>([]);
@@ -65,6 +65,7 @@ export default function SurveysPage() {
         <Box sx={{ bgcolor: '#fff', minHeight: '100vh' }}>
             <Container maxWidth="lg" sx={{ py: { xs: 4, md: 8 } }}>
                 <Typography
+                    component="h1"
                     variant="h2"
                     align="center"
                     sx={{
@@ -74,14 +75,12 @@ export default function SurveysPage() {
                         color: '#1a1a1a',
                     }}
                 >
-                    {lang === 'en' ? 'Surveys' : 'Опитування'}
+                    {t('pages.surveys')}
                 </Typography>
 
                 {surveys.length === 0 ? (
                     <Typography align="center" sx={{ color: '#666', fontSize: '1.1rem' }}>
-                        {lang === 'en'
-                            ? 'No surveys are currently available.'
-                            : 'Наразі доступних опитувань немає.'}
+                        {t('pages.noSurveys')}
                     </Typography>
                 ) : (
                     <Box
@@ -110,11 +109,17 @@ export default function SurveysPage() {
                                         transform: 'translateY(-6px)',
                                         boxShadow: '0 18px 40px rgba(0,0,0,0.08)',
                                     },
+                                    '&:focus-within': {
+                                        outline: '2px solid #BA0000',
+                                        outlineOffset: '2px'
+                                    }
                                 }}
                             >
                                 <CardMedia
                                     component="img"
                                     image={getFullImagePath(survey.photoPath)}
+                                    alt={survey.name}
+                                    loading="lazy"
                                     sx={{
                                         height: { xs: 240, md: 280 },
                                         width: '100%',
@@ -165,9 +170,13 @@ export default function SurveysPage() {
                                                 borderColor: '#900000',
                                                 bgcolor: 'rgba(186,0,0,0.05)',
                                             },
+                                            '&:focus-visible': {
+                                                outline: '2px solid #BA0000',
+                                                outlineOffset: '2px'
+                                            }
                                         }}
                                     >
-                                        {lang === 'en' ? 'Open survey' : 'Відкрити опитування'}
+                                        {t('pages.openSurvey')}
                                     </Button>
                                 </Box>
                             </Box>

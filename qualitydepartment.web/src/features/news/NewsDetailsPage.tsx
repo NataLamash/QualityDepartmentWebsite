@@ -8,18 +8,20 @@ import { useTranslation } from 'react-i18next';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import agent, { type NewsItem, type PagedResponse } from '../../api/agent'; 
+import agent, { type NewsItem, type PagedResponse } from '../../api/agent';
+import LanguageFallbackNotice from '../../components/common/LanguageFallbackNotice';
 
 const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '');
 
 export default function NewsDetailsPage() {
     const { id } = useParams<{ id: string }>();
-    const { i18n } = useTranslation();
+    const { i18n, t } = useTranslation();
     const navigate = useNavigate();
 
     const [news, setNews] = useState<NewsItem | null>(null);
     const [latestNews, setLatestNews] = useState<NewsItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const [hasTranslation, setHasTranslation] = useState(true);
 
     const isEventDetail = window.location.pathname.includes('/events');
 
@@ -38,6 +40,13 @@ export default function NewsDetailsPage() {
                 const details = await agent.News.details(Number(id), lang);
                 setNews(details);
 
+                // Перевірка перекладу (якщо мова EN, але прийшов текст з маркером відсутності або пустий)
+                if (lang === 'en' && !details.title) {
+                    setHasTranslation(false);
+                } else {
+                    setHasTranslation(true);
+                }
+
                 const latestRes = isEventDetail
                     ? await agent.Events.listPaged(1, 4, lang, 'desc')
                     : await agent.News.list(4, lang);
@@ -49,6 +58,7 @@ export default function NewsDetailsPage() {
                 setLatestNews(latestItems.filter((n: NewsItem) => n.id !== Number(id)).slice(0, 3));
             } catch (err) {
                 console.error(err);
+                setNews(null);
             } finally {
                 setLoading(false);
             }
@@ -63,7 +73,32 @@ export default function NewsDetailsPage() {
         </Box>
     );
 
-    if (!news) return <Typography align="center" sx={{ py: 10 }}>Новину не знайдено</Typography>;
+    if (!news) {
+        return (
+            <Container maxWidth="md" sx={{ py: 10, textAlign: 'center' }}>
+                <Typography variant="h4" sx={{ fontWeight: 800, mb: 2, color: '#1a1a1a' }}>
+                    {t('notfound.title')}
+                </Typography>
+                <Typography variant="body1" sx={{ color: '#666', mb: 4 }}>
+                    {t('notfound.description')}
+                </Typography>
+                <Button
+                    variant="contained"
+                    onClick={() => navigate(isEventDetail ? '/events' : '/news')}
+                    startIcon={<ArrowBackIcon />}
+                    sx={{
+                        bgcolor: '#BA0000',
+                        color: '#fff',
+                        fontWeight: 700,
+                        '&:hover': { bgcolor: '#8B0000' },
+                        '&:focus-visible': { outline: '2px solid #BA0000', outlineOffset: '2px' }
+                    }}
+                >
+                    {isEventDetail ? t('content.backToEvents') : t('content.backToNews')}
+                </Button>
+            </Container>
+        );
+    }
 
     return (
         <Box sx={{ bgcolor: '#fff', minHeight: '100vh' }}>
@@ -71,6 +106,8 @@ export default function NewsDetailsPage() {
                 <Box
                     component="img"
                     src={getFullImagePath(news.photoPath)}
+                    alt={news.title || 'Header banner'}
+                    loading="lazy"
                     sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
                 <Box sx={{
@@ -82,14 +119,17 @@ export default function NewsDetailsPage() {
                         <Button
                             startIcon={<ArrowBackIcon />}
                             onClick={() => navigate(isEventDetail ? '/events' : '/news')}
-                            sx={{ color: 'white', mb: 4, textTransform: 'none' }}
+                            sx={{
+                                color: 'white',
+                                mb: 4,
+                                textTransform: 'none',
+                                '&:focus-visible': { outline: '2px solid #fff', outlineOffset: '2px' }
+                            }}
                         >
-                            {isEventDetail
-                                ? (i18n.language === 'en' ? 'Back to Events' : 'Назад до заходів')
-                                : (i18n.language === 'en' ? 'Back to News' : 'Назад до новин')
-                            }
+                            {isEventDetail ? t('content.backToEvents') : t('content.backToNews')}
                         </Button>
-                        <Typography variant="h2" sx={{ color: 'white', fontWeight: 800, mb: 2, fontSize: { xs: '2rem', md: '3.5rem' } }}>
+
+                        <Typography variant="h1" sx={{ color: 'white', fontWeight: 800, mb: 2, fontSize: { xs: '2rem', md: '3.5rem' } }}>
                             {news.title}
                         </Typography>
                         <Stack direction="row" spacing={3} sx={{ color: 'rgba(255,255,255,0.8)', alignItems: 'center' }}>
@@ -99,7 +139,7 @@ export default function NewsDetailsPage() {
                             </Stack>
                             <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                                 <AccessTimeIcon fontSize="small" />
-                                <Typography>3 {i18n.language === 'en' ? 'min read' : 'хв читання'}</Typography>
+                                <Typography>3 {t('content.minRead')}</Typography>
                             </Stack>
                         </Stack>
                     </Container>
@@ -107,8 +147,9 @@ export default function NewsDetailsPage() {
             </Box>
 
             <Container maxWidth="lg">
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <LanguageFallbackNotice hasTranslation={hasTranslation} />
 
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     <Box sx={{ width: '100%' }}>
                         <Box sx={{
                             '& p': { fontSize: '1.2rem', lineHeight: 1.8, mb: 3, color: '#333' },
@@ -122,11 +163,8 @@ export default function NewsDetailsPage() {
 
                     {latestNews.length > 0 && (
                         <Box sx={{ mb: 6, width: '100%' }}>
-                            <Typography variant="h4" sx={{ fontWeight: 800, mb: 4 }}>
-                                {isEventDetail
-                                    ? (i18n.language === 'en' ? 'Latest Events' : 'Останні заходи')
-                                    : (i18n.language === 'en' ? 'Latest News' : 'Останні новини')
-                                }
+                            <Typography variant="h2" sx={{ fontWeight: 800, mb: 4, fontSize: { xs: '1.5rem', md: '2rem' } }}>
+                                {isEventDetail ? t('content.latestEvents') : t('content.latestNews')}
                             </Typography>
 
                             <Box sx={{
@@ -146,6 +184,12 @@ export default function NewsDetailsPage() {
                                         <Paper
                                             elevation={0}
                                             onClick={() => navigate(isEventDetail ? `/events/${item.id}` : `/news/${item.id}`)}
+                                            tabIndex={0}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                    navigate(isEventDetail ? `/events/${item.id}` : `/news/${item.id}`);
+                                                }
+                                            }}
                                             sx={{
                                                 cursor: 'pointer',
                                                 bgcolor: '#f9f9f9',
@@ -158,6 +202,10 @@ export default function NewsDetailsPage() {
                                                 '&:hover': {
                                                     boxShadow: '0 10px 25px rgba(0,0,0,0.05)',
                                                     '& img': { transform: 'scale(1.03)' }
+                                                },
+                                                '&:focus-visible': {
+                                                    outline: '2px solid #BA0000',
+                                                    outlineOffset: '2px'
                                                 }
                                             }}
                                         >
@@ -165,6 +213,8 @@ export default function NewsDetailsPage() {
                                                 <Box
                                                     component="img"
                                                     src={getFullImagePath(item.photoPath)}
+                                                    alt={item.title}
+                                                    loading="lazy"
                                                     sx={{ width: '100%', height: '100%', objectFit: 'cover', transition: '0.4s' }}
                                                 />
                                             </Box>

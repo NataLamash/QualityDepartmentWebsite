@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Box, Button, CircularProgress, Container, Typography } from '@mui/material';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import agent, { type DocumentItem } from '../../api/agent';
+import LanguageFallbackNotice from '../../components/common/LanguageFallbackNotice';
 
 const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '');
 
@@ -19,7 +20,7 @@ const getFullFilePath = (path: string) => {
 export default function DocumentSearchPreviewPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const { i18n } = useTranslation();
+    const { i18n, t } = useTranslation();
 
     const lang = i18n.language.startsWith('en') ? 'en' : 'ua';
 
@@ -27,26 +28,13 @@ export default function DocumentSearchPreviewPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    const text = useMemo(
-        () => ({
-            back: lang === 'en' ? 'Back to archive' : 'Назад до архіву',
-            notFound: lang === 'en' ? 'Document not found.' : 'Документ не знайдено.',
-            error:
-                lang === 'en'
-                    ? 'Failed to load document preview.'
-                    : 'Не вдалося завантажити перегляд документа.',
-            download: lang === 'en' ? 'Download' : 'Завантажити',
-        }),
-        [lang]
-    );
-
     useEffect(() => {
         let active = true;
 
         const loadDocument = async () => {
             if (!id) {
                 setLoading(false);
-                setError(text.notFound);
+                setError(t('notfound.title'));
                 return;
             }
 
@@ -60,7 +48,7 @@ export default function DocumentSearchPreviewPage() {
                 if (!active) return;
 
                 if (!found) {
-                    setError(text.notFound);
+                    setError(t('notfound.title'));
                     setDocumentItem(null);
                 } else {
                     setDocumentItem(found);
@@ -68,7 +56,7 @@ export default function DocumentSearchPreviewPage() {
             } catch (err) {
                 console.error('Document preview load error:', err);
                 if (active) {
-                    setError(text.error);
+                    setError(t('content.docLoadError'));
                 }
             } finally {
                 if (active) {
@@ -82,13 +70,15 @@ export default function DocumentSearchPreviewPage() {
         return () => {
             active = false;
         };
-    }, [id, lang, text.error, text.notFound]);
+    }, [id, lang, t]);
 
     const fileUrl = documentItem?.filePath ? getFullFilePath(documentItem.filePath) : '';
     const title =
         (lang === 'en'
             ? documentItem?.nameEn || documentItem?.name
             : documentItem?.nameUa || documentItem?.name) || 'PDF';
+
+    const hasTranslation = Boolean(lang === 'ua' || (documentItem && (documentItem.nameEn || documentItem.name)));
 
     return (
         <Box sx={{ bgcolor: '#fff', minHeight: '100vh' }}>
@@ -107,10 +97,16 @@ export default function DocumentSearchPreviewPage() {
                             bgcolor: 'rgba(184,0,0,0.04)',
                             borderColor: '#B80000',
                         },
+                        '&:focus-visible': {
+                            outline: '2px solid #BA0000',
+                            outlineOffset: '2px'
+                        }
                     }}
                 >
-                    {text.back}
+                    {t('content.backToArchive')}
                 </Button>
+
+                <LanguageFallbackNotice hasTranslation={hasTranslation} />
 
                 {loading && (
                     <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
@@ -119,9 +115,14 @@ export default function DocumentSearchPreviewPage() {
                 )}
 
                 {!loading && error && (
-                    <Typography sx={{ color: '#BA0000', fontWeight: 700 }}>
-                        {error}
-                    </Typography>
+                    <Box sx={{ py: 6, textAlign: 'center' }}>
+                        <Typography variant="h5" sx={{ color: '#BA0000', fontWeight: 700, mb: 2 }}>
+                            {error}
+                        </Typography>
+                        <Typography variant="body1" sx={{ color: '#666', mb: 3 }}>
+                            {t('notfound.description')}
+                        </Typography>
+                    </Box>
                 )}
 
                 {!loading && !error && documentItem && (
@@ -136,7 +137,7 @@ export default function DocumentSearchPreviewPage() {
                                 mb: 3,
                             }}
                         >
-                            <Typography variant="h4" sx={{ fontWeight: 800 }}>
+                            <Typography variant="h1" sx={{ fontWeight: 800, fontSize: { xs: '1.8rem', md: '2.5rem' } }}>
                                 {title}
                             </Typography>
 
@@ -159,9 +160,13 @@ export default function DocumentSearchPreviewPage() {
                                         borderColor: '#900000',
                                         bgcolor: 'rgba(186,0,0,0.05)',
                                     },
+                                    '&:focus-visible': {
+                                        outline: '2px solid #BA0000',
+                                        outlineOffset: '2px'
+                                    }
                                 }}
                             >
-                                {text.download}
+                                {t('content.download')}
                             </Button>
                         </Box>
 

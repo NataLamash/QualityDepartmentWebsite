@@ -26,31 +26,9 @@ interface DocumentPageProps {
 }
 
 export default function DocumentPage({ isQualityPage = false }: DocumentPageProps) {
-    const { i18n } = useTranslation();
+    const { t, i18n } = useTranslation();
     const lang = getLang(i18n.language);
     const [searchParams] = useSearchParams();
-
-    const text = {
-
-        title: isQualityPage
-            ? (lang === 'en' ? 'Quality Evaluation' : 'Оцінювання якості')
-            : (lang === 'en' ? 'Documents' : 'Документи'),
-        filters: lang === 'en' ? 'Filters' : 'Фільтри',
-        category: lang === 'en' ? 'Category' : 'Категорія',
-        date: lang === 'en' ? 'Choose date' : 'Оберіть дату',
-        search: lang === 'en' ? 'Search' : 'Пошук',
-        sort: lang === 'en' ? 'Sorting' : 'Сортування',
-        newest: lang === 'en' ? 'Newest first' : 'Спочатку нові',
-        oldest: lang === 'en' ? 'Oldest first' : 'Спочатку старі',
-        az: lang === 'en' ? 'Alphabetically A–Z' : 'За алфавітом А–Я',
-        za: lang === 'en' ? 'Alphabetically Z–A' : 'За алфавітом Я–А',
-        allCategories: lang === 'en' ? 'All categories' : 'Усі категорії',
-        apply: lang === 'en' ? 'APPLY' : 'ЗАСТОСУВАТИ',
-        loadMore: lang === 'en' ? 'Load more' : 'Завантажити більше',
-        noDocuments: lang === 'en' ? 'No documents found' : 'Документи не знайдено',
-        error: lang === 'en' ? 'Failed to load documents' : 'Не вдалося завантажити документи',
-        namePlaceholder: lang === 'en' ? 'Title' : 'Назва',
-    };
 
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
     const [viewMode, setViewMode] = useState<ViewMode>('icons');
@@ -163,7 +141,7 @@ export default function DocumentPage({ isQualityPage = false }: DocumentPageProp
             const response = await fetch(fileUrl);
 
             if (!response.ok) {
-                throw new Error('Не вдалося завантажити файл');
+                throw new Error('Failed to download file');
             }
 
             const blob = await response.blob();
@@ -184,8 +162,8 @@ export default function DocumentPage({ isQualityPage = false }: DocumentPageProp
             link.remove();
 
             window.URL.revokeObjectURL(blobUrl);
-        } catch (error) {
-            console.error('Download error:', error);
+        } catch (err) {
+            console.error('Download error:', err);
         }
     };
 
@@ -206,7 +184,7 @@ export default function DocumentPage({ isQualityPage = false }: DocumentPageProp
     return (
         <Container maxWidth="xl" sx={pageContainerSx}>
             <Typography component="h1" variant="h2" align="center" sx={pageTitleSx}>
-                {text.title}
+                {isQualityPage ? t('pages.qualityEvaluation') : t('pages.documents')}
             </Typography>
 
             {isQualityPage && (
@@ -222,9 +200,9 @@ export default function DocumentPage({ isQualityPage = false }: DocumentPageProp
                     }}
                 >
                     {appliedCategory === 'all'
-                        ? (lang === 'en' ? 'All sections' : 'Усі документи розділу')
+                        ? t('filters.allSections')
                         : (lang === 'en'
-                            ? (appliedCategory === 'Внутрішнє оцінювання якості' ? 'Internal Quality Evaluation' : 'External Quality Evaluation')
+                            ? (appliedCategory === 'Внутрішнє оцінювання якості' ? t('header.internalQuality') : t('header.externalQuality'))
                             : appliedCategory
                         )
                     }
@@ -232,7 +210,7 @@ export default function DocumentPage({ isQualityPage = false }: DocumentPageProp
             )}
 
             <DocumentsTopBar
-                filtersLabel={text.filters}
+                filtersLabel={t('filters.filters')}
                 viewMode={viewMode}
                 onOpenFilters={(e) => setAnchorEl(e.currentTarget)}
                 onToggleView={handleToggleView}
@@ -248,13 +226,13 @@ export default function DocumentPage({ isQualityPage = false }: DocumentPageProp
 
             {!loading && !!error && (
                 <Typography component="p" sx={errorTextSx}>
-                    {text.error}
+                    {t('filters.errorLoading')}
                 </Typography>
             )}
 
             {!loading && !error && dateFilteredDocuments.length === 0 && (
                 <Typography component="p" sx={emptyTextSx}>
-                    {text.noDocuments}
+                    {t('filters.noDocuments')}
                 </Typography>
             )}
 
@@ -262,7 +240,7 @@ export default function DocumentPage({ isQualityPage = false }: DocumentPageProp
                 <DocumentsListView
                     documents={visibleDocuments}
                     lang={lang}
-                    namePlaceholder={text.namePlaceholder}
+                    namePlaceholder={t('filters.titlePlaceholder')}
                     getFullFilePath={getFullFilePath}
                     onPreview={handleOpenPreview}
                     onDownload={handleDownloadDocument}
@@ -273,7 +251,7 @@ export default function DocumentPage({ isQualityPage = false }: DocumentPageProp
                 <DocumentsGridView
                     documents={visibleDocuments}
                     lang={lang}
-                    namePlaceholder={text.namePlaceholder}
+                    namePlaceholder={t('filters.titlePlaceholder')}
                     getFullFilePath={getFullFilePath}
                     onPreview={handleOpenPreview}
                     onDownload={handleDownloadDocument}
@@ -289,12 +267,17 @@ export default function DocumentPage({ isQualityPage = false }: DocumentPageProp
                             <Box
                                 component="img"
                                 src="/material-symbols_replay.png"
+                                alt=""
+                                aria-hidden="true"
                                 sx={{ width: 22 }}
                             />
                         }
-                        sx={loadMoreButtonSx}
+                        sx={{
+                            ...loadMoreButtonSx,
+                            '&:focus-visible': { outline: '2px solid #BA0000', outlineOffset: '2px' }
+                        }}
                     >
-                        {text.loadMore}
+                        {t('filters.loadMore')}
                     </Button>
                 </Box>
             )}
@@ -304,17 +287,17 @@ export default function DocumentPage({ isQualityPage = false }: DocumentPageProp
                 anchorEl={anchorEl}
                 onClose={() => setAnchorEl(null)}
                 onApply={handleApplyFilters}
-                title={text.filters}
-                categoryLabel={text.category}
-                dateLabel={text.date}
-                searchLabel={text.search}
-                sortLabel={text.sort}
-                applyLabel={text.apply}
-                allCategoriesLabel={text.allCategories}
-                newestLabel={text.newest}
-                oldestLabel={text.oldest}
-                azLabel={text.az}
-                zaLabel={text.za}
+                title={t('filters.filters')}
+                categoryLabel={t('filters.category')}
+                dateLabel={t('filters.chooseDate')}
+                searchLabel={t('filters.search')}
+                sortLabel={t('filters.sorting')}
+                applyLabel={t('filters.apply')}
+                allCategoriesLabel={t('filters.allCategories')}
+                newestLabel={t('filters.newest')}
+                oldestLabel={t('filters.oldest')}
+                azLabel={t('filters.az')}
+                zaLabel={t('filters.za')}
                 categories={categories}
                 tempCategory={tempCategory}
                 tempDate={tempDate}

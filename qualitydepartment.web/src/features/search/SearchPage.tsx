@@ -19,42 +19,8 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import agent, { type GlobalSearchResultItem } from '../../api/agent';
 
-const getTypeMeta = (type: string, lang: 'ua' | 'en') => {
-    switch (type) {
-        case 'News':
-            return {
-                label: lang === 'en' ? 'News' : 'Новина',
-                icon: <ArticleRoundedIcon fontSize="small" />,
-            };
-        case 'Document':
-            return {
-                label: lang === 'en' ? 'Document' : 'Документ',
-                icon: <DescriptionRoundedIcon fontSize="small" />,
-            };
-        case 'ExternalLink':
-            return {
-                label: lang === 'en' ? 'Useful information' : 'Корисна інформація',
-                icon: <LinkRoundedIcon fontSize="small" />,
-            };
-        default:
-            return {
-                label: type,
-                icon: <SearchRoundedIcon fontSize="small" />,
-            };
-    }
-};
-
-const formatDate = (date: string, lang: 'ua' | 'en') => {
-    const locale = lang === 'en' ? 'en-GB' : 'uk-UA';
-    return new Date(date).toLocaleDateString(locale, {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-    });
-};
-
 export default function SearchPage() {
-    const { i18n } = useTranslation();
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -68,22 +34,38 @@ export default function SearchPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    const text = {
-        title: lang === 'en' ? 'Search results' : 'Результати пошуку',
-        searchingFor: lang === 'en' ? 'Search query' : 'Пошуковий запит',
-        empty:
-            lang === 'en'
-                ? 'No results found for your query.'
-                : 'За вашим запитом нічого не знайдено.',
-        tooShort:
-            lang === 'en'
-                ? 'Enter at least 3 characters.'
-                : 'Введіть щонайменше 3 символи.',
-        error:
-            lang === 'en'
-                ? 'Failed to load search results.'
-                : 'Не вдалося завантажити результати пошуку.',
-        open: lang === 'en' ? 'Open' : 'Відкрити',
+    const getTypeMeta = (type: string) => {
+        switch (type) {
+            case 'News':
+                return {
+                    label: t('search.typeNews'),
+                    icon: <ArticleRoundedIcon fontSize="small" />,
+                };
+            case 'Document':
+                return {
+                    label: t('search.typeDocument'),
+                    icon: <DescriptionRoundedIcon fontSize="small" />,
+                };
+            case 'ExternalLink':
+                return {
+                    label: t('search.typeExternalLink'),
+                    icon: <LinkRoundedIcon fontSize="small" />,
+                };
+            default:
+                return {
+                    label: type,
+                    icon: <SearchRoundedIcon fontSize="small" />,
+                };
+        }
+    };
+
+    const formatDate = (date: string) => {
+        const locale = lang === 'en' ? 'en-GB' : 'uk-UA';
+        return new Date(date).toLocaleDateString(locale, {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+        });
     };
 
     useEffect(() => {
@@ -98,7 +80,7 @@ export default function SearchPage() {
 
             if (query.length < 3) {
                 setResults([]);
-                setError(text.tooShort);
+                setError(t('search.tooShort'));
                 return;
             }
 
@@ -114,7 +96,7 @@ export default function SearchPage() {
             } catch (err) {
                 console.error('Search error:', err);
                 if (active) {
-                    setError(text.error);
+                    setError(t('search.error'));
                     setResults([]);
                 }
             } finally {
@@ -129,7 +111,7 @@ export default function SearchPage() {
         return () => {
             active = false;
         };
-    }, [query, lang, text.error, text.tooShort]);
+    }, [query, lang, t]);
 
     const handleOpenResult = (item: GlobalSearchResultItem) => {
         if (item.type === 'ExternalLink') {
@@ -151,9 +133,10 @@ export default function SearchPage() {
                         fontWeight: 800,
                         mb: 2,
                         fontSize: { xs: '2.3rem', md: '3.5rem' },
+                        color: '#1a1a1a',
                     }}
                 >
-                    {text.title}
+                    {t('search.title')}
                 </Typography>
 
                 <Typography
@@ -164,7 +147,7 @@ export default function SearchPage() {
                         fontSize: '1.05rem',
                     }}
                 >
-                    {text.searchingFor}: <strong>{query || '—'}</strong>
+                    {t('search.searchingFor')}: <strong>{query || '—'}</strong>
                 </Typography>
 
                 {loading && (
@@ -174,7 +157,7 @@ export default function SearchPage() {
                 )}
 
                 {!loading && error && (
-                    <Alert severity="warning" sx={{ mb: 4 }}>
+                    <Alert severity="warning" sx={{ mb: 4, borderRadius: '16px' }}>
                         {error}
                     </Alert>
                 )}
@@ -191,7 +174,7 @@ export default function SearchPage() {
                         }}
                     >
                         <Typography sx={{ color: '#666', fontSize: '1.05rem' }}>
-                            {text.empty}
+                            {t('search.empty')}
                         </Typography>
                     </Paper>
                 )}
@@ -199,7 +182,7 @@ export default function SearchPage() {
                 {!loading && !error && results.length > 0 && (
                     <Stack spacing={3}>
                         {results.map((item) => {
-                            const typeMeta = getTypeMeta(item.type, lang);
+                            const typeMeta = getTypeMeta(item.type);
 
                             return (
                                 <Paper
@@ -241,12 +224,14 @@ export default function SearchPage() {
                                                     }}
                                                 />
 
-                                                <Typography
-                                                    variant="caption"
-                                                    sx={{ color: '#888', fontWeight: 600 }}
-                                                >
-                                                    {formatDate(item.publishDate, lang)}
-                                                </Typography>
+                                                {item.publishDate && (
+                                                    <Typography
+                                                        variant="caption"
+                                                        sx={{ color: '#888', fontWeight: 600 }}
+                                                    >
+                                                        {formatDate(item.publishDate)}
+                                                    </Typography>
+                                                )}
                                             </Box>
 
                                             <Typography
@@ -261,15 +246,17 @@ export default function SearchPage() {
                                                 {item.title}
                                             </Typography>
 
-                                            <Typography
-                                                sx={{
-                                                    color: '#555',
-                                                    lineHeight: 1.8,
-                                                    mb: 0,
-                                                }}
-                                            >
-                                                {item.shortDescription || ''}
-                                            </Typography>
+                                            {item.shortDescription && (
+                                                <Typography
+                                                    sx={{
+                                                        color: '#555',
+                                                        lineHeight: 1.8,
+                                                        mb: 0,
+                                                    }}
+                                                >
+                                                    {item.shortDescription}
+                                                </Typography>
+                                            )}
                                         </Box>
 
                                         <Button
@@ -289,9 +276,13 @@ export default function SearchPage() {
                                                     borderColor: '#900000',
                                                     bgcolor: 'rgba(186,0,0,0.05)',
                                                 },
+                                                '&:focus-visible': {
+                                                    outline: '2px solid #BA0000',
+                                                    outlineOffset: '2px',
+                                                },
                                             }}
                                         >
-                                            {text.open}
+                                            {t('search.open')}
                                         </Button>
                                     </Box>
                                 </Paper>
