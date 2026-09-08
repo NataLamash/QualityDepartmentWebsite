@@ -301,6 +301,18 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
                 ConcurrencyStamp = "1912dca2-3106-41d3-990b-1b71ec296577"
             }
         );
+        modelBuilder.Entity<ApplicationUser>().HasData(new ApplicationUser
+        {
+            Id = 3,
+            UserName = "natalama1204",
+            NormalizedUserName = "NATALAMA1204",
+            Email = "natalama1204@gmail.com",
+            NormalizedEmail = "NATALAMA1204@GMAIL.COM",
+            EmailConfirmed = true,
+            SecurityStamp = "A841DB52-91C4-4B62-92D8-72D1B47C3185",
+            ConcurrencyStamp = "E7523B11-2B5C-4476-A1A5-F203C35C2F14",
+            PasswordHash = "AQAAAAIAAYagAAAAEGjthsKhOUSp3G03HRX9BAr1z7mpyb50xhBHWx94BDJsVpnJKMGRw+UpxEBFqY2EgA=="
+        });
 
         var hasher = new PasswordHasher<ApplicationUser>();
         modelBuilder.Entity<ApplicationUser>().HasData(new ApplicationUser
@@ -339,6 +351,12 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
         {
             UserId = 2,
             RoleId = 2
+        });
+
+        modelBuilder.Entity<IdentityUserRole<int>>().HasData(new IdentityUserRole<int>
+        {
+            UserId = 3,
+            RoleId = 1
         });
 
         modelBuilder.Entity<DocumentCategory>().HasData(

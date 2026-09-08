@@ -4,11 +4,17 @@ import {
     Box,
     Button,
     CircularProgress,
+    Link as MuiLink,
     Paper,
     TextField,
     Typography,
 } from '@mui/material';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import {
+    Link as RouterLink,
+    Navigate,
+    useLocation,
+    useNavigate,
+} from 'react-router-dom';
 import { useAuth } from './AuthProvider';
 
 const getApiError = (error: unknown) => {
@@ -43,7 +49,7 @@ export default function LoginPage() {
         return <Navigate to="/dashboard" replace />;
     }
 
-    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
         event.preventDefault();
 
         try {
@@ -127,6 +133,14 @@ export default function LoginPage() {
                             fullWidth
                             required
                         />
+
+                        <MuiLink
+                            component={RouterLink}
+                            to="/forgot-password"
+                            sx={{ alignSelf: 'flex-end' }}
+                        >
+                            Забули пароль?
+                        </MuiLink>
 
                         <Button
                             type="submit"

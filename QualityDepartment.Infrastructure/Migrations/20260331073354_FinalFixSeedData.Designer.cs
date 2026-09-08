@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using QualityDepartment.Infrastructure.Data;
+using Microsoft.AspNetCore.Identity;
+using QualityDepartment.Core.Entities;
 
 #nullable disable
 

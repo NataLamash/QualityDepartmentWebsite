@@ -12,6 +12,16 @@ export interface LoginDto {
     password: string;
 }
 
+export interface ForgotPasswordDto {
+    email: string;
+}
+
+export interface ResetPasswordDto {
+    email: string;
+    token: string;
+    newPassword: string;
+}
+
 export interface AuthResponseDto {
     token: string;
     username: string;
@@ -55,7 +65,13 @@ const agent = {
     Auth: {
     login: (body: LoginDto) =>
         requests.post<ApiResponse<AuthResponseDto>>('/admin/auth/login', body),
-    },
+
+    forgotPassword: (body: ForgotPasswordDto) =>
+        requests.post<ApiResponse<boolean>>('/admin/auth/forgot-password', body),
+
+    resetPassword: (body: ResetPasswordDto) =>
+        requests.post<ApiResponse<boolean>>('/admin/auth/reset-password', body),
+},
    News: {
     list: (page = 1, pageSize = 50, search = '') =>
         requests.get<any>(

@@ -2,6 +2,8 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import AdminLayout from '../layout/AdminLayout';
 import ProtectedRoute from '../../components/ui/ProtectedRoute';
 import LoginPage from '../../features/auth/LoginPage';
+import ForgotPasswordPage from '../../features/auth/ForgotPasswordPage';
+import ResetPasswordPage from '../../features/auth/ResetPasswordPage';
 import DashboardPage from '../../features/dashboard/DashboardPage';
 import NewsAdminPage from '../../features/news/NewsAdminPage';
 import DocumentsAdminPage from '../../features/documents/DocumentsAdminPage';
@@ -10,12 +12,21 @@ import UsefulInformationPage from '../../features/useful-information/UsefulInfor
 import CategoriesPage from '../../features/categories/CategoriesPage';
 import TagsPage from '../../features/tags/TagsPage';
 import SurveysAdminPage from '../../features/surveys/SurveysAdminPage';
+import EventsAdminPage from '../../features/events/EventsAdminPage';
+import QualityAssessmentAdminPage from '../../features/quality-assessment/QualityAssessmentAdminPage';
 
 export default function AppRouter() {
     return (
         <Routes>
             <Route path="/login" element={<LoginPage />} />
-
+            <Route
+                path="/forgot-password"
+                element={<ForgotPasswordPage />}
+            />
+            <Route
+                path="/reset-password"
+                element={<ResetPasswordPage />}
+            />
             <Route element={<ProtectedRoute />}>
                 <Route element={<AdminLayout />}>
                     <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -27,6 +38,16 @@ export default function AppRouter() {
                     <Route path="/categories" element={<CategoriesPage />} />
                     <Route path="/tags" element={<TagsPage />} />
                     <Route path="/surveys" element={<SurveysAdminPage />} />
+                    <Route path="/events" element={<EventsAdminPage />} />
+                    <Route path="/quality-assessment" element={<Navigate to="/quality-assessment/internal" replace />} />
+                    <Route
+                        path="/quality-assessment/internal"
+                        element={<QualityAssessmentAdminPage mode="internal" />}
+                    />
+                    <Route
+                        path="/quality-assessment/external"
+                        element={<QualityAssessmentAdminPage mode="external" />}
+                    />
                 </Route>
             </Route>
 

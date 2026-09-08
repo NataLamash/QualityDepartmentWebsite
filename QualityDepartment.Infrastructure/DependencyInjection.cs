@@ -72,6 +72,7 @@ namespace QualityDepartment.Infrastructure
                 };
             });
 
+            services.AddScoped<EmailService>();
             services.AddScoped<AuthService>();
 
 

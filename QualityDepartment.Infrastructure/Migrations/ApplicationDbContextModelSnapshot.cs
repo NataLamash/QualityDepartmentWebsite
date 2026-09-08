@@ -151,6 +151,11 @@ namespace QualityDepartment.Infrastructure.Migrations
                         {
                             UserId = 2,
                             RoleId = 2
+                        },
+                        new
+                        {
+                            UserId = 3,
+                            RoleId = 1
                         });
                 });
 
@@ -345,6 +350,22 @@ namespace QualityDepartment.Infrastructure.Migrations
                     b.ToTable("AspNetUsers", (string)null);
 
                     b.HasData(
+                        new
+                        {
+                            Id = 3,
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "E7523B11-2B5C-4476-A1A5-F203C35C2F14",
+                            Email = "natalama1204@gmail.com",
+                            EmailConfirmed = true,
+                            LockoutEnabled = false,
+                            NormalizedEmail = "NATALAMA1204@GMAIL.COM",
+                            NormalizedUserName = "NATALAMA1204",
+                            PasswordHash = "AQAAAAIAAYagAAAAEGjthsKhOUSp3G03HRX9BAr1z7mpyb50xhBHWx94BDJsVpnJKMGRw+UpxEBFqY2EgA==",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "A841DB52-91C4-4B62-92D8-72D1B47C3185",
+                            TwoFactorEnabled = false,
+                            UserName = "natalama1204"
+                        },
                         new
                         {
                             Id = 1,

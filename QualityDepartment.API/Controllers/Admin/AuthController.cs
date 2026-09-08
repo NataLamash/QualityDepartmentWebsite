@@ -22,5 +22,41 @@ namespace QualityDepartment.API.Controllers
 
             return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result));
         }
+
+        [HttpPost("forgot-password")]
+        public async Task<ActionResult<ApiResponse<bool>>> ForgotPassword(
+            [FromBody] ForgotPasswordDto dto)
+        {
+            await _authService.ForgotPasswordAsync(dto.Email);
+
+            return Ok(
+                ApiResponse<bool>.SuccessResponse(
+                    true,
+                    "Якщо обліковий запис з такою електронною адресою існує, ми надіслали інструкції для відновлення пароля."));
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<ActionResult<ApiResponse<bool>>> ResetPassword(
+            [FromBody] ResetPasswordDto dto)
+        {
+            var result = await _authService.ResetPasswordAsync(dto);
+
+            if (!result.Succeeded)
+            {
+                var errors = result.Errors
+                    .Select(error => error.Code)
+                    .ToList();
+
+                return BadRequest(
+                    ApiResponse<bool>.FailureResponse(
+                        errors,
+                        "PASSWORD_RESET_FAILED"));
+            }
+
+            return Ok(
+                ApiResponse<bool>.SuccessResponse(
+                    true,
+                    "Пароль успішно змінено."));
+        }
     }
 }
