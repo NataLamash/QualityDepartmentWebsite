@@ -27,7 +27,8 @@ namespace QualityDepartment.Infrastructure
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseMySQL(connectionString!));
 
-            services.AddIdentity<ApplicationUser, IdentityRole<int>>(options => {
+            services.AddIdentity<ApplicationUser, IdentityRole<int>>(options =>
+            {
                 options.Password.RequireDigit = false;
                 options.Password.RequiredLength = 6;
                 options.Password.RequireNonAlphanumeric = false;
@@ -40,6 +41,8 @@ namespace QualityDepartment.Infrastructure
             {
                 options.AddPolicy("AdminOnly", policy =>
                     policy.RequireRole("Admin", "SuperAdmin"));
+                options.AddPolicy("SuperAdminOnly", policy =>
+                    policy.RequireRole("SuperAdmin"));
             });
 
             services.AddScoped<NewsService>();
@@ -51,13 +54,19 @@ namespace QualityDepartment.Infrastructure
             services.AddScoped<CategoryService>();
             services.AddScoped<TagService>();
             services.AddScoped<SearchService>();
+            services.AddScoped<EmailService>();
+            services.AddScoped<AuthService>();
+            services.AddScoped<ProfileService>();
+            services.AddScoped<AdminUserService>();
 
             var jwtKey = configuration["Jwt:Key"];
-            services.AddAuthentication(options => {
+            services.AddAuthentication(options =>
+            {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-            .AddJwtBearer(options => {
+            .AddJwtBearer(options =>
+            {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
@@ -71,10 +80,6 @@ namespace QualityDepartment.Infrastructure
                     NameClaimType = ClaimTypes.Name
                 };
             });
-
-            services.AddScoped<EmailService>();
-            services.AddScoped<AuthService>();
-
 
             services.AddAutoMapper(config =>
             {

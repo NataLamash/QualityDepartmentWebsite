@@ -2,9 +2,12 @@ import { Box, Button, Typography } from '@mui/material';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../features/auth/AuthProvider';
+import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 
 const titleMap: Record<string, string> = {
     '/dashboard': 'Панель керування',
+    '/profile': 'Мій профіль',
+    '/admin-users': 'Адміністратори',
     '/news': 'Новини',
     '/events': 'Заходи',
     '/documents': 'Документи',
@@ -74,6 +77,24 @@ export default function AdminHeader() {
                     >
                         {user?.username || 'Адміністратор'}
                     </Box>
+
+                    <Button
+                        onClick={() => navigate('/profile')}
+                        startIcon={<PersonRoundedIcon />}
+                        sx={{
+                            borderRadius: '999px',
+                            border: '1px solid #E5E5E5',
+                            color: '#B80000',
+                            px: 2,
+                            textTransform: 'none',
+                            '&:hover': {
+                                borderColor: '#B80000',
+                                bgcolor: 'rgba(184,0,0,0.04)',
+                            },
+                        }}
+                    >
+                        Мій профіль
+                    </Button>
 
                     <Button
                         onClick={handleLogout}

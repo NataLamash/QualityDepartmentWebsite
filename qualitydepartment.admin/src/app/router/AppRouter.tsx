@@ -14,7 +14,8 @@ import TagsPage from '../../features/tags/TagsPage';
 import SurveysAdminPage from '../../features/surveys/SurveysAdminPage';
 import EventsAdminPage from '../../features/events/EventsAdminPage';
 import QualityAssessmentAdminPage from '../../features/quality-assessment/QualityAssessmentAdminPage';
-
+import ProfilePage from '../../features/profile/ProfilePage';
+import AdminUsersPage from '../../features/admin-users/AdminUsersPage';
 export default function AppRouter() {
     return (
         <Routes>
@@ -31,6 +32,8 @@ export default function AppRouter() {
                 <Route element={<AdminLayout />}>
                     <Route path="/" element={<Navigate to="/dashboard" replace />} />
                     <Route path="/dashboard" element={<DashboardPage />} />
+                    <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/admin-users" element={<AdminUsersPage />} />
                     <Route path="/news" element={<NewsAdminPage />} />
                     <Route path="/documents" element={<DocumentsAdminPage />} />
                     <Route path="/administration" element={<AdministrationMembersPage />} />

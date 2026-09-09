@@ -28,6 +28,54 @@ export interface AuthResponseDto {
     roles: string[];
 }
 
+export type AdminRole =
+    | 'Admin'
+    | 'SuperAdmin';
+
+export interface AdminUserDto {
+    id: number;
+    email: string;
+    firstName: string | null;
+    lastName: string | null;
+    patronymic: string | null;
+    phoneNumber: string | null;
+    role: AdminRole;
+    isBlocked: boolean;
+    isCurrentUser: boolean;
+}
+
+export interface UpdateAdminUserDto {
+    lastName: string;
+    firstName: string;
+    patronymic: string | null;
+    email: string;
+    phoneNumber: string | null;
+}
+
+export interface ChangeAdminRoleDto {
+    role: AdminRole;
+}
+export interface AdminProfileDto {
+    lastName: string | null;
+    firstName: string | null;
+    patronymic: string | null;
+    email: string;
+    phoneNumber: string | null;
+}
+
+export interface UpdateAdminProfileDto {
+    lastName: string;
+    firstName: string;
+    patronymic: string | null;
+    email: string;
+    phoneNumber: string | null;
+}
+
+export interface ChangePasswordDto {
+    currentPassword: string;
+    newPassword: string;
+}
+
 export interface CategoryAdminDto {
     id: number;
     nameUa: string;
@@ -63,59 +111,114 @@ const requests = {
 
 const agent = {
     Auth: {
-    login: (body: LoginDto) =>
-        requests.post<ApiResponse<AuthResponseDto>>('/admin/auth/login', body),
+        login: (body: LoginDto) =>
+            requests.post<ApiResponse<AuthResponseDto>>('/admin/auth/login', body),
 
-    forgotPassword: (body: ForgotPasswordDto) =>
-        requests.post<ApiResponse<boolean>>('/admin/auth/forgot-password', body),
+        forgotPassword: (body: ForgotPasswordDto) =>
+            requests.post<ApiResponse<boolean>>('/admin/auth/forgot-password', body),
 
-    resetPassword: (body: ResetPasswordDto) =>
-        requests.post<ApiResponse<boolean>>('/admin/auth/reset-password', body),
-},
-   News: {
-    list: (page = 1, pageSize = 50, search = '') =>
-        requests.get<any>(
-            `/admin/news?page=${page}&pageSize=${pageSize}&search=${encodeURIComponent(search)}`
-        ),
+        resetPassword: (body: ResetPasswordDto) =>
+            requests.post<ApiResponse<boolean>>('/admin/auth/reset-password', body),
+    },
+    Profile: {
+        get: () =>
+            requests.get<ApiResponse<AdminProfileDto>>(
+                '/admin/profile'
+            ),
 
-    eventsList: (page = 1, pageSize = 50, search = '') =>
-        requests.get<any>(
-            `/admin/news/events?page=${page}&pageSize=${pageSize}&search=${encodeURIComponent(search)}`
-        ),
+        update: (body: UpdateAdminProfileDto) =>
+            requests.put<ApiResponse<AdminProfileDto>>(
+                '/admin/profile',
+                body
+            ),
+        changePassword: (body: ChangePasswordDto) =>
+            requests.put<ApiResponse<boolean>>(
+                '/admin/profile/password',
+                body
+            ),
+    },
 
-    details: (id: number) => requests.get<any>(`/admin/news/${id}`),
-    create: (news: FormData) => requests.post<void>('/admin/news', news),
-    update: (id: number, news: FormData) => requests.put<void>(`/admin/news/${id}`, news),
-    delete: (id: number) => requests.del<void>(`/admin/news/${id}`),
-},
+    AdminUsers: {
+        list: () =>
+            requests.get<ApiResponse<AdminUserDto[]>>(
+                '/admin/users'
+            ),
+
+        update: (
+            id: number,
+            body: UpdateAdminUserDto
+        ) =>
+            requests.put<ApiResponse<AdminUserDto>>(
+                `/admin/users/${id}`,
+                body
+            ),
+
+        changeRole: (
+            id: number,
+            body: ChangeAdminRoleDto
+        ) =>
+            requests.put<ApiResponse<AdminUserDto>>(
+                `/admin/users/${id}/role`,
+                body
+            ),
+
+        block: (id: number) =>
+            requests.put<ApiResponse<AdminUserDto>>(
+                `/admin/users/${id}/block`,
+                {}
+            ),
+
+        unblock: (id: number) =>
+            requests.put<ApiResponse<AdminUserDto>>(
+                `/admin/users/${id}/unblock`,
+                {}
+            ),
+    },
+
+    News: {
+        list: (page = 1, pageSize = 50, search = '') =>
+            requests.get<any>(
+                `/admin/news?page=${page}&pageSize=${pageSize}&search=${encodeURIComponent(search)}`
+            ),
+
+        eventsList: (page = 1, pageSize = 50, search = '') =>
+            requests.get<any>(
+                `/admin/news/events?page=${page}&pageSize=${pageSize}&search=${encodeURIComponent(search)}`
+            ),
+
+        details: (id: number) => requests.get<any>(`/admin/news/${id}`),
+        create: (news: FormData) => requests.post<void>('/admin/news', news),
+        update: (id: number, news: FormData) => requests.put<void>(`/admin/news/${id}`, news),
+        delete: (id: number) => requests.del<void>(`/admin/news/${id}`),
+    },
 
     Documents: {
-    list: (page = 1, pageSize = 10, search = '') =>
-        requests.get<any>(`/admin/documents?page=${page}&pageSize=${pageSize}&search=${search}`),
+        list: (page = 1, pageSize = 10, search = '') =>
+            requests.get<any>(`/admin/documents?page=${page}&pageSize=${pageSize}&search=${search}`),
 
-    details: (id: number) => requests.get<any>(`/admin/documents/${id}`),
+        details: (id: number) => requests.get<any>(`/admin/documents/${id}`),
 
-    create: (doc: FormData) => requests.post<void>('/admin/documents', doc),
-    update: (id: number, doc: FormData) => requests.put<void>(`/admin/documents/${id}`, doc),
-    delete: (id: number) => requests.del<void>(`/admin/documents/${id}`),
+        create: (doc: FormData) => requests.post<void>('/admin/documents', doc),
+        update: (id: number, doc: FormData) => requests.put<void>(`/admin/documents/${id}`, doc),
+        delete: (id: number) => requests.del<void>(`/admin/documents/${id}`),
 
-    categories: () => requests.get<any[]>('/documents/categories'),
+        categories: () => requests.get<any[]>('/documents/categories'),
 
-    internalAssessment: (page = 1, pageSize = 10, search = '') =>
-        requests.get<any>(
-            `/admin/documents/internal-assessment?page=${page}&pageSize=${pageSize}&search=${encodeURIComponent(search)}`
-        ),
+        internalAssessment: (page = 1, pageSize = 10, search = '') =>
+            requests.get<any>(
+                `/admin/documents/internal-assessment?page=${page}&pageSize=${pageSize}&search=${encodeURIComponent(search)}`
+            ),
 
-    externalAssessment: (page = 1, pageSize = 10, search = '') =>
-        requests.get<any>(
-            `/admin/documents/external-assessment?page=${page}&pageSize=${pageSize}&search=${encodeURIComponent(search)}`
-        ),
+        externalAssessment: (page = 1, pageSize = 10, search = '') =>
+            requests.get<any>(
+                `/admin/documents/external-assessment?page=${page}&pageSize=${pageSize}&search=${encodeURIComponent(search)}`
+            ),
 
-    internalCategoryId: () =>
-        requests.get<ApiResponse<number>>('/documents/categories/internal-id'),
+        internalCategoryId: () =>
+            requests.get<ApiResponse<number>>('/documents/categories/internal-id'),
 
-    externalCategoryId: () =>
-        requests.get<ApiResponse<number>>('/documents/categories/external-id'),
+        externalCategoryId: () =>
+            requests.get<ApiResponse<number>>('/documents/categories/external-id'),
     },
 
     AdministrationMembers: {
@@ -150,17 +253,17 @@ const agent = {
     },
 
     Tags: {
-    list: () => requests.get<ApiResponse<AdminTagDto[]>>('/admin/tags'),
-    details: (id: number) => requests.get<ApiResponse<AdminTagDto>>(`/admin/tags/${id}`),
-    create: (data: TagCreateUpdateDto) =>
-        requests.post<ApiResponse<AdminTagDto>>('/admin/tags', data),
-    update: (id: number, data: TagCreateUpdateDto) =>
-        requests.put<ApiResponse<boolean>>(`/admin/tags/${id}`, data),
-    delete: (id: number) =>
-        requests.del<ApiResponse<boolean>>(`/admin/tags/${id}`),
+        list: () => requests.get<ApiResponse<AdminTagDto[]>>('/admin/tags'),
+        details: (id: number) => requests.get<ApiResponse<AdminTagDto>>(`/admin/tags/${id}`),
+        create: (data: TagCreateUpdateDto) =>
+            requests.post<ApiResponse<AdminTagDto>>('/admin/tags', data),
+        update: (id: number, data: TagCreateUpdateDto) =>
+            requests.put<ApiResponse<boolean>>(`/admin/tags/${id}`, data),
+        delete: (id: number) =>
+            requests.del<ApiResponse<boolean>>(`/admin/tags/${id}`),
 
-    eventsTagId: () =>
-        requests.get<ApiResponse<number>>('/tags/events-id'),
+        eventsTagId: () =>
+            requests.get<ApiResponse<number>>('/tags/events-id'),
     },
 };
 

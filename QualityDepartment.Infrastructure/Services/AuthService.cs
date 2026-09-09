@@ -20,13 +20,16 @@ namespace QualityDepartment.Infrastructure.Services
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _config;
         private readonly EmailService _emailService;
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
         public AuthService(
             UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
             IConfiguration config,
             EmailService emailService)
         {
             _userManager = userManager;
+            _signInManager = signInManager;
             _config = config;
             _emailService = emailService;
         }
@@ -34,7 +37,17 @@ namespace QualityDepartment.Infrastructure.Services
         public async Task<AuthResponseDto?> LoginAsync(LoginDto dto)
         {
             var user = await _userManager.FindByEmailAsync(dto.Email);
-            if (user == null || !await _userManager.CheckPasswordAsync(user, dto.Password))
+
+            if (user == null)
+                return null;
+
+            var signInResult =
+                await _signInManager.CheckPasswordSignInAsync(
+                    user,
+                    dto.Password,
+                    lockoutOnFailure: false);
+
+            if (!signInResult.Succeeded)
                 return null;
 
             var roles = await _userManager.GetRolesAsync(user);
@@ -91,10 +104,10 @@ namespace QualityDepartment.Infrastructure.Services
             <p>Якщо ви не запитували відновлення пароля, просто проігноруйте цей лист.</p>
             """;
 
-                await _emailService.SendEmailAsync(
-                    user.Email,
-                    "Відновлення пароля адміністратора",
-                    emailBody);
+            await _emailService.SendEmailAsync(
+                user.Email,
+                "Відновлення пароля адміністратора",
+                emailBody);
         }
 
         public async Task<IdentityResult> ResetPasswordAsync(ResetPasswordDto dto)

@@ -11,9 +11,12 @@ import SellRoundedIcon from '@mui/icons-material/SellRounded';
 import QuizRoundedIcon from '@mui/icons-material/QuizRounded';
 import EventAvailableRoundedIcon from '@mui/icons-material/EventAvailableRounded';
 import FactCheckRoundedIcon from '@mui/icons-material/FactCheckRounded';
+import AdminPanelSettingsRoundedIcon from '@mui/icons-material/AdminPanelSettingsRounded';
+import { useAuth } from '../../features/auth/AuthProvider';
 
 const sidebarItems = [
     { label: 'Панель керування', path: '/dashboard', icon: DashboardRoundedIcon },
+    {label: 'Адміністратори', path: '/admin-users', icon: AdminPanelSettingsRoundedIcon, superAdminOnly: true,},
     { label: 'Новини', path: '/news', icon: FeedRoundedIcon },
     { label: 'Заходи', path: '/events', icon: EventAvailableRoundedIcon },
     { label: 'Документи', path: '/documents', icon: DescriptionRoundedIcon },
@@ -30,6 +33,10 @@ const sidebarItems = [
 export default function AdminSidebar() {
     const navigate = useNavigate();
     const location = useLocation();
+    const { user } = useAuth();
+
+    const isSuperAdmin =
+        user?.roles.includes('SuperAdmin') ?? false;
 
     return (
         <Box
@@ -75,7 +82,13 @@ export default function AdminSidebar() {
             </Box>
 
             <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
-                {sidebarItems.map((item) => {
+                {sidebarItems
+                    .filter(
+                        (item) =>
+                            !item.superAdminOnly ||
+                            isSuperAdmin
+                    )
+                    .map((item) => {
                     const isActive =
                         location.pathname === item.path ||
                         (item.path === '/quality-assessment/internal' &&
